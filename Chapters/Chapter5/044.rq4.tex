@@ -5,14 +5,14 @@ We design an ablation study to quantify how two mechanisms detailed in~\cref{sec
 
 %For brevity, we refer to these two types of mechanism as \emph{validation and repair} (VAL) and \emph{intermediate-rule feedback} (INT), respectively.
 
-\paragraph{Configurations}
+\textbf{Configurations}
 We evaluate three configurations that progressively enable these mechanisms:
 \textbf{Base} directly executes the LLM-generated Datalog program without any validation or additional feedback, except the output or error messages from \souffle{} itself. \textbf{VAL} (validation and repair) enables parser-gated validation with deterministic syntactic repairs and high-confidence semantic checks. \textbf{Full} further enables intermediate-rule mutation and feedback.
 %
 All configurations share the same LLM, initial prompt, iteration budget, and underlying fact bases.
 %Each natural-language query is evaluated independently.
 
-\paragraph{Metrics}
+\textbf{Metrics}
 We compare  (i) execution success rate and non-empty result rate, (ii) mean LLM iterations to first successful execution and (iii) final answer correctness on \dataset.
 
 % \usepackage{siunitx}
