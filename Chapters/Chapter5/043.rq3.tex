@@ -1,4 +1,4 @@
-\subsubsection{Efficiency}\label{sec:cost}
+\subsubsection{Efficiency}\label{sec:cost-dataloc}
 Figure~\ref{fig:cost_analysis} presents a comprehensive comparison using a lollipop chart, where the vertical axis represents average execution time (seconds) and bubble size reflects total token consumption (labeled in thousands). As illustrated, \tooldataloc (Claude3.5) establishes a new efficiency frontier for KA-LCL tasks, achieving the optimal balance between speed and token consumption with 37 seconds execution time and a 13.5k token consumption. Compared to other approaches, \tooldataloc exhibits a clear dual advantage in both temporal efficiency and token economy:
 
 \textbf{Temporal efficiency.} \tooldataloc (Claude-3.5) completes localization in around half minute per task, outperforming all agentic baselines. Even the fastest CoSIL (GPT-4o) remain over 3$\times$ slower. The poor performance in Table~\ref{tab:comparison_lq} further indicate that, without keyword shortcuts, baseline methods fail to perform meaningful repo-level inference, despite exhibiting imtermediate reasoning steps.

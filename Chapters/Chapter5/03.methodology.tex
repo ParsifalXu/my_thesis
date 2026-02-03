@@ -1,4 +1,4 @@
-\section{Methodology}\label{sec:method}
+\section{Methodology}\label{sec:method-dataloc}
 In this section, we first formalize the repository-level code localization problem. We then analyze the intrinsic challenges that motivate our hybrid approach, \tooldataloc, which combines the strengths of large language models with the rigorous logical reasoning of Datalog.
 
 Given a natural language query $q$ (e.g., a bug report or feature request) and a target codebase $\mathcal{C}$, the goal of \textbf{repository-level code localization} is to identify a list of relevant code locations $\mathcal{L}=\{l_1, l_2, \dots, l_k\}$. Effective localization bridges the gap between informal natural language and the rigid execution logic of software. We identify three primary challenges:
@@ -33,7 +33,7 @@ The workflow begins with performing a preliminary analysis to extract the core t
 
 % \subsubsection{Syntax Correction and Intermediate-rule Diagnosis}
 \subsubsection{Synthesize-Check-Refine Loop}
-As shown in the red box in the Figure~\ref{fig:arch}, before execution, \tooldataloc follows a \textit{synthesize-check-refine} loop to mitigate the impact of hallucinations and improve the executability of LLM-generated Datalog programs. It mainly contains two critical, feedback-driven phases (Details in Section~\ref{sec:method:val} and \ref{sec:method:int}): (1) \textit{Syntax correction}. Each synthesized program will undergo a parser-gated validation to ensure syntactic well-formedness. Our workflow adopts a \emph{best-effort repair, then fallback} strategy: unambiguous cases are handled via conservative rule-based fixes, revalidated with \souffle’s parser, and all other cases return error feedback to the LLM.restructuring. (2) \textit{Intermediate-rule diagnosis}. We instrument the program to track row counts of intermediate relations, thereby identifying rules that produce empty results. Using controlled, mutation-based probing, we differentiate fragile-empty relations caused by over-constraints from stable-empty relations that reflect inherent dataset properties. These feedbacks help the model refine the generated program and ensure its quality before it reaches the inference engine. Validated programs are then executed through \texttt{exec\_dl} tool to generate a list of candidates. Excessive locations are treated as failures, triggering refinement with stricter constraints to reduce noise and improve precision.
+As shown in the red box in the Figure~\ref{fig:arch}, before execution, \tooldataloc follows a \textit{synthesize-check-refine} loop to mitigate the impact of hallucinations and improve the executability of LLM-generated Datalog programs. It mainly contains two critical, feedback-driven phases (Details in Section~\ref{sec:method:val-dataloc} and \ref{sec:method:int-dataloc}): (1) \textit{Syntax correction}. Each synthesized program will undergo a parser-gated validation to ensure syntactic well-formedness. Our workflow adopts a \emph{best-effort repair, then fallback} strategy: unambiguous cases are handled via conservative rule-based fixes, revalidated with \souffle’s parser, and all other cases return error feedback to the LLM.restructuring. (2) \textit{Intermediate-rule diagnosis}. We instrument the program to track row counts of intermediate relations, thereby identifying rules that produce empty results. Using controlled, mutation-based probing, we differentiate fragile-empty relations caused by over-constraints from stable-empty relations that reflect inherent dataset properties. These feedbacks help the model refine the generated program and ensure its quality before it reaches the inference engine. Validated programs are then executed through \texttt{exec\_dl} tool to generate a list of candidates. Excessive locations are treated as failures, triggering refinement with stricter constraints to reduce noise and improve precision.
 
 \begin{figure}[t]
 	\centering
@@ -82,7 +82,7 @@ As depicted in the yellow box in Figure~\ref{fig:arch}, once a set of potential 
 
 
 \subsection{Program Repair for LLM Generated Datalog}
-\label{sec:method:val}
+\label{sec:method:val-dataloc}
 In practice, LLM-generated Datalog programs (the dialect used by \souffle, in our case) often contain syntactic and semantic errors, especially when the model is not fine-tuned for Datalog programming.
 
 Before executing an LLM-generated Datalog program, we enforce a \emph{parser-gated validation} workflow to ensure that only syntactically well-formed programs reach later stages of the pipeline. This design is motivated by the observation that some failures are caused by superficial syntactic issues that can be repaired deterministically, while more complex parse failures often require global restructuring that is better handled by the LLM. Our workflow therefore follows a \emph{best-effort repair, then fallback} strategy: we apply conservative rule-based fixes when the repair is unambiguous, re-check the program using \souffle's parser, and otherwise return error feedback to the LLM.
@@ -109,14 +109,14 @@ A representative example is the use of string containment constraints. \souffle{
 % This error does not trigger any syntax or type error, produces a well-formed but logically inverted condition, and leads to silent failure or empty results that are difficult for LLM to realize, even with multiple iterations of try and feedback.
 
 Prompt techniques such as few-shot learning cannot effectively eliminate this kind of error. Therefore, we construct a library of semantic rules that check the correct usage of built-in predicates with non-commutative argument semantics and other similar constraints. These repairs are applied only when the transformation is high-confidence and semantics-preserving. When uncertain, the checker records the issue for subsequent feedback to the LLM rather than applying a blind fix, thereby guiding the refinement in subsequent iterations.
-We evaluate the contribution of this mechanism through an ablation study in~\cref{sec:ablation}, demonstrating its effectiveness in improving synthesis quality. 
+We evaluate the contribution of this mechanism through an ablation study in~\ref{sec:ablation-dataloc}, demonstrating its effectiveness in improving synthesis quality. 
 
 % If uncertainty exists, the checker refrains from modifying the program and instead records the issue for later feedback to the LLM, guiding it to generate better results in subsequent iterations.
 
 
 
 \subsection{Diagnosing Intermediate Rules via Conservative Mutation Analysis}
-\label{sec:method:int}
+\label{sec:method:int-dataloc}
 \begin{figure}[t]
 	\centering
 	\includegraphics[width=\textwidth]{Figures/Chapter5/mutate.pdf}
