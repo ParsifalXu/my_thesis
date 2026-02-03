@@ -1,0 +1,46 @@
+\subsubsection{Effectiveness for general issues}
+
+To evaluate the practical utility of \tooldataloc in real-world software maintenance, we conducted a comparative analysis on the SWE-bench Lite. Existing approaches usually employ top-$n$ strategy, whereas \tooldataloc operates without a predefined $n$. Table~\ref{tab:comparison_isq} illustrates that \tooldataloc remains highly competitive.
+
+A critical distinction lies in the recommendation density and target precision. While \tooldataloc provides instance-specific localization with an average of only 2 candidates per issue, SOTA baselines rely on much broader and often fixed-size candidate sets to improve their accuracy. Specifically, CoSIL and LocAgent typically default to a top-$5$ recommendation at the function level, while Agentless routinely recommends 5 locations as candidates regardless of the issue's actual complexity. SweRank adopts an even more aggressive strategy, utilizing top-100 rankings.
+
+Consequently, even when Acc@$n$ metrics appear comparable, \tooldataloc achieves substantially higher precision. By providing a concise and accurate set of entry points, \tooldataloc minimizes the noise that developers or downstream agents must filter, reducing validation overhead. This precision-centric design also yields substantial gains in resource efficiency (details in Section~\ref{sec:cost}). 
+
+% Compared to agent-based baselines that require extensive multi-turn interactions, \tooldataloc operates with remarkably low latency and token consumption by focusing only on logically necessary code segments. We also observed that this efficiency contrasts with the operational instability of tools like LocAgent, which frequently falls into infinite execution loops on complex or mutated instances. While we will provide a comprehensive breakdown of these overhead metrics in RQ3, these preliminary results highlight that \tooldataloc delivers a superior balance of competitive recall, surgical precision, and minimal resource expenditure.
+
+
+\begin{table}[t]
+\centering
+\caption{Comparison of different methods and models across various localization granularities.}
+\label{tab:comparison_isq}
+\small 
+\begin{tabularx}{\textwidth}{@{} ll CCCCC CC @{}}
+\toprule
+\multirow{2}{*}{\textbf{Method}} & \multirow{2}{*}{\textbf{Model}} & \multicolumn{3}{c}{\textbf{File (\%)}} & \multicolumn{2}{c}{\textbf{Module (\%)}} & \multicolumn{2}{c}{\textbf{Function (\%)}} \\ 
+\cmidrule(lr){3-5} \cmidrule(lr){6-7} \cmidrule(lr){8-9}
+& & Acc@1 & Acc@3 & Acc@5 & Acc@5 & Acc@10 & Acc@5 & Acc@10 \\ 
+\midrule
+\multirow{2}{*}{SweRank}   & Small           & 78.10 & 92.34 & 94.53 & 89.05 & 92.70 & 79.56 & 86.13 \\
+                           & Large           & 83.21 & 94.89 & 95.99 & 90.88 & 93.43 & 81.39 & 88.69 \\ 
+\midrule
+% \addlinespace[0.5em] 
+\multirow{2}{*}{Agentless} & gpt-4o          & 67.50 & 74.45 & 74.45 & 67.15 & 67.15 & 55.47 & 55.47 \\
+                           & claude-3.5      & 72.63 & 79.20 & 79.56 & 68.98 & 68.98 & 58.76 & 58.76 \\ 
+\midrule
+% \addlinespace[0.5em]
+\multirow{2}{*}{LocAgent}  & Qwen2.5-32B(ft) & 75.91 & 90.51 & 92.70 & 85.77 & 87.23 & 71.90 & 77.01 \\
+                           & claude-3.5      & 77.74 & 91.97 & 94.16 & 86.50 & 87.59 & 73.36 & 77.37 \\ 
+\midrule
+% \addlinespace[0.5em]
+\multirow{2}{*}{DataLoc}   & gpt-5.1         & 71.53 & 77.38 & 78.47 & 70.80 & 72.26 & 63.14 & 64.96 \\
+                           & claude-3.5      & 72.26 & 80.66 & 81.02 & 75.55 & 75.55 & 68.98 & 68.98 \\ 
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\smallskip
+\noindent\shadowbox{%
+  \begin{minipage}{0.98\columnwidth}
+    \textbf{Answer to RQ2:}
+		\tooldataloc also demonstrates competitive performance on issue-solving benchmarks. Notably, given that \tooldataloc produces only 2 candidate locations on average, it offers distinct advantages in recommendation efficiency and in excluding incorrect locations. This precise localization helps reduce the potential overhead of downstream tasks.
+  \end{minipage}}

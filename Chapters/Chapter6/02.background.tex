@@ -1,0 +1,120 @@
+\section{Background}\label{sec:bg-dataloc}
+This section introduces the background on program facts and Datalog that forms the symbolic reasoning component of our framework.
+
+\subsection{Program Facts}
+Program facts are a structured representation of information extracted from source code for the purpose of automated reasoning and analysis. They encode observable properties of a program, such as the existence of entities (e.g., functions, classes, variables), their attributes (e.g., names, locations, modifiers), and relations between them (e.g., containment, calls, inheritance), in a form suitable for systematic querying and inference.
+
+Program facts are derived mechanically from source code through language-specific frontends, typically by parsing the code and traversing intermediate representations such as abstract syntax trees or control-flow graphs. Each extracted fact captures a single, well-defined aspect of the program, and together they provide a precise, machine-readable abstraction of the program’s structure and behavior. Importantly, program facts are \emph{descriptive}: they record what is present in the program, rather than how analyses should be performed.
+
+
+\subsection{Datalog}
+
+Datalog is a declarative logic programming language rooted in first-order logic and database theory. A Datalog specification consists of a set of rules that describe how new facts can be derived from existing ones.
+
+\begin{definition}[Datalog Rule]
+A Datalog rule has the form:
+\begin{equation}
+    R_0(t_1, \dots, t_k) \leftarrow R_1(u_1^{(1)}, \dots, u_{m_1}^{(1)}), \dots, R_n(u_1^{(n)}, \dots, u_{m_n}^{(n)})
+\end{equation}
+where each $R_i$ is a predicate symbol. The atom on the left-hand side is called the \emph{head}, and the atoms on the right-hand side form the \emph{body}.
+Each argument $t_j$ or $u_j^{(i)}$ is either a constant or a variable.
+\end{definition}
+
+The rule is interpreted as follows: for any assignment of variables to constants that makes all body atoms simultaneously true, the corresponding instantiated head atom is also true. Variables thus serve as placeholders that allow a rule to match and relate multiple facts.
+
+\begin{definition}[Datalog Program]
+A Datalog program is a finite set of Datalog rules evaluated over a given set of ground facts. Its semantics is defined as the least fixpoint of rule application: rules are repeatedly applied to derive new ground facts until no further facts can be inferred.
+\end{definition}
+
+Datalog supports recursion and operates under a monotonic, set-based semantics, making it well suited for expressing transitive and structural properties such as reachability, dependency propagation, and hierarchical relations in program analysis.
+
+
+
+
+\subsection{Program Facts in Datalog}
+
+In program analysis, program facts are represented in Datalog as \emph{ground predicate instances}. Each predicate schema corresponds to a specific kind of program entity or relation, while each extracted program fact instantiates that schema with concrete constants derived from the source code.
+
+For example, a predicate describing function definitions may be declared as:
+\begin{minted}{prolog}
+.decl function_definition(file_path: symbol, function_name: symbol, start_line: number, end_line: number, param_count: number, is_async: symbol, containing_class: symbol)
+\end{minted}
+
+An extracted function definition in the source code gives rise to a ground fact of this predicate, with all arguments bound to concrete values such as file paths, names, and line numbers.
+
+Datalog rules operate over these ground program facts using variables to range over matching predicate instances. The body of a rule specifies patterns over existing program facts, while the head defines a new fact to be derived whenever the body is satisfied under some variable assignment. Through repeated rule application, Datalog derives higher-level program properties—such as reachability, dependency relations, or structural patterns—from the underlying set of extracted program facts.
+
+This representation cleanly separates \emph{fact extraction}, which records concrete observations about the program, from \emph{logical inference}, which declaratively specifies how additional properties are derived.
+
+
+\subsection{Motivating Example}\label{sec:example}
+% To demonstrate how the aforementioned definitions are applied to code localization, we consider a practical query designed to identify functions with more than 15 parameters that are not \_\_init\_\_ methods.
+
+\begin{figure}
+    \centering
+\begin{tikzpicture}[node distance=0.5em, every node/.style={inner sep=0pt}]
+    \node (issue) [anchor=north] {
+        \begin{stepbox}[width=\linewidth, colframe=red!50!gray, boxed title style={colback=red!10, colframe=red!50!gray}]{Question}
+            \begin{minted}[fontsize=\footnotesize]{text}
+Find all functions where: (1) the function has more than 15 parameters, and 
+(2) the function is not an __init__ method.
+            \end{minted}
+        \end{stepbox}
+    };
+
+    \node (code) [below=of issue] {
+        \begin{stepbox}[width=\linewidth, colframe=cyan!50!gray, boxed title style={colback=cyan!10, colframe=cyan!50!gray}]{Datalog Query}
+            \begin{minted}{prolog}
+% EDB: Facts extracted from source code
+.decl function_definition(file_path: symbol, function_name: symbol, start_line: number, end_line: number, param_count: number, is_async: symbol, containing_class: symbol)
+
+% IDB: Derived analytical facts
+.decl LargeFunctions(file_path: symbol, function_name: symbol, start_line: number, param_count: number, containing_class: symbol)
+
+% Inference rule for localization
+LargeFunctions(file_path, function_name, start_line, param_count, containing_class) :-
+    function_definition(file_path, function_name, start_line, _, param_count, _, containing_class),
+    param_count > 15,
+    function_name != "__init__".
+
+% Query
+.output LargeFunctions
+            \end{minted}
+        \end{stepbox}
+    };
+
+    \node (result) [below=of code] {
+        \begin{stepbox}[width=\linewidth, colframe=green!50!gray, boxed title style={colback=green!10, colframe=green!50!gray}]{Query Result}
+            \begin{minted}[fontsize=\scriptsize]{text}
+//  file_path                     function_name   start_line   param_count   containing_class
+---------------------------------------------------------------------------------------------
+astropy/convolution/convolve.py    convolve_fft        442	   19         module_level      
+astropy/io/fits/column.py          _verify_keywords    952	   17         Column
+            \end{minted}
+        \end{stepbox}
+    };
+
+    \draw [-{Stealth[scale=1.2]}, line width=1pt, gray!60, shorten >=-12pt, shorten <=1pt] (issue.south) -- (code.north) 
+        node[pos=1.8, right=6pt, circle, fill=black, text=white, inner sep=1pt, font=\tiny, ](n1){1};
+        % node[right=2pt of num1, font=\footnotesize\sffamily, text=black] {Agent};
+
+    
+    \draw [-{Stealth[scale=1.2]}, line width=1pt, gray!60, shorten >=-12pt, shorten <=1pt] (code.south) -- (result.north) 
+        node[pos=1.8, right=6pt, circle, fill=black, text=white, inner sep=1pt, font=\tiny](n2){2};
+    \node[anchor=west, at={(n1.east)}, xshift=5pt, font=\scriptsize\sffamily, text=black] {Generated by LLM};
+    \node[anchor=west, at={(n2.east)}, xshift=5pt, font=\scriptsize\sffamily, text=black] {Execute by Soufflé};
+\end{tikzpicture}
+    \caption{A motivating exampele of a logic query}
+    \label{fig:example}
+\end{figure}
+
+To illustrate the query process in Datalog, we provide a motivating example. Consider a EA-LCL task that requires identifying functions in a codebase satisfying specific structural constraints: (1) the function has more than 15 parameters, and (2) the function is not an \_\_init\_\_ method.
+
+Figure~\ref{fig:example} demonstrates a basic localization process. Given a natural language query, the Large Language Model translates the question's intention into a formal Datalog program. The generated program operates over two types of facts: \textit{Extensional Database (EDB)} facts extracted directly from source code, such as \texttt{function\_definition} containing metadata about each function's location, parameters, and context; and \textit{Intensional Database (IDB)} facts derived through logical inference, such as \texttt{LargeFunctions}. The Datalog query defines an inference rule (lines 8-11) that identifies target functions by matching against \texttt{function\_definition} facts. Irrelevant attributes are marked with underscore ``\_'' to avoid unnecessary computation, while the rule filters for functions with param\_count > 15 and excludes those named ``\_\_init\_\_''.
+
+When executed by the Soufflé Datalog engine, the query precisely localizes two functions meeting the specified criteria: the \texttt{convolve\_fft} function with 19 parameters at line 442 in \texttt{astropy/convolution/convolve.py}, and the \texttt{\_verify\_keywords} function with 17 parameters at line 952 in \texttt{astropy/io/fits/column.py}. This example highlights the key advantages of our approach: the LLM bridges the semantic gap between natural language and formal logic, while Datalog ensures soundness and completeness of results through deductive reasoning over program facts, enabling precise localization without exhaustive manual repository traversal.
+%%% Local Variables:
+%%% mode: LaTeX
+%%% TeX-master: "../main.tex"
+%%% TeX-command-extra-options: "-shell-escape"
+%%% End:

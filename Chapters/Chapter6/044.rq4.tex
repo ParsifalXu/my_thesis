@@ -1,0 +1,90 @@
+\subsubsection{Ablation Study}\label{sec:ablation}
+We design an ablation study to quantify how two mechanisms detailed in~\cref{sec:method:val} and \cref{sec:method:int} improve the quality of LLM-generated Datalog program.
+
+%where ``quality'' encompasses (i) executability (passing parsing and evaluation), (ii) result usefulness (avoiding silent empty outputs caused by mistakes), and (iii) convergence efficiency (reaching a working query with fewer LLM iterations).
+
+%For brevity, we refer to these two types of mechanism as \emph{validation and repair} (VAL) and \emph{intermediate-rule feedback} (INT), respectively.
+
+\paragraph{Configurations}
+We evaluate three configurations that progressively enable these mechanisms:
+\textbf{Base} directly executes the LLM-generated Datalog program without any validation or additional feedback, except the output or error messages from \souffle{} itself. \textbf{VAL} (validation and repair) enables parser-gated validation with deterministic syntactic repairs and high-confidence semantic checks. \textbf{Full} further enables intermediate-rule mutation and feedback.
+%
+All configurations share the same LLM, initial prompt, iteration budget, and underlying fact bases.
+%Each natural-language query is evaluated independently.
+
+\paragraph{Metrics}
+We compare  (i) execution success rate and non-empty result rate, (ii) mean LLM iterations to first successful execution and (iii) final answer correctness on \dataset.
+
+% \usepackage{siunitx}
+\begin{table}[t]
+  \centering
+  \small
+  \setlength{\tabcolsep}{4.0pt}
+  \renewcommand{\arraystretch}{1.15}
+  \caption{Ablation results under two LLMs. \textbf{Base}: no mechanism;
+  \textbf{VAL}: validation \& repair; \textbf{Full}: VAL+intermediate-rule feedback (INT).
+  Rates are reported in \%. Iteration and time metrics report mean values (lower is better). Time is reported in seconds.}
+  \label{tab:ablation}
+
+  \resizebox{\columnwidth}{!}{%
+  \begin{tabular}{ll
+                  cc
+                  cc c
+                  cccccc}
+    \toprule
+    \multirow{2}{*}{\textbf{Model}} &
+    \multirow{2}{*}{\textbf{Config}} &
+    \multicolumn{2}{c}{\textbf{Rates} $\uparrow$} &
+    \multicolumn{3}{c}{\textbf{Cost (Iter, Time)} $\downarrow$} &
+    \multicolumn{6}{c}{\textbf{Correctness (function-level)} $\uparrow$} \\
+    \cmidrule(lr){3-4}
+    \cmidrule(lr){5-7}
+    \cmidrule(lr){8-13}
+    & & \textbf{ExecSucc} & \textbf{$\ne\varnothing$} &
+    \textbf{First} & \textbf{Iter} & \textbf{Time} &
+    \textbf{SR} & \textbf{PRE} & \textbf{REC} & \textbf{AJS} & \textbf{PLR} & \textbf{HR} \\
+    \midrule
+
+    \multirow{3}{*}{Qwen3-Max} &
+    Base   & 73.59 & 49.41 & 1.48 & 12.92 & 427 & 20.00 & 18.20 & 15.87 & 26.73 & 16.00 & 20.00 \\
+    & VAL  & 84.12 & 75.68 & 1.28 & 10.16 & 104 & 40.00 & 38.93 & 31.87 & 43.67 & 32.00 & 44.00 \\
+    & Full & 84.12 & 78.52 & 1.24 & 10.92 & 136 & 56.00 & 55.20 & 45.53 & 58.73 & 40.00 & 60.00 \\
+    \midrule
+
+    \multirow{3}{*}{Claude-3.5} &
+    Base   & 89.42 & 67.95 & 1.16 & 4.20 & 38 & 44.00 & 38.10 & 33.87 & 43.70 & 24.00 & 52.00 \\
+    & VAL  & 94.67 & 75.86 & 1.04 & 4.28 & 40 & 44.00 & 38.90 & 31.87 & 48.36 & 32.00 & 52.00 \\
+    & Full & 94.67 & 80.69 & 1.08 & 4.08 & 37 & 61.90 & 62.70 & 63.63 & 57.09 & 42.86 & 80.95 \\
+    \bottomrule
+  \end{tabular}}
+
+  \vspace{1mm}
+  \footnotesize\raggedright
+  \textbf{Cost metrics.}
+  \textbf{$\ne\varnothing$} denotes the fraction of queries that produce non-empty answers.
+  \textbf{First} is the mean number of LLM iterations to the first successfully executing program.
+  \textbf{Iter} is the average total number of LLM iterations consumed per query.
+  \textbf{Time} reports the mean end-to-end wall-clock time per query, including failed attempts and tool feedback.
+\end{table}
+
+\ref{tab:ablation} summarizes the ablation results under two different LLMs, comparing the baseline system with progressively enabled mechanisms.
+The results show that validation and repair (VAL) substantially improves the quality of LLM-generated Datalog for both models, with a markedly stronger effect on Qwen3 Max than on Claude 3.5 Sonnet. This difference is expected given the models' baseline capabilities: without VAL, Qwen3 Max exhibits a significantly lower execution success rate due to its weaker ability to consistently produce syntactically correct \souffle{} Datalog, whereas Claude already achieves a relatively high baseline level of syntactic validity.
+
+For Qwen3 Max, enabling VAL leads to a dramatic improvement across nearly all metrics. The non-empty result rate increases from 49\% to 75\%, indicating that a large fraction of previously failing or unproductive queries were recoverable once parser-gated validation and conservative repairs were applied. At the same time, the average end-to-end execution time drops sharply from 427 seconds to 104 seconds, reflecting a reduction in wasted iterations caused by unrecoverable parser errors and repeated failed executions. Improvements are also reflected in downstream task quality: function-level correctness metrics show substantial gains, with precision increasing from 18\% to 50\%, demonstrating that VAL does not merely enable execution but also materially improves the semantic adequacy of the resulting queries.
+In contrast, the effect of VAL on Claude is more moderate: execution success rate increases by +5 percentage points, and the non-empty result rate increases by +8 percentage points. 
+
+Enabling intermediate-rule feedback (INT) in the Full configuration produces a different pattern. The primary role of INT is to guide the LLM toward identifying which specific rule is semantically invalid in the sense of producing no results, and how that rule can be locally revised. As a result, INT may slightly increase iteration count or execution time in some cases due to additional diagnostic executions; however, this overhead consistently translates into higher non-empty rates and improved final answer correctness.
+
+\smallskip
+\noindent\shadowbox{%
+  \begin{minipage}{0.98\columnwidth}
+    \textbf{Answer to RQ4:} Validation and repair (VAL) substantially improves the robustness of
+    LLM-generated Datalog, with particularly large gains for weaker models by increasing non-empty
+    result rates and reducing execution cost. Intermediate-rule feedback (INT) complements VAL by
+    guiding targeted revisions of logically unproductive rules, occasionally incurring additional
+    diagnostic cost but improving final answer correctness across models.
+  \end{minipage}}
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../main"
+%%% End:

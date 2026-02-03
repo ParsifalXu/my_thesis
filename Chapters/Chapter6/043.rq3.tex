@@ -1,0 +1,24 @@
+\subsubsection{Efficiency}\label{sec:cost}
+Figure~\ref{fig:cost_analysis} presents a comprehensive comparison using a lollipop chart, where the vertical axis represents average execution time (seconds) and bubble size reflects total token consumption (labeled in thousands). As illustrated, \tooldataloc (Claude3.5) establishes a new efficiency frontier for KA-LCL tasks, achieving the optimal balance between speed and token consumption with 37 seconds execution time and a 13.5k token consumption. Compared to other approaches, \tooldataloc exhibits a clear dual advantage in both temporal efficiency and token economy:
+
+\paragraph{Temporal efficiency.} \tooldataloc (Claude-3.5) completes localization in around half minute per task, outperforming all agentic baselines. Even the fastest CoSIL (GPT-4o) remain over 3$\times$ slower. The poor performance in Table~\ref{tab:comparison_lq} further indicate that, without keyword shortcuts, baseline methods fail to perform meaningful repo-level inference, despite exhibiting imtermediate reasoning steps.
+
+\paragraph{Token economy.} Approaches that rely more on agents incur substantially higher token consumption, with LocAgent and Agentless consuming over an order of magnitude more tokens per task than \tooldataloc. This token explosion reflects a trade-off where tokens are exchanged for intelligence, but this intelligence is currently tie to text. As a result, without keyword shortcuts to guide retrieval, these agents are trapped in multi-round conversation and iterative codebase exploration. In our evaluation, three queries causes LocAgent to enter infinite loops without producing results.
+
+The efficiency of \tooldataloc stems from its hybrid architecture. In our design, the LLM-based agent is strategically confined to high-level tasks: query analysis, Datalog program synthesis, and final candidate verification. By shifting deep inference to a specialized engine, \tooldataloc greatly reduces the overhead of redundant multi-round exploration. In addition, errors carry small cost, requiring only the regeneration of a Datalog program. Beyond this low overhead, our parser-gated validation and intermediate-rule feedback actively assist LLM to synthesize high-quality programs.
+
+
+
+\begin{figure}[t]
+	\centering
+	\includegraphics[width=\textwidth]{Figures/Chapter6/cost.png}
+	\caption{Average execution time and token consumption of \dataset}
+	\label{fig:cost_analysis}
+\end{figure}
+
+\smallskip
+\noindent\shadowbox{%
+  \begin{minipage}{0.98\columnwidth}
+    \textbf{Answer to RQ3:}
+		\tooldataloc defines the efficiency frontier in the KA-LCL challenge, maintaining an average execution time of 37s and a token consumption of 13.5k. By replacing expensive LLM-based exploration with Datalog-driven inference, \tooldataloc bypasses the prohibitive costs and execution loops of existing agentic baselines, demonstrating its potential industrial deployment.
+  \end{minipage}}

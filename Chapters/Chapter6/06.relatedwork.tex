@@ -1,0 +1,43 @@
+\section{Related Work}\label{sec:related}
+\noindent \textbf{LLM for Issue Resolution and Question Answering.} 
+Large language models are increasingly integrated into software engineering, motivating a wide range of benchmarks for codebase question answering and issue resolution. Existing benchmarks fall into two main categories. Code QA benchmarks~\cite{strich2024improving, li2024infibench, li2024procqa} evaluate models on either code snippets (e.g. CodeQueries~\cite{sahu2024codequeries}, CodeQA~\cite{liu2021codeqa}, CoSQA~\cite{liu2021codeqa}) or repository-level contexts derived from GitHub issues (e.g. CodeRepoQA~\cite{hu2024coderepoqa}, CoReQA~\cite{chen2025coreqa}, SWE-QA~\cite{peng2025swe}). End-to-end issue resolution benchmarks, such as SWE-Bench~\cite{jimenez2023swe} and its extensions, assess full issue-solving capabilities~\cite{jimenez2023swe,chen-etal-2025-locagent,zhuo2024bigcodebench,deng2025nocode,niu2023crosscodebench,chen2021evaluating,ouyang2024benchmarking,gao2023benchmarking,jiang2024collubenchbenchmarkpredictinglanguage,jain2024r2e,mundler2024swt,xie2024osworld, yang2025swesmith}, primarily focus on bug-fix tasks and limited programming languages. However, excessive keywords in these benchmarks provide models with too many shortcuts for code localization by superficial lexical matching. To mitigate this bias, we propose \dataset, which removes semantic keywords and only keeps logic structures, and \negset, an empty-ground-truth variant designed to evaluate abstention ability.
+
+
+% Large language models are increasingly integrated into software engineering, where developers rely on them for issue resolution and question answering for complex projects. 
+% On one hand, many code question answering benchmarks have been developed to evaluate QA systems. Snippet-level benchmarks like CodeQueries~\cite{sahu2024codequeries}, CodeQA~\cite{liu2021codeqa}, and CoSQA~\cite{liu2021codeqa} focus on isolated code snippets or single functions. Repository-level benchmarks such as CodeRepoQA~\cite{hu2024coderepoqa}, CoReQA~\cite{chen2025coreqa} and SWE-QA~\cite{peng2025swe} collect data from Github issues, while Spyder-CodeQA~\cite{strich2024improving} provides only QA pairs from one project. InfiBench~\cite{li2024infibench} and ProCQA~\cite{li2024procqa} focus on general programming tasks. One the other hand, numerous benchmarks have emerged from efforts to assess end-to-end issue-solving ability~\cite{jimenez2023swe,chen-etal-2025-locagent,zhuo2024bigcodebench,deng2025nocode,niu2023crosscodebench,chen2021evaluating,ouyang2024benchmarking,gao2023benchmarking,jiang2024collubenchbenchmarkpredictinglanguage,jain2024r2e,mundler2024swt,xie2024osworld}. SWE-Bench~\cite{jimenez2023swe} is among the most widely adopted, comprising 2,294 issue–pull request pairs from 12 open-source Python projects, primarily targeting bug-fix tasks. Its lightweight variant, SWE-Bench Lite, condenses the benchmark into 300 curated issues, making it a practical and standardized evaluation set for subsequent studies.  To overcome the limitation of single programming language evaluation, SWE-Bench Multilingual~\cite{yang2025swesmith} introduces 300 tasks from 42 additional repositories across nine programming languages. Expanding beyond bug fixing, LocBench~\cite{chen-etal-2025-locagent} extends coverage to 560 issues spanning a broader range of task types. 
+
+
+% Unlike prior studies that evaluate LLMs on a single programming language (e.g., Python) or a single benchmark, we evaluate \tool across multiple programming languages (Java and Python) and multiple benchmarks, including LocBench, SWE-Bench, and SWE-Bench Multilingual.
+
+% reference：https://arxiv.org/html/2503.22424v1
+
+\noindent \textbf{Code Localization.}  
+Code localization refers to identifying relevant code locations (e.g., files, modules, or functions) to resolve developers' queries. 
+Recent advancements in this area have taken two complementary directions. 
+Meanwhile, LLM-based retrieval techniques have been proposed to improve code localization performance by leveraging semantic understanding~\cite{xia2024agentless,chen-etal-2025-locagent,reddy2025swerank,wang2024openhands,yang2024swe,jiang2025cosil,zhang2024autocoderover,tao2024magis,xie2025swe,ma2025sorft}.
+Recent research has proposed numerous code localization approaches that can be broadly categorized
+into three classes: (1) \textit{Embedding-based approaches} (e.g.,
+SWERankEmbed~\cite{reddy2025swerank}, CodeSage~\cite{zhang2024code}) encode code entities and natural language descriptions as
+embeddings, ranking them based on semantic similarity. While they achieve high recall by retrieving
+a broad range of relevant candidate locations, they can only identify code snippets that ``look
+similar'' without understanding the logical relationships between them.
+Furthermore, they suffer from hallucination and noise interference, such as methods with identical
+names but entirely different functionalities.
+(2) \textit{Pipeline-based LLM approaches} (e.g., Agentless~\cite{xia2024agentless}) follow a
+structured, multi-stage workflow from files to functions.
+However, such hierarchical localization design overly depends on initial file-level
+localization and fails to capture cross-level dependencies, implicitly assuming that developers
+adhere to good naming conventions.
+(3) \textit{Agent-based LLM approches} (e.g., LocAgent~\cite{chen-etal-2025-locagent},
+CoSIL~\cite{jiang2025cosil}, Orca Loca~\cite{yu2025orcalocallmagentframework}, GraphLocator~\cite{liu2025graphlocator}) offer greater flexibility by
+allowing LLMs to autonomously traverse the repository graph.
+Nevertheless, they only consider surface-level relevance and exhibit rapid performance degradation
+without explicit contextual guidance.
+
+% AIDE, such as \texttt{Cursor}~\cite{cursor_ai_editor}, \texttt{Gemini-CLI}~\cite{gemini_cli}, and \texttt{Claude-code}~\cite{claude_code}, have emerged to assist developers by suggesting or navigating to relevant code. 
+
+
+% CodeQA
+% CodeQL
+% code search
+% BM25 retrieval

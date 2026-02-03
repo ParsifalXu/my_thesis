@@ -1,0 +1,212 @@
+\section{Methodology}\label{sec:method}
+In this section, we first formalize the repository-level code localization problem. We then analyze the intrinsic challenges that motivate our hybrid approach, \tooldataloc, which combines the strengths of large language models with the rigorous logical reasoning of Datalog.
+
+Given a natural language query $q$ (e.g., a bug report or feature request) and a target codebase $\mathcal{C}$, the goal of \textbf{repository-level code localization} is to identify a list of relevant code locations $\mathcal{L}=\{l_1, l_2, \dots, l_k\}$. Effective localization bridges the gap between informal natural language and the rigid execution logic of software. We identify three primary challenges:
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Challenge 1: Semantic and Lexical Disconnect.} There exists a non-trivial gap between the informal vocabulary of $q$ and the formal identifiers in $\mathcal{C}$. We categorize this disconnect into three progressive layers: (1) \textit{Keyword Absense}, where a query lacks any direct textual anchors present in the code; (2) \textit{Latent Semantic Mapping}, where high-level task descriptions (e.g., \texttt{login failure}) lack direct textual overlap with low-level implementation entities (e.g., \texttt{AuthManager} or \texttt{ValidateToken}); (3) \textit{Lexical Divergence}, where developers use synonyms or abbreviations (e.g., \texttt{fqn} for \texttt{fullyQualifiedName}) that elude exact match search.
+
+    \item \textbf{Challenge 2: Non-local Structural Dependencies.} Relevant code is often not directly mentioned in queries but connected through dependencies or calls. In modern software, even a single feature may be implemented across multiple files. For example, identifying \textit{password validation} logic may require traversing complex call chains and data flows scattered across authentication modules and database layers. Existing pipeline-based tools rely on local directory traversal and fail to capture these deep, cross-file relational dependencies.
+    
+    \item \textbf{Challenge 3: Complex Logical Pattern Constraints.} Questions may contain logical pattern requirements that candidate code must satisfy. Certain localization tasks are defined by structural patterns rather than keywords. For example, \textit{``identifying the conditional statement that raises three distinct error types in different branches''} requires satisfying specific logical constraints defined by the language's syntax and semantics. Such patterns are difficult to locate by simply retrieving class or function information; it requires a more comprehensive understanding of the codebase and reasoning ability.
+\end{itemize}
+
+To address these challenges, we propose \tooldataloc, a synergy between LLMs and Datalog. Our intuition is that LLMs excel at resolving Challenge 1 by translating vague natural language intents into structured requirements, while Datalog provides the relational and reasoning power to solve Challenge 2 and 3 by performing exhaustive, sound traversal over codebase. 
+In our framework, we represent the codebase $\mathcal{C}$ as a set of pre-extracted program facts $\mathcal{F}$, where $\mathcal{F}$ captures both the source entities and the structural relations (e.g., call graphs, inheritance). Each location $l_i \in \mathcal{L}$ corresponds to a specific level of granularity, such as a file, module, or function, that is essential for resolving the query $q$. Figure~\ref{fig:arch} illustrates the overview of the framework of \tooldataloc. Our framework operates in two stages. First, an offline program fact extraction stage analyzes the codebase to build a structured knowledge base. Second, an automated agent execution stage leverages these extracted facts to perform code localization by synthesizing high-quality Datalog queries.
+
+\subsection{Program Facts Extraction}
+In this step, we will discuss the details of extracting program facts from a given repository.
+We extract program facts through a modular pipeline that separates source discovery, structural parsing, and fact emission. First, we enumerate source files under the repository root using configurable include/exclude patterns that respect version-control ignores, build artifacts, and generated code. Language frontend then analyzes its files using the most suitable intermediate representation. For Python, we parse source code into an abstract syntax tree and emit facts during traversal. The frontend produces Datalog facts annotated with precise source locations and stable identifiers, enabling traceability and incremental updates.
+
+
+From these frontends, we emit facts describing program entities (files, modules, functions, classes, variables) and relations (containment, inheritance, import/use, call, and reference edges), together with optional control flow and data flow information when available. This representation directly addresses Challenge 2 (non-local structural dependencies) by making cross-file interactions explicit and queryable~\cite{wu2021diffbase}. Instead of relying on local directory traversal, localization can now operate over global dependency graphs, enabling the identification of code relevant to a feature even when it is scattered across multiple modules and layers.
+
+Meanwhile, our facts enables expressive logical pattern matching, which helps solving the Challenge 3 (complex logical pattern constraints). Structural requirements, such as the presence of specific exception patterns, or multi-step call sequences, can be formulated as Datalog queries over extracted facts. This allows localization tasks defined by program structure rather than surface keywords to be handled systematically, without requiring the LLM to reason over raw source code.
+
+\subsection{Agentic Workflow}
+This section elaborates on our agent-based workflow for automated repository-level code localization, which builds upon the program facts constructed offline.
+
+Our end-to-end agent is designed to accept natural language queries and return precise code locations. Unlike approaches that provide a fixed top-$n$ list of candidates, our system outputs a dynamic set of potential locations to maximize precision. To mitigate hallucinations and enhance abstention ability, we decouple reasoning from generation. A deterministic engine handles inference while the LLM functions as a coordinator for query analysis and result calibration. The agent is equipped with three basic tools: ``\texttt{exec\_dl}'' for executing Datalog programs, and ``\texttt{get\_file\_contents}'' along with ``\texttt{get\_sources}'' for retrieving source code and specific line ranges.
+
+\subsubsection{Query Analysis and Information Resolution}
+The workflow begins with performing a preliminary analysis to extract the core technical concepts and structural elements. By identifying program entities like specific file paths and module names, and core structure descriptions, the agent establishes an internal context. This preparatory step provides the necessary predicates and constraints for the subsequent synthesis of Datalog programs.
+
+% \subsubsection{Syntax Correction and Intermediate-rule Diagnosis}
+\subsubsection{Synthesize-Check-Refine Loop}
+As shown in the red box in the Figure~\ref{fig:arch}, before execution, \tooldataloc follows a \textit{synthesize-check-refine} loop to mitigate the impact of hallucinations and improve the executability of LLM-generated Datalog programs. It mainly contains two critical, feedback-driven phases (Details in Section~\ref{sec:method:val} and \ref{sec:method:int}): (1) \textit{Syntax correction}. Each synthesized program will undergo a parser-gated validation to ensure syntactic well-formedness. Our workflow adopts a \emph{best-effort repair, then fallback} strategy: unambiguous cases are handled via conservative rule-based fixes, revalidated with \souffle’s parser, and all other cases return error feedback to the LLM.restructuring. (2) \textit{Intermediate-rule diagnosis}. We instrument the program to track row counts of intermediate relations, thereby identifying rules that produce empty results. Using controlled, mutation-based probing, we differentiate fragile-empty relations caused by over-constraints from stable-empty relations that reflect inherent dataset properties. These feedbacks help the model refine the generated program and ensure its quality before it reaches the inference engine. Validated programs are then executed through \texttt{exec\_dl} tool to generate a list of candidates. Excessive locations are treated as failures, triggering refinement with stricter constraints to reduce noise and improve precision.
+
+\begin{figure}[t]
+	\centering
+	\includegraphics[width=\textwidth]{Figures/Chapter6/architecture.pdf}
+	\caption{Overview of \tooldataloc framework}
+	\label{fig:arch}
+\end{figure}
+
+
+
+% Programs undergo an initial syntactic parsing where simple errors are auto-corrected and ambiguous ones trigger an immediate return to the LLM. Survivors then proceed to semantic checks targeting Soufflé-specific constraints, with feedback provided for uncertain cases.
+
+
+% our workflow integrates two critical, feedback-driven phases: parser-gated validation and mutation-based intermediate-rules diagnosis. 
+
+% this process follows a ``synthesize-check-refine'' loop, as depicted in :
+
+% \begin{enumerate}
+%     \item \textit{Parser-Gated Validation.} Before execution, synthesized queries undergo a parser-gated validation workflow to ensure syntactic well-formedness. If failures occur, the system applies a \textit{best-effort repair} strategy, using rule-based fixes for unambiguous issues (e.g., reserved keyword renaming) or providing raw parser diagnostics back to the LLM for global restructuring.
+%     \item \textit{Semantic Correctness Checking.} After passing the parser check, the workflow applies a set of semantic rules to rectify common logical misconceptions, such as inverted argument semantics in built-in predicates (e.g., contains). This ensures the query is not only syntactically correct but also logically sound before it reaches the execution engine.
+%     \item \textit{Execution and Result Refinement.} Validated queries are executed via the \texttt{exec\_dl} tool. If the query returns an excessive number of results, the agent treats it as a failure and refines the logic with stricter constraints to minimize noise and improve precision.
+% \end{enumerate}
+
+\subsubsection{Context Retrieval and Final Verification}
+As depicted in the yellow box in Figure~\ref{fig:arch}, once a set of potential code locations has been determined, the agent retrieves the relevant code snippets using \texttt{get\_sources} or \texttt{get\_file\_contents} and conducts a verification against the original query. These verified locations are then returned in a standardized format (e.g., \texttt{FILE\_PATH:CLASS.METHOD}). Although the agent may undergo multiple internal reasoning iterations, the user experience is streamlined into a single step: submitting a query and receiving a list of locations. This fully automated closed-loop design ensures both usability and seamless integration into production development environments.
+
+
+% \begin{table}[htbp]
+%     \centering
+%     \caption{Available Tools for Agent}
+%     \label{tab:available-tools}
+%     % \vspace{2mm} 
+%     \small
+%     \begin{tabularx}{0.9\textwidth}{@{} l X @{}}
+%         \toprule
+%         \textbf{Tool Name} & \textbf{Description} \\
+%         \midrule
+%         \texttt{exec\_dl} & Execute Datalog programs (schema depends on detected language). \\
+%         % \addlinespace
+%         \texttt{get\_file\_contents} & Get complete source file contents using appropriate identifiers. \\
+%         % \addlinespace
+%         \texttt{get\_sources} & Get multiple specific line ranges from source files. \\
+%         \bottomrule
+%     \end{tabularx}
+% \end{table}
+
+
+\subsection{Program Repair for LLM Generated Datalog}
+\label{sec:method:val}
+In practice, LLM-generated Datalog programs (the dialect used by \souffle, in our case) often contain syntactic and semantic errors, especially when the model is not fine-tuned for Datalog programming.
+
+Before executing an LLM-generated Datalog program, we enforce a \emph{parser-gated validation} workflow to ensure that only syntactically well-formed programs reach later stages of the pipeline. This design is motivated by the observation that some failures are caused by superficial syntactic issues that can be repaired deterministically, while more complex parse failures often require global restructuring that is better handled by the LLM. Our workflow therefore follows a \emph{best-effort repair, then fallback} strategy: we apply conservative rule-based fixes when the repair is unambiguous, re-check the program using \souffle's parser, and otherwise return error feedback to the LLM.
+
+We invoke a lightweight parser helper (based on \souffle's parsing frontend) to validate the generated program. If parsing fails, we first attempt a small set of mechanical rewrite rules targeting high-frequency issues. For example, LLMs frequently introduce naming collisions by using reserved or special identifiers as variable names. E.g., using \texttt{count} as a variable name while it is a reserved keyword in \souffle. Such cases can be fixed locally via deterministic renaming.
+%We similarly normalize other local parse hazards (e.g., missing terminators, malformed aggregate punctuation) when the repair is syntactically and semantically safe.
+
+However, not all parser errors admit a reliable deterministic repair.
+%Complex failures,s uch as malformed rule structure, severely mismatched parentheses, or directive misuse intertwined with rule bodies, often have multiple plausible fixes and may require the program to be re-synthesized rather than patched.
+In these cases, we do not attempt speculative transformations. Instead, we return the raw parser diagnostics (optionally augmented with concise hints) to the LLM, allowing the model to revise the program directly.
+
+Any program that does not pass the parser check is rejected and never proceeds to semantic validation or execution. Only after the program passes syntactic validation (either initially or after rule-based fixes) do we apply semantic rule checking and subsequent execution. Then we apply a set of semantic correctness checks that encode \souffle-specific usage rules and common domain conventions observed in LLM-generated programs. These checks target misconceptions that LLMs frequently exhibit when generating Datalog program.
+%This staged design prevents cascading failures in later steps and ensures that semantic checking operates over a well-defined abstract syntax.
+
+
+%Relying solely on iterative prompting or post-hoc error messages from the Datalog engine can lead to repeated failures and excessive tool calls. To address this issue, we introduce a repair component that automatically validates and repairs LLM-generated Datalog programs before sending it to the \souffle{} engine.
+
+%We first employ \souffle's parser to perform strict syntactic validation on the generated program. Many syntactic issues can be easil
+%Unlike treating the engine as a black box that only reports errors after a failed execution, we explicitly surface parse-time diagnostics and use them to drive targeted rewrites. Common syntactic issues include missing rule terminators, malformed aggregates, unmatched parentheses, and incorrect use of directives such as .decl, .input, and .output.
+%For high-confidence cases, we apply deterministic fixes (e.g., normalizing aggregate syntax, inserting missing delimiters, or correcting directive placement). Programs that cannot be repaired unambiguously at this stage are passed through unchanged but annotated with structured diagnostics for downstream hint generation.
+
+A representative example is the use of string containment constraints. \souffle{} provides a constraint function
+\texttt{contains(sub:symbol,full:symbol)}, which is defined such that the second argument must contain the first (i.e., full includes sub). However, we observe that LLMs frequently invert this positional relationship by producing atoms like \texttt{contains(content,"keyword")} instead of the correct \texttt{contains("keyword",content)}. Since such inversion conforms to both syntax and type specifications, it leads to silent failure or empty results that are difficult for LLM to self-correct, even with multiple iterations of try and feedback.
+% This error does not trigger any syntax or type error, produces a well-formed but logically inverted condition, and leads to silent failure or empty results that are difficult for LLM to realize, even with multiple iterations of try and feedback.
+
+Prompt techniques such as few-shot learning cannot effectively eliminate this kind of error. Therefore, we construct a library of semantic rules that check the correct usage of built-in predicates with non-commutative argument semantics and other similar constraints. These repairs are applied only when the transformation is high-confidence and semantics-preserving. When uncertain, the checker records the issue for subsequent feedback to the LLM rather than applying a blind fix, thereby guiding the refinement in subsequent iterations.
+We evaluate the contribution of this mechanism through an ablation study in~\cref{sec:ablation}, demonstrating its effectiveness in improving synthesis quality. 
+
+% If uncertainty exists, the checker refrains from modifying the program and instead records the issue for later feedback to the LLM, guiding it to generate better results in subsequent iterations.
+
+
+
+\subsection{Diagnosing Intermediate Rules via Conservative Mutation Analysis}
+\label{sec:method:int}
+\begin{figure}[t]
+	\centering
+	\includegraphics[width=\textwidth]{Figures/Chapter6/mutate.pdf}
+	\caption{Intermediate rules mutation and feedback}
+	\label{fig:mutate}
+\end{figure}
+We introduce an intermediate-rule diagnostic and mutation-based feedback mechanism to improve both the efficiency and effectiveness of LLM-based Datalog synthesis. As illustrated in~\cref{fig:mutate}, instead of evaluating a generated program solely by its final output, we instrument execution to collect row counts for intermediate relations and identify rules whose derived relations are empty. In practice, empty intermediate relations frequently indicate overly restrictive constraints, mismatched join keys, or incorrect predicate usage, and therefore serve as a useful signal for localizing potential errors in synthesized programs.
+
+An empty relation is not inherently incorrect: depending on the user’s constraints and the underlying dataset, the semantically correct result may legitimately be the empty set. To avoid forcing spurious revisions or encouraging the model to hallucinate evidence, our approach explicitly distinguishes between fragile and stable emptiness through controlled diagnostic probing.
+
+When detecting an intermediate relation that produces zero rows, we pick several applicable mutations from a small, fixed set of lightweight diagnostic mutations to the corresponding rule and re-execute the program, as shown in~\cref{fig:mutate}. These mutations are structure-preserving and intentionally conservative (e.g., relaxing exact string equality to substring or pattern matching, or weakening a single brittle filter), and they are used only for diagnosis, not as candidate replacements for the final query. We then observe whether any mutation yields non-empty results and how row counts change relative to the original execution.
+
+Based on this behavior, we classify empty intermediates into two categories. A relation is considered fragile-empty if at least one diagnostic mutation produces a non-empty result, suggesting that the original rule may be over-constrained or mis-specified. In this case, we return targeted feedback identifying the affected relation, the specific mutations applied, and the observed changes in row counts (optionally including a small sample of newly surfaced tuples). Conversely, a relation is considered stable-empty if it remains empty under all tested mutations. In such cases, emptiness may reflect a genuine property of the dataset under the stated constraints rather than a synthesis error. To remain conservative, we do not pressure the model to introduce relaxations; instead, we report that the empty result appears robust and encourage the model to either preserve the current semantics or emit auxiliary diagnostic outputs rather than altering the core query.
+
+Results produced by mutated programs are never used as final answers. Mutations serve only as execution-guided diagnostic probes to help the model decide whether and where revision is warranted. This design balances error localization with semantic caution, enabling targeted repair when evidence exists while avoiding misleading feedback in cases where empty results are likely correct. 
+
+
+% \begin{algorithm}[t]
+% \caption{Intermediate-Rule Diagnostic Feedback}
+% \begin{algorithmic}[1]
+% \Require Program $P$, dataset $D$
+% \Ensure Feedback $F$
+
+% \State $trace \gets \Call{InstrumentedExecute}{P, D}$
+% \For{each empty relation $(r, rule) \in trace$}
+%     \State $M \gets \Call{GenerateMutations}{rule}$ \Comment{Conservative probes}
+%     \For{each mutation $m \in M$}
+%         \State Test $m$ and record row count changes
+%     \EndFor
+%     \If{any mutation yields non-empty results}
+%         \State $F \gets F \cup \{\text{fragile-empty}: \text{suggest revision}\}$
+%     \Else
+%         \State $F \gets F \cup \{\text{stable-empty}: \text{preserve semantics}\}$
+%     \EndIf
+% \EndFor
+% \State \Return $F$
+% \end{algorithmic}
+% \end{algorithm}
+
+% \begin{algorithm}
+% 	\caption{\tool: Neurosymbolic Code Localization}
+% 	\label{alg:main}
+% 	\begin{algorithmic}[1]
+% 		\Require Codebase $C$, Question $q$, Max iterations $maxIterations$
+% 		\Ensure Code locations $L$
+% 		\State $\mathcal{F} \leftarrow$ ExtractFacts($C$)
+% 		\State $intent \leftarrow$ AnalyzeQuery($q$)
+% 		\State $query \leftarrow$ GenerateDatalog($intent, \mathcal{F}$)
+% 		\State $currentIterations \leftarrow 1$
+% 		\State $candidates \leftarrow \emptyset$
+% 		\While{$currentIterations \leq maxIterations$}
+% 		\State $results \leftarrow$ ExecuteDatalog($query, \mathcal{F}$)
+% 		\If{$results = \bot$} \Comment{Execution failed}
+% 		\State $error \leftarrow$ GetExecutionError($query$)
+% 		\State $query \leftarrow$ RefineDatalogQuery($query, error, intent, \mathcal{F}$) 
+% 		\State $currentIterations \leftarrow currentIterations + 1$
+% 		\Else
+% 		\State $sources \leftarrow$ GetSources($results$)
+% 		\State $candidates \leftarrow$ ValidateAndFilter($results, sources, intent$)
+% 		\State $\mathcal{L} \leftarrow \mathcal{L} \cup candidates$
+% 		\EndIf
+% 		\EndWhile
+% 		\Return $\mathcal{L}$
+% 	\end{algorithmic}
+% \end{algorithm}
+
+
+%We introduce an intermediate-rule diagnostic and mutation-based feedback mechanism to improve both the efficiency and effectiveness of LLM-based Datalog synthesis. Instead of evaluating a generated program solely by its final output, we instrument execution to collect row counts for intermediate relations and identify rules whose derived relations are empty. In practice, empty intermediate relations frequently indicate overly restrictive constraints, mismatched join keys, or incorrect predicate usage, and therefore serve as a useful signal for localizing potential errors in synthesized programs.
+%
+%At the same time, an empty relation is not inherently incorrect: depending on the user’s constraints and the underlying dataset, the semantically correct result may legitimately be the empty set. To avoid forcing spurious revisions or encouraging the model to hallucinate evidence, our approach explicitly distinguishes between fragile and stable emptiness through controlled diagnostic probing.
+%
+%Concretely, for each intermediate relation that produces zero rows, we apply a small, fixed set of lightweight diagnostic mutations to the corresponding rule and re-execute the program. These mutations are structure-preserving and intentionally conservative (e.g., relaxing exact string equality to substring or pattern matching, or weakening a single potentially brittle filter), and they are used only for diagnosis, not as candidate replacements for the final query. We then observe whether any mutation yields non-empty results and how row counts change relative to the original execution.
+%
+%Based on this behavior, we classify empty intermediates into two categories. A relation is considered fragile-empty if at least one diagnostic mutation produces a non-empty result, suggesting that the original rule may be over-constrained or mis-specified. In this case, we return targeted feedback identifying the affected relation, the specific mutations applied, and the observed changes in row counts (optionally including a small sample of newly surfaced tuples). Conversely, a relation is considered stable-empty if it remains empty under all tested mutations. In such cases, emptiness may reflect a genuine property of the dataset under the stated constraints rather than a synthesis error. To remain conservative, we do not pressure the model to introduce relaxations; instead, we report that the empty result appears robust and encourage the model to either preserve the current semantics or emit auxiliary diagnostic outputs rather than altering the core query.
+%
+%Results produced by mutated programs are never used as final answers. Mutations serve only as execution-guided diagnostic probes to help the model decide whether and where revision is warranted. This design balances error localization with semantic caution, enabling targeted repair when evidence exists while avoiding misleading feedback in cases where empty results are likely correct. We evaluate the contribution of this mechanism through an ablation study (\cref{TODO:ablation}), demonstrating its effectiveness in accelerating convergence and improving synthesis quality without sacrificing correctness.
+
+
+
+
+
+%For each occurrence of such predicates, the checker verifies whether:
+
+%When a high-confidence inversion is detected
+
+
+% \subsection{The \tooldataloc workflow}
+
+%%% Local Variables:
+%%% mode: LaTeX
+%%% TeX-master: "../main.tex"
+%%% TeX-command-extra-options: "-shell-escape"
+%%% End:
