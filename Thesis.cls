@@ -203,15 +203,15 @@
 
 %Your thesis title - this is used in the title and abstract
 %-------------------------------------------------
-\thesistitle{\href{https://github.com/wang-chen/thesis_template_ntu}{The Greatest Thesis in the World}} %
+\thesistitle{The Greatest Thesis in the World} %
 %-------------------------------------------------
-\supervisor{Prof. Einstein \textsc{XXX}} % You supervisor's name - this is used in the title page
+\supervisor{Prof. Yi Li} % You supervisor's name - this is used in the title page
 %-------------------------------------------------
 \examiner{} % Your examiner's name - this is not currently used anywhere in the template, cite it with \examname if you want it
 %-------------------------------------------------
 \degree{Doctor of Philosophy} % Your degree name - this is currently used in the title page and abstract
 %-------------------------------------------------
-\authors{\href{https://wang-chen.github.io}{Author Name}} % Your name - this is used in the title page and abstract
+\authors{\href{}{Xiufeng Xu}} % Your name - this is used in the title page and abstract
 %-------------------------------------------------
 \addresses{} % Your address - this is not currently used anywhere in the template, cite it with \addressnames if you want it
 %-------------------------------------------------
@@ -219,17 +219,17 @@
 %-------------------------------------------------
 \keywords{} % Keywords for your thesis - this is not currently used anywhere in the template, cite it with \keywordnames if you want it
 %-------------------------------------------------
-\university{\texorpdfstring{\href{http://www.university.com} % Your university's URL
-                {University Name}} % Your university's name - this is currently used in the title page
-                {University Name}}
+\university{\texorpdfstring{\href{https://www.ntu.edu.sg} % Your university's URL
+                {Nanyang Technological University}} % Your university's name - this is currently used in the title page
+                {Nanyang Technological University}}
 %-------------------------------------------------
-\UNIVERSITY{\texorpdfstring{\href{http://www.ntu.edu.sg/} % Your university's URL
-                {UNIVERSITY NAME (IN BLOCK CAPITALS)}} % Your university's name in capitals - this is currently used in the abstract page
-                {UNIVERSITY NAME (IN BLOCK CAPITALS)}}
+\UNIVERSITY{\texorpdfstring{\href{https://www.ntu.edu.sg} % Your university's URL
+                {NANYANG TECHNOLOGICAL UNIVERSITY}} % Your university's name in capitals - this is currently used in the abstract page
+                {NANYANG TECHNOLOGICAL UNIVERSITY}}
 %-------------------------------------------------
-\department{\texorpdfstring{\href{http://www.eee.ntu.edu.sg} % Your department's URL
-                {School of Electrical \& Electronic Engineering}} % Your department's name - used in the title page and abstract
-                {Department or School Name}}
+\department{\texorpdfstring{\href{https://www.ntu.edu.sg/computing} % Your department's URL
+                {College of Computing and Data Science}} % Your department's name - used in the title page and abstract
+                {College of Computing and Data Science}}
 %-------------------------------------------------
 \DEPARTMENT{\texorpdfstring{\href{Department or School Web Site URL Here (include http://)} % Your department's URL
                 {DEPARTMENT OR SCHOOL NAME (IN BLOCK CAPITALS)}} % Your department's name in capitals - this is not currently used anywhere in the template, cite it with \DEPTNAME if you want it
