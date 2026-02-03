@@ -1,0 +1,66 @@
+\subsection{Preprocessing}\label{sec:preprocess}
+In this step, we will discuss the details of separating the documentation and corresponding code from the project and the specifics of preprocessing the documentation content.
+
+In modern data science libraries, documentation is typically auto-generated using Sphinx, a tool that can automatically create HTML documentation from Python code. Sphinx supports various docstring styles, with Google style and NumPy style being commonly used. Figures~\ref{fig:docstring} respectively display docstring examples of two different styles from Sphinx official website~\cite{sphnix:google,sphnix:numpy}. Google-style docstrings use a clear and concise format with a minimalistic structure. It divides the docstring into sections like \textbf{Args}, \textbf{Attributes}, etc., with each section using plain indentation. Similarly, Numpy-style docstrings organize sections more rigidly. Sections are divided by using \textbf{Parameters}, \textbf{Attributes}, etc. with horizontal dash lines ``\textbf{- - -}'' under the section header. The number of dashes is the same as the number of letters in the section header. Regardless of the style used, the docstring is normally placed at the beginning inside its corresponding class or function.
+
+After downloading the project, our tool first converts every Python file from the project into an Abstract Syntax Tree (AST) and isolates the classes and independent functions. This paper focuses on the CDI issue, so in this step, we filter out code without documentation and separately extract the code and documentation from the remaining code. Since Python supports object-oriented programming but current symbolic execution tools have limited support for classes, we have to limit our experimental units to functions. For independent functions, the scope of constraints in the documentation usually applies within the function itself. For classes, however, the constraints cover the entire class, including each member function. Therefore, we create a new directory for every class and independent function, with member function directories placed within their corresponding class directories to maintain structural consistency. If the member function has its own documentation, it will also be retained. 
+
+To help the LLM better focus on the constraints between parameters and reduce the occurrence of erroneous constraints, we retained parameters or attributes and their corresponding descriptions in the form of key-value pairs, based on the two aforementioned docstring styles. We subsequently applied a rule-based heuristic approach to retain documentation that potentially contain constraints and to discard the rest. For instance, if none of the parameters or attributes appear in other descriptions, this indicates the absence of multi-parameter constraints in that documentation.
+
+
+\begin{figure*}[t]
+	\vspace{2mm}
+    \begin{subfigure}{0.49\linewidth}
+        \begin{tcolorbox}[colback=Emerald!10,colframe=cyan!40!black,title=\textbf{Numpy Style Docstrings}]
+\begin{lstlisting}[escapechar=@]
+class ExampleNumpyStyle():
+  """Exceptions are documented
+  @\colorbox{blue!20}{Parameters}@
+  ----------
+  msg : str
+    Human readable string describing the exception.
+  code : obj:`int`, optional 
+    Numeric error code.
+  @\colorbox{blue!20}{Attributes}@
+  ----------
+  msg : str
+    Human readable string describing the exception.
+  code : int
+    Numeric error code.
+  """
+  def __init__(self, msg, code):
+    self.msg = msg
+    self.code = code
+\end{lstlisting}
+        \end{tcolorbox}
+        \label{fig:numpy}
+    \end{subfigure}
+    \begin{subfigure}{0.49\linewidth}
+\begin{tcolorbox}[colback=Salmon!20, colframe=Salmon!90!Black,title=\textbf{Google Style Docstrings}]
+\begin{lstlisting}[escapechar=@]
+class ExampleGoogleStyle():
+  """Exceptions are documented
+  Note:
+    Do not include the `self` parameter in the ``Args`` section.
+        
+  @\colorbox{blue!20}{Args:}@
+    msg (str): Human readable string describing the exception.
+    code (:obj:`int`, optional): Error code.
+
+  @\colorbox{blue!20}{Attributes:}@    
+    msg (str): Human readable string describing the exception.
+    code (int): Exception error code
+  """
+  def __init__(self, msg, code):
+    self.msg = msg
+    self.code = code
+\end{lstlisting}
+\end{tcolorbox}
+    \label{fig:google}
+    \end{subfigure}
+    \caption{Example of two docstring styles}
+    \label{fig:docstring}
+    \vspace{-10pt}
+\end{figure*}
+
+

@@ -1,0 +1,181 @@
+\subsection{Inconsistency Detection}\label{sec:detect}
+
+In the second phase, we extracted constraints from both documentation and code. While \emph{code-constraints} are deterministic in nature, \emph{doc-constraints} inherently contain uncertainties stemming from two main sources. First, there are \emph{implicit constraints} arising from vague or incomplete descriptions, which we address by defining fuzzy words to extend them into soft constraints. Second, we encounter uncertainties introduced by generative models' limited reasoning capabilities and unavoidable hallucination issues, for which no validator exists to definitively determine the correctness of generated constraints. To address this challenging scenario, we proposed a customized fuzzy constraint logic to mitigate such vagueness. With the help of fuzzy words and fuzzy constraint logic, our converter can effectively handle both explicit and implicit constraints. The converter ultimately produces fuzzy expressions, which are then processed by a reasoner based on the z3 SMT (Satisfiability Modulo Theories) solver to detect inconsistencies.
+
+
+The reasoner offers two strategies, from relaxed to strict, to identify inconsistencies from the perspectives of satisfiability and equivalence. Given a \emph{doc-constraint} $c$ and a \emph{code-constraint} set $P$ containing a group of path constraints $p$, the detection strategies are defined as follows:
+\begin{itemize}
+	\item \textbf{Unsatisfiability} checking determines whether the \emph{doc-constraint} $c$ is unsatisfiable under all path constraints. If the conjunction of $c$ and every path constraint $p$ is unsatisfiable, it indicates a contradictory inconsistency, meaning that under all possible execution paths, the code violates the constraint stipulated in the documentation.
+	\begin{equation}\label{eq: uq1}
+		\forall p \in P, \neg (c \wedge p)
+	\end{equation}
+	\item \textbf{Nonequivalence} checking determines whether the \emph{doc-constraint} $c$ and \emph{code-constraints} are logically equivalent. If equivalence holds only under specific conditions, a behavioral inconsistency may arise, implying that the constraints implemented in the code are not fully equivalent to the documentation.
+	\begin{equation}\label{eq: uq3}
+		\exists p \in P, \neg (c \Leftrightarrow p)
+	\end{equation}
+\end{itemize}
+
+For constraints containing sub-constraints that do not exist in the code logic, we employ a heuristic approach to provide suggestions. Specifically, when a constraint mentioned in the documentation is not present in the corresponding code logic, we issue a warning and label this constraint as a potential weak constraint to prompt further investigation by the user.
+
+
+
+\subsubsection{Fuzzy Words}\label{sec:fuzzword}
+
+The example from~\cref{sec:eg2} illustrates a very typical implicit constraint with fuzzy words, where part of constraint is clearly defined while others remain uncertain. We introduce a series of fuzzy words to help LLM extract constraints better. These fuzzy words frequently appear in documentation but don't represent specific values, making it challenging for the LLM to extract them directly. We generally categorize these fuzzy words into two types: \textit{existence} and \textit{non-existence}. In fuzzy words, \textit{non-existence} includes ``ignore'', ``no effect'', ``unused'', ``override'', indicating that a parameter either is unused or does not exist within code segments where other conditions are met. Similarly, \textit{existence} includes ``specify'', ``have an effect'', ``exist'', ``significant'', indicating that the parameter is used or exists when other conditions are met.
+
+We implement several specialized predicates to evaluate such implicit constraints. \tool will first trace the target variable's define-use chain (DU-chain)~\cite{kennedy1978use, harrold1994efficient} and then check if the definition and usage of it are existed or not under a specific program path. For instance, ``\texttt{exist(x)}'' will check if the definition and usage of a variable \texttt{x} are existed in the program path with other explicit conditions. If found, it will return \texttt{True}; otherwise, it will return \texttt{False}. Similarly, ``\texttt{ignore(x)}'' will check whether the definition and usage of \texttt{x} are absent under the program path with given explicit conditions. It can be further extended to check weak \emph{doc-constraints}. Like the example in~\cref{sec:eg2}, \textit{gamma} will be ignored not only when \texttt{``affinity$=$nearest\_neighbors''} but also ignored when \texttt{``affinity$=$precomputed\_nearest\_neighbors''} as well as \texttt{``affinity$=$precomputed''}.
+
+
+
+\subsubsection{Fuzzy Constraint Satisfaction}\label{sec:fuzzlogic}
+
+While we have employed several strategies in Phase II to maximize LLM's understanding of
+constraints and restrict randomness in outputs, inaccurate extraction is still unavoidable.
+The main reasons are threefold: (1) typos inevitably occur when developers write documentation; (2)
+the hallucination issues inherent to black-box generative models; and (3) the intrinsic ambiguity in
+natural languages. This implies that correct documentation descriptions can generate incorrect \emph{doc-constraints}, and incorrect documentation descriptions can also have the chance to generate correct \emph{doc-constraints}.
+
+In the absence of LLM unpredictability, detecting CDI issues is a crisp constraint satisfaction
+problem (CSP), deciding whether a \emph{doc-constraint} is consistent with the actual code implementation.
+Nevertheless, due to minor errors introduced by LLMs, such as a single letter being wrongly spelled
+in a parameter name, or a comparison operator being reversed, e.g., writing ``<'' instead of ``>'',
+a \emph{doc-constraint} can be mistakenly identified as inconsistent when it is actually correct.
+
+To address this, we proposed a customized fuzzy constraint logic that reconciles such
+unpredictability.
+In a traditional fuzzy constraint~\cite{kosko1993fuzzy, ruttkay1994fuzzy}, a membership function
+assigns a degree of satisfaction (ranging from 0 to 1) to each possible variable value.
+It enables partial fulfillment of a condition, with satisfaction measured on a continuous scale.
+In our case, a constraint needs to be measured on a new scale, assessing ``how likely'' the
+extracted \emph{doc-constraint} conforms to the \emph{code-constraints}.
+Therefore, we introduced a unique similarity computation which serves as the membership function.
+
+\cref{fig:ebnf} shows an EBNF grammar for our multi-parameter constraints.
+A multi-parameter constraint is a combination and nesting of binary expressions and Boolean
+operators, which can be viewed as a complete binary tree where leaf nodes are binary expressions
+over single parameters and non-leaf nodes are logical operators connecting them.
+Without loss of generality, we only keep negation, conjunction, and disjunction in the constraints;
+logical relations such as implications can be simplified accordingly.
+The fuzziness of a constraint is defined with respect to a set of \emph{environment expressions},
+facts that are known to hold (with a truth value of 1).
+In other words, the instantiation of a specific tree structure and nodes is a constraint $c$
+evaluated against a set of expressions $\{e_1, e_2, \ldots, e_n\}$.
+Next, we define the membership function of our fuzzy constraint logic through a few similarity
+functions.
+
+
+\begin{figure}[t]
+\small\centering
+\begin{align*}
+   c \in Constraint &::= e \; |\; \neg c \;|\; c \vee c \;|\; c \wedge c \nonumber\\
+   e \in Expression &::= \; p \bowtie v\\
+   p \in Parameter &::= \; char,\{char \;|\; digit\} \nonumber\\
+   \bowtie \; \in Operator &::= \; \textbf{<} \;|\; \textbf{>} \;|\; \textbf{<=} \;|\;
+   \textbf{>=} \;|\; \textbf{=} \;|\; \textbf{!=} \; \nonumber\\
+   v \in Value &::= \; string \;|\; number \;|\; bool \nonumber
+\end{align*}%
+\caption{Extended Backus-Naur form for multi-parameter constraint.}\label{fig:ebnf}
+\vspace{-5pt}
+\end{figure}
+
+\begin{definition}[Expression Similarity]\label{def:es}
+The similarity between two expressions $e_1$ and $e_2$ is defined as,
+\begin{equation}\label{eq:simexpr}
+  \sigma(e_1, e_2) = \alpha * (1 - \frac{LD(p_1, p_2)}{\max(|p_1|, |p_2|)}) + \beta *
+  (\frac{\delta_{\bowtie_1} \cdot \delta_{\bowtie_2}}{\|\delta_{\bowtie_1}\|
+  \|\delta_{\bowtie_2}\|}) + \alpha * (1 - \frac{LD(v_1, v_2)}{\max(|v_1|, |v_2|)}),
+\end{equation}
+where $\alpha$ and $\beta$ denote the relative weights, $p$, $\bowtie$, and $v$
+are parameter, operator, and value, respectively, $|p|$ and $|v|$ denotes the length of $p$ and $v$, $\|\delta_{\bowtie}\|$ denotes the magnitudes (or Euclidean norms) of the vector $\delta_{\bowtie}$.
+\end{definition}
+
+The similarity between two expressions are considered separately for the parameters, operators, and
+values appeared in the expressions.
+Both $p$ and $v$ can be treated as texts, therefore, Levenshtien Distance (a.k.a.
+edit distance) is used to represent their similarity.
+The normalized Levenshtien Distance (NLD) is given in \cref{eq:ld}, where $s$ denotes strings ($p$
+or $v$) and $|s|$ denotes the length of it.
+
+\begin{equation}\label{eq:ld}
+    \eta(s_1, s_2) = NLD =  1 - \frac{LD(s_1, s_2)}{\max(|s_1|, |s_2|)}
+\end{equation}
+
+\begin{equation}\label{eq:embedding}
+    \delta_{\bowtie} = (C, E, G, L, N), \text{where } C, E, G, L, N \in \{0, 1\}
+\end{equation}
+
+\begin{equation}\label{eq:cossim}
+    cos\theta(\bowtie_1, \bowtie_2) = \frac{\delta_{\bowtie_1} \cdot \delta_{\bowtie_2}}{\|\delta_{\bowtie_1}\| \|\delta_{\bowtie_2}\|}
+\end{equation}
+
+As illustrated in \cref{eq:embedding}, we design an operator embedding across five key dimensions: \underline{\textbf{C}}omparison, \underline{\textbf{E}}quality, \underline{\textbf{G}}reater than, \underline{\textbf{L}}ess than, and \underline{\textbf{N}}egativity.
+This way, we may calculate the similarity between two operators by simply calculating the cosine
+similarity between two vectors.
+The result is highly intuitive. For example, with $\delta_{<} = (1, 0, 0, 1, 0)$, $\delta_{>} =
+(1, 0, 1, 0, 0)$, and $\delta_{<=} = (1, 1, 0, 1, 0)$, the similarity between ``$<$'' and ``$>$''
+is 0.5, while the similarity between ``$<$'' and ``$<=$'' is 0.82.
+
+The weight of operator similarity is set as $\beta$ such that the weights of operators, values, and
+parameters within a given experssion should sum to one.
+Thus, we have $\alpha = \frac{1 - \beta}{2}$ and the similarity $\sigma$ of two single parameter
+expressions (i.e., atomic constraint) can be calculated according to \cref{eq:simexpr}.
+
+
+\begin{definition}[Constraint Similarity]
+Let $c$ be a constraint and $\Phi = \{e_i | i=1,\ldots,n\}$ be a set of
+environment expressions assumed to hold true.
+The similarity of $c$ against $\Phi$ is given by the following set of calculations.
+\begin{equation}\label{eq:js}
+    \rho(c,\Phi) =
+    \begin{cases}
+        \mathop{\arg\max}\limits_{e_i \in \Phi} \sigma(e, e_i),
+        & \text{if } c \text{ is an expression } e \\
+        1 - \sigma(c', \Phi), & \text{if $c = \neg c'$} \\
+        \min\{\sigma(c_1, \Phi), \sigma(c_2, \Phi)\}, & \text{if } c = c_1 \wedge c_2 \\
+        \max\{\sigma(c_1, \Phi), \sigma(c_2, \Phi)\}, & \text{if } c = c_1 \vee c_2 \\
+    \end{cases}
+\end{equation}
+\end{definition}
+
+Consider an atomic constraint with a single expression; its similarity to $\Phi$ associated with
+a set of \emph{environment expressions} can be represented by the maximum expression similarity among
+all expressions within $\Phi$.
+Based on the \textit{conjunctive combination principle}~\cite{zadeh1965fuzzy}, when combining two
+constraints using a conjunction, their degree of joint similarity $\rho$ should be represented by
+the minimum similarity between them. Similarly, based on the \textit{disjunctive combination
+principle}~\cite{zadeh1965fuzzy}, when they are combined with a disjunction, the maximum similarity
+should be used. For negation, the complementary similarity is used.
+
+
+
+\begin{definition}[Membership Function for Fuzzy Constraint Satisfaction]
+Constraint similarity serves as the membership function $\mu_{\Omega}$, quantifying the degree to
+which a given constraint $\epsilon$ is consistent with the code, which is represented as a set
+$\Omega$ of path constraints $\omega$:
+%\vspace{-8pt}
+\begin{equation}
+\mu_{\Omega}(\epsilon) = \rho(\epsilon, \Phi_\Omega) \cdot \epsilon[e \mapsto e_{\Phi_\Omega}]
+\end{equation}
+where $\Phi_\Omega$ denotes the set of expressions aggregated from all the path constraints in
+$\Omega$, and $\epsilon[e \mapsto e_{\Phi_\Omega}]$ is a rewrite of $\epsilon$, where each
+expression $e$ has been replaced by its cloest counterpart from $\Phi_\Omega$.
+\end{definition}
+
+The inconsistency between the modified constraint $\epsilon[e \mapsto e_{\Phi_\Omega}]$ and
+$\Omega$ is then evaluated (according to \cref{eq: uq1} or
+\cref{eq: uq3}), yielding a binary result (\texttt{True} or \texttt{False}).
+To enable the probabilistic interpretation, a linear transformation
+ensures complementary probabilities. For instance, ``0.7$\cdot$False = 0.3$\cdot$True'', indicating
+a 70\% probability of inconsistency or a 30\% probability of consistency.
+
+
+\subsubsection{Constraint Similarity Threshold.} LLMs demonstrate a great potential in constraint extraction, yet they still encounter errors such as using incorrect parameter names or values and introducing non-existent constraints. To reduce false positives from these inevitable issues, we set a constraint similarity threshold of 0.85. This is based on the observation that a high constraint similarity (>0.85) indicates a high likelihood of misinterpretation or conflation by the LLM.
+
+For instance, in \texttt{scikit-learn}, the documentation of \texttt{LinearSVC} states: ``\emph{If n\_samples < n\_features and optimizer supports chosen loss, multi\_class and penalty, then dual will be set to True}''. However, the extracted constraint is ``\texttt{$($samples$<$features$)$$\wedge$$($dual$=$True$)$}'', where two parameters are mistakenly mapped to similar names. Their constraint similarity is 0.86, exceeding the threshold, leading \tool to discard the result. Moreover, in most cases where the expression contains only a single parameter, the threshold exhibits stronger filtering capability.
+
+However, setting a threshold cannot entirely exclude all false positives, as there is no definitive rule to ascertain whether an error originates from the documentation or the LLM. Another example from \texttt{scikit-learn} illustrates this limitation: the documentation of \texttt{estimator\_} states: \emph{``The child estimator template used to create the collection of fitted sub-estimators''}. Yet, the extracted constraint ``\texttt{$($estimator\_$=$child\_estimator\_template$)\wedge($collection$=$fitted\_sub\_estimators$)$}'' has a constraint similarity of 0.67, which is below the threshold, leading \tool to accept the result.
+
+
+
+
+

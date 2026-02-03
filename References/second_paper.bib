@@ -1,6 +1,932 @@
-@book{bauschke2011convex,
-  title={Convex analysis and monotone operator theory in Hilbert spaces},
-  author={Bauschke, Heinz H and Combettes, Patrick L},
-  year={2011},
-  publisher={Springer Science \& Business Media}
+
+@string{academic = {Academic Press}}
+
+@string{acmmathsoft = {{ACM} Trans. Math. Software}}
+
+@string{acmpress = {{ACM} Press}}
+
+@string{adamhilger = {Adam Hilger}}
+
+@string{addisonwesley = {Addison-Wesley}}
+
+@string{allynbacon = {Allyn and Bacon}}
+
+@string{amermathmonthly = {Amer. Math. Monthly}}
+
+@string{amersocio = {American Journal of Sociology}}
+
+@string{amerstatassoc = {J. Amer. Statist. Assoc.}}
+
+@string{ams = {American Mathematical Society}}
+
+@string{amstrans = {Amer. Math. Soc. Transl.}}
+
+@string{applmathcomp = {Appl. Math. Comput.}}
+
+@string{birkhauser = {Birkha{\"u}ser}}
+
+@string{bit = {{BIT}}}
+
+@string{britstatpsych = {Brit. J. Math. Statist. Psych.}}
+
+@string{bullams = {Bull. Amer. Math. Soc.}}
+
+@string{cacm = {Commun. {ACM}}}
+
+@string{cambridgepress = {Cambridge University Press}}
+
+@string{canmathbull = {Canad. Math. Bull.}}
+
+@string{chelsea = {Chelsea}}
+
+@string{claredonpress = {Claredon Press}}
+
+@string{compapplmath = {J. Comput. Appl. Math.}}
+
+@string{compjour = {Comput. J.}}
+
+@string{compphys = {J. Comput. Phys.}}
+
+@string{compserv = {Comput. Surveys}}
+
+@string{compstruct = {Comput. \& Structures}}
+
+@string{compsyssci = {J. Comput. System Sci.}}
+
+@string{computer = {{IEEE} Computer}}
+
+@string{computing = {Computing}}
+
+@string{contempmath = {Contemp. Math.}}
+
+@string{crelle = {Crelle's Journal}}
+
+@string{doverpub = {Dover Publications}}
+
+@string{eyolles = {Eyolles}}
+
+@string{giornalemath = {Giorn. Mat.}}
+
+@string{holtrinehartwinston = {Holt, Rinehart and Winston}}
+
+@string{ieeespec = {{IEEE} Spectrum}}
+
+@string{ieeetransac = {{IEEE} Trans. Automat. Control}}
+
+@string{ieeetransaeroelec = {{IEEE} Trans. Aerospace Electron. Systems}}
+
+@string{ieeetranscomp = {{IEEE} Trans. Comput.}}
+
+@string{imanumerana = {{IMA} J. Numer. Anal.}}
+
+@string{infproclet = {Inform. Process. Lett.}}
+
+@string{instmathapp = {J. Inst. Math. Appl.}}
+
+@string{intcontrol = {Internat. J. Control}}
+
+@string{interscience = {Interscience}}
+
+@string{intnumereng = {Internat. J. Numer. Methods Engrg.}}
+
+@string{intsuper = {Internat. J. Supercomputing Applic.}}
+
+@string{jacm = {J. ACM}}
+
+@string{johnshopkinspress = {The Johns Hopkins University Press}}
+
+@string{johnwileysons = {John Wiley and Sons}}
+
+@string{jresnatburstand = {J. Res. Nat. Bur. Standards}}
+
+@string{jsiam = {J. Soc. Indust. Appl. Math.}}
+
+@string{jsiamb = {J. Soc. Indust. Appl. Math. Ser. B Numer. Anal.}}
+
+@string{kibernetika = {Kibernetika}}
+
+@string{linalgapp = {Linear Algebra Appl.}}
+
+@string{macmillan = {Macmillan}}
+
+@string{mathanaappl = {J. Math. Anal. Appl.}}
+
+@string{mathannalen = {Math. Ann.}}
+
+@string{mathcomp = {Math. Comp.}}
+
+@string{mathphys = {J. Math. Phys.}}
+
+@string{mathscand = {Math. Scand.}}
+
+@string{mathworks = {The Math Works Inc.}}
+
+@string{mcgrawhill = {McGraw-Hill}}
+
+@string{natburstd = {National Bureau of Standards}}
+
+@string{northholland = {North-Holland}}
+
+@string{numermath = {Numer. Math.}}
+
+@string{oxfordpress = {Oxford University Press}}
+
+@string{pacificmath = {Pacific J. Math.}}
+
+@string{parcomputing = {Parallel Comput.}}
+
+@string{pardistcomp = {J. Parallel and Distrib. Comput.}}
+
+@string{pergamonpress = {Pergamon Press}}
+
+@string{philmag = {Philos. Mag.}}
+
+@string{plenumpress = {Plenum Press}}
+
+@string{prenticehall = {Prentice-Hall}}
+
+@string{procams = {Proc. Amer. Math. Soc.}}
+
+@string{procieee = {Proc. {IEEE}}}
+
+@string{procnas = {Proc. Nat. Acad. Sci. U. S. A.}}
+
+@string{psychometrika = {Psychometrika}}
+
+@string{quartapplmath = {Quart. Appl. Math.}}
+
+@string{quartmath = {Quart. J. Math. Oxford Ser. (2)}}
+
+@string{revueinststat = {Rev. Inst. Internat. Statist.}}
+
+@string{siamalgmeth = {{SIAM} J. Algebraic Discrete Methods}}
+
+@string{siamappmath = {{SIAM} J. Appl. Math.}}
+
+@string{siamcomp = {{SIAM} J. Comput.}}
+
+@string{siammatrix = {{SIAM} J. Matrix Anal. Appl.}}
+
+@string{siamnumanal = {{SIAM} J. Numer. Anal.}}
+
+@string{siampub = {{SIAM} Publications}}
+
+@string{siamreview = {{SIAM} Rev.}}
+
+@string{siamscistat = {{SIAM} J. Sci. Statist. Comput.}}
+
+@string{signum = {{ACM} {SIGNUM} Newslett.}}
+
+@string{softpracexp = {Software Prac. Experience}}
+
+@string{springer = {Springer-Verlag}}
+
+@string{statscience = {Statist. Sci.}}
+
+@string{tablesaidscomp = {Math. Tables Aids Comput.}}
+
+@string{techno = {Technometrics}}
+
+@string{texaspress = {University of Texas Press}}
+
+@string{transams = {Trans. Amer. Math. Soc.}}
+
+@string{ussrcompmathphys = {{U. S. S. R.} Comput. Math. and Math. Phys.}}
+
+@string{vannostrand = {Van Nostrand}}
+
+@string{vlsicompsys = {J. {VLSI} Comput. Syst.}}
+
+@string{whfreeman = {W. H. Freeman and Co.}}
+
+@string{zangewmathmech = {Z. Angew. Math. Mech.}}
+
+@string{zangewmathphys = {Z. Angew. Math. Phys.}}
+
+
+@inproceedings{Ma2025SAG,
+	author = {Ma, Lezhi and Liu, Shangqing and Li, Yi and Xie, Xiaofei and Bu, Lei},
+	booktitle = {Proceedings of the 47th International Conference on Software Engineering},
+	series = {ICSE},
+	date-added = {2025-02-24 23:30:56 +0800},
+	date-modified = {2025-02-24 23:30:56 +0800},
+	month = apr,
+	title = {{SpecGen}: Automated Generation of Formal Program Specifications via Large Language Models},
+	year = {2025}}
+
+@misc{issue28469,
+	date-modified = {2024-09},
+	howpublished = {\url{https://github.com/scikit-learn/scikit-learn/issues/28469}},
+	title = {Scikit-learn issue\#28469.},
+	year = {2024}}
+
+@misc{issue28470,
+	date-modified = {2024-09},
+	howpublished = {\url{https://github.com/scikit-learn/scikit-learn/issues/28470}},
+	title = {Scikit-learn issue\#28470.},
+	year = {2024}}
+
+@misc{issue28473,
+	date-modified = {2024-09},
+	howpublished = {\url{https://github.com/scikit-learn/scikit-learn/issues/28473}},
+	title = {Scikit-learn issue\#28473.},
+	year = {2024}}
+
+@misc{issue29440,
+	date-modified = {2024-09},
+	howpublished = {\url{https://github.com/scikit-learn/scikit-learn/issues/29440}},
+	title = {Scikit-learn issue\#29440.},
+	year = {2024}}
+
+@misc{issue29463,
+	date-modified = {2024-09},
+	howpublished = {\url{https://github.com/scikit-learn/scikit-learn/issues/29463}},
+	title = {Scikit-learn issue\#29463.},
+	year = {2024}}
+
+@misc{issue29464,
+	date-modified = {2024-09},
+	howpublished = {\url{https://github.com/scikit-learn/scikit-learn/issues/29464}},
+	title = {Scikit-learn issue\#29464.},
+	year = {2024}}
+
+@misc{issue30099,
+	date-modified = {2024-10},
+	howpublished = {\url{https://github.com/scikit-learn/scikit-learn/issues/30099}},
+	title = {Scikit-learn issue\#30099.},
+	year = {2024}}
+
+@misc{issue29509,
+	date-modified = {2024-09},
+	howpublished = {\url{https://github.com/scikit-learn/scikit-learn/issues/29509}},
+	title = {Scikit-learn issue\#29509.},
+	year = {2024}}
+
+@misc{issue9304,
+	date-modified = {2024-09},
+	howpublished = {\url{https://github.com/statsmodels/statsmodels/issues/9304}},
+	title = {Statsmodels issue\#9304.},
+	year = {2024}}
+
+@misc{issue11336,
+	date-modified = {2024-09},
+	howpublished = {\url{https://github.com/dask/dask/issues/11336}},
+	title = {Dask issue\#11336.},
+	year = {2024}}
+
+@misc{issue20141,
+	date-modified = {2024-09},
+	howpublished = {\url{https://github.com/keras-team/keras/issues/20141}},
+	title = {Keras issue\#20141.},
+	year = {2024}}
+
+@inproceedings{zhu2022identifying,
+	author = {Zhu, Chenguang and Liu, Ye and Wu, Xiuheng and Li, Yi},
+	booktitle = {Proceedings of the 37th IEEE/ACM International Conference on Automated Software Engineering},
+	series = {ASE},
+	pages = {1--13},
+	title = {Identifying solidity smart contract api documentation errors},
+	year = {2022}}
+
+@inproceedings{aghajani2018large,
+	author = {Aghajani, Emad and Nagy, Csaba and Bavota, Gabriele and Lanza, Michele},
+	booktitle = {2018 IEEE International conference on software maintenance and evolution (ICSME)},
+	organization = {IEEE},
+	pages = {25--35},
+	title = {A large-scale empirical study on linguistic antipatterns affecting apis},
+	year = {2018}}
+
+@inproceedings{stulova2020towards,
+	author = {Stulova, Nataliia and Blasi, Arianna and Gorla, Alessandra and Nierstrasz, Oscar},
+	booktitle = {2020 IEEE 20th international working conference on source code analysis and manipulation (SCAM)},
+	organization = {IEEE},
+	pages = {65--69},
+	title = {Towards detecting inconsistent comments in java source code automatically},
+	year = {2020}}
+
+@inproceedings{rani2021comments,
+	author={Rani, Pooja and Abukar, Suada and Stulova, Nataliia and Bergel, Alexandre and Nierstrasz, Oscar},
+	booktitle={2021 IEEE 21st International Working Conference on Source Code Analysis and Manipulation (SCAM)},
+	organization={IEEE},
+	pages={165--169},
+	title={Do comments follow commenting conventions? a case study in java and python},
+	year={2021}
+}
+
+@inproceedings{wu2021diffbase,
+	author = {Wu, Xiuheng and Zhu, Chenguang and Li, Yi},
+	booktitle = {Proceedings of the 29th ACM Joint Meeting on European Software Engineering Conference and Symposium on the Foundations of Software Engineering},
+	series = {ESEC/FSE},
+	pages = {503--515},
+	title = {Diffbase: A differential factbase for effective software evolution management},
+	year = {2021}}
+
+@article{uddin2015api,
+	author = {Uddin, Gias and Robillard, Martin P},
+	journal = {Ieee software},
+	number = {4},
+	pages = {68--75},
+	publisher = {IEEE},
+	title = {How API documentation fails},
+	volume = {32},
+	year = {2015}}
+
+@inproceedings{zhou2017analyzing,
+	author = {Zhou, Yu and Gu, Ruihang and Chen, Taolue and Huang, Zhiqiu and Panichella, Sebastiano and Gall, Harald},
+	booktitle = {2017 IEEE/ACM 39th International Conference on Software Engineering},
+	series = {ICSE},
+	organization = {IEEE},
+	pages = {27--37},
+	title = {Analyzing APIs documentation and code to detect directive defects},
+	year = {2017}}
+
+@article{kosko1993fuzzy,
+	author = {Kosko, Bart and Isaka, Satoru},
+	journal = {Scientific American},
+	number = {1},
+	pages = {76--81},
+	publisher = {JSTOR},
+	title = {Fuzzy logic},
+	volume = {269},
+	year = {1993}}
+
+@inproceedings{khurshid2003generalized,
+	author = {Khurshid, Sarfraz and P{\u{a}}s{\u{a}}reanu, Corina S and Visser, Willem},
+	booktitle = {International Conference on Tools and Algorithms for the Construction and Analysis of Systems},
+	organization = {Springer},
+	pages = {553--568},
+	title = {Generalized symbolic execution for model checking and testing},
+	year = {2003}}
+
+@misc{github:pysmt,
+	author = {pySMT},
+	title = {A library for SMT formulae manipulation and solving},
+	url = {https://github.com/pysmt/pysmt},
+	year = {2024},
+	bdsk-url-1 = {https://github.com/pysmt/pysmt}}
+
+@misc{github:pyexsmt,
+	author = {PyExSMT},
+	title = {Python Symbolic Execution},
+	url = {https://github.com/FedericoAureliano/PyExSMT},
+	year = {2024},
+	bdsk-url-1 = {https://github.com/FedericoAureliano/PyExSMT}}
+
+@misc{github:pyexz3,
+	author = {PyExZ3},
+	title = {Python Exploration with Z3},
+	url = {https://github.com/thomasjball/PyExZ3},
+	year = {2024},
+	bdsk-url-1 = {https://github.com/thomasjball/PyExZ3}}
+
+@misc{github:statsmodels,
+	author = {statsmodels},
+	title = {Statistical modeling and econometrics in Python},
+	url = {https://github.com/statsmodels/statsmodels},
+	year = {2024},
+	bdsk-url-1 = {https://github.com/statsmodels/statsmodels}}
+
+@misc{github:scikit,
+	author = {scikit-learn},
+	title = {Machine learning in Python},
+	url = {https://github.com/scikit-learn/scikit-learn},
+	year = {2024},
+	bdsk-url-1 = {https://github.com/scikit-learn/scikit-learn}}
+
+@misc{sphnix:google,
+	author = {Sphnix},
+	title = {Example Google Style Python Docstrings},
+	url = {https://www.sphinx-doc.org/en/master/usage/extensions/example_google.html},
+	year = {2024},
+	bdsk-url-1 = {https://www.sphinx-doc.org/en/master/usage/extensions/example_google.html}}
+
+@misc{sphnix:numpy,
+	author = {Sphnix},
+	title = {Example Numpy Style Python Docstrings},
+	url = {https://www.sphinx-doc.org/en/master/usage/extensions/example_numpy.html},
+	year = {2024},
+	bdsk-url-1 = {https://www.sphinx-doc.org/en/master/usage/extensions/example_numpy.html}}
+
+@online{modeltoken,
+	author = {OpenAI},
+	title = {OpenAI Models},
+	url = {https://platform.openai.com/docs/models/o1},
+	year = {2024},
+	bdsk-url-1 = {https://platform.openai.com/docs/models/o1}}
+
+@online{gemini,
+	author = {Google},
+	title = {AI for every developer},
+	url = {https://ai.google.dev},
+	year = {2024},
+	bdsk-url-1 = {https://ai.google.dev}}
+
+@online{llama3,
+	author = {Meta},
+	title = {Introducing Llama 3},
+	url = {https://www.llama.com},
+	year = {2024},
+	bdsk-url-1 = {https://www.llama.com}}
+
+@online{tokencount,
+	author = {OpenAI},
+	title = {What are tokens and how to count them?},
+	url = {https://help.openai.com/en/articles/4936856-what-are-tokens-and-how-to-count-them},
+	year = {2024},
+	bdsk-url-1 = {https://help.openai.com/en/articles/4936856-what-are-tokens-and-how-to-count-them}}
+
+@article{rubin2021learning,
+	author = {Rubin, Ohad and Herzig, Jonathan and Berant, Jonathan},
+	journal = {arXiv preprint arXiv:2112.08633},
+	title = {Learning to retrieve prompts for in-context learning},
+	year = {2021}}
+
+@article{min2022rethinking,
+	author = {Min, Sewon and Lyu, Xinxi and Holtzman, Ari and Artetxe, Mikel and Lewis, Mike and Hajishirzi, Hannaneh and Zettlemoyer, Luke},
+	journal = {arXiv preprint arXiv:2202.12837},
+	title = {Rethinking the role of demonstrations: What makes in-context learning work?},
+	year = {2022}}
+
+@inproceedings{dvivedi2024comparative,
+	author = {Dvivedi, Shubhang Shekhar and Vijay, Vyshnav and Pujari, Sai Leela Rahul and Lodh, Shoumik and Kumar, Dhruv},
+	booktitle = {Proceedings of the 1st ACM International Conference on AI-Powered Software},
+	title = {A comparative analysis of large language models for code documentation generation},
+	year = {2024}}
+
+@incollection{ball2015deconstructing,
+	author = {Ball, Thomas and Daniel, Jakub},
+	booktitle = {Dependable Software Systems Engineering},
+	pages = {26--41},
+	publisher = {IOS Press},
+	title = {Deconstructing dynamic symbolic execution},
+	year = {2015}}
+
+@article{wadhwa2024codequality,
+	articleno = {36},
+	author = {Wadhwa, Nalin and Pradhan, Jui and Sonwane, Atharv and Sahu, Surya Prakash and Natarajan, Nagarajan and Kanade, Aditya and Parthasarathy, Suresh and Rajamani, Sriram},
+	issue_date = {July 2024},
+	journal = {Proc. ACM Softw. Eng.},
+	number = {FSE},
+	numpages = {23},
+	publisher = {Association for Computing Machinery},
+	title = {CORE: Resolving Code Quality Issues using LLMs},
+	year = {2024}}
+
+@inproceedings{nam2024codeunderstand,
+	author = {Nam, Daye and Macvean, Andrew and Hellendoorn, Vincent and Vasilescu, Bogdan and Myers, Brad},
+	booktitle = {Proceedings of the IEEE/ACM 46th International Conference on Software Engineering},
+	numpages = {13},
+	publisher = {Association for Computing Machinery},
+	series = {ICSE},
+	title = {Using an LLM to Help With Code Understanding},
+	year = {2024}}
+
+@inproceedings{north2024generatecode,
+	author = {North, Marc and Atapour-Abarghouei, Amir and Bencomo, Nelly},
+	booktitle = {2024 IEEE 32nd International Requirements Engineering Conference (RE)},
+	title = {Code Gradients: Towards Automated Traceability of LLM-Generated Code},
+	year = {2024}}
+
+@inproceedings{zhang2024codeinconsistency,
+	author = {Zhang, Yichi},
+	booktitle = {Companion Proceedings of the 32nd ACM International Conference on the Foundations of Software Engineering},
+	series = {FSE},
+	pages = {683--685},
+	publisher = {Association for Computing Machinery},
+	title = {Detecting Code Comment Inconsistencies using LLM and Program Analysis},
+	year = {2024}}
+
+@inproceedings{jin2023programrepair,
+	author = {Jin, Matthew and Shahriar, Syed and Tufano, Michele and Shi, Xin and Lu, Shuai and Sundaresan, Neel and Svyatkovskiy, Alexey},
+	publisher = {Association for Computing Machinery},
+	series = {ESEC/FSE},
+	title = {InferFix: End-to-End Program Repair with LLMs},
+	year = {2023}}
+
+@inproceedings{xia2024programrepair,
+	address = {New York, NY, USA},
+	author = {Xia, Chunqiu Steven and Zhang, Lingming},
+	booktitle = {Proceedings of the 33rd ACM SIGSOFT International Symposium on Software Testing and Analysis},
+	date-modified = {2024-10-29 16:26:42 -0700},
+	pages = {819--831},
+	publisher = {Association for Computing Machinery},
+	series = {ISSTA},
+	title = {Automated Program Repair via Conversation: Fixing 162 out of 337 Bugs for \$0.42 Each using ChatGPT},
+	year = {2024}}
+
+@inproceedings{yang2024programrepair,
+	author = {Yang, Boyang and Tian, Haoye and Pian, Weiguo and Yu, Haoran and Wang, Haitao and Klein, Jacques and Bissyand\'{e}, Tegawend\'{e} F. and Jin, Shunfu},
+	booktitle = {Proceedings of the 33rd ACM SIGSOFT International Symposium on Software Testing and Analysis},
+	numpages = {13},
+	pages = {882--894},
+	publisher = {ACM},
+	series = {ISSTA},
+	title = {CREF: An LLM-Based Conversational Software Repair Framework for Programming Tutors},
+	year = {2024}}
+
+@inproceedings{rong2024code,
+	author = {Rong, Guoping and Yu, Yongda and Liu, Song and Tan, Xin and Zhang, Tianyi and Shen, Haifeng and Hu, Jidong},
+	booktitle = {2025 IEEE/ACM 47th International Conference on Software Engineering},
+	series = {ICSE},
+	organization = {IEEE Computer Society},
+	pages = {432--443},
+	title = {Code Comment Inconsistency Detection and Rectification Using a Large Language Model},
+	year = {2024}}
+
+@article{bruni2011peer,
+	author = {Bruni, Alessandro Disney and Disney, Tim and Flanagan, Cormac},
+	journal = {Universidad de California, Santa Cruz},
+	publisher = {Citeseer},
+	title = {A peer architecture for lightweight symbolic execution},
+	year = {2011}}
+
+@misc{github:libcst,
+	author = {LibCST},
+	title = {A Concrete Syntax Tree parser and serializer library for Python},
+	url = {https://github.com/Instagram/LibCST},
+	year = {2024},
+	bdsk-url-1 = {https://github.com/Instagram/LibCST}}
+
+@article{li2024llms,
+	author = {Li, Zhiming and Cao, Yushi and Xu, Xiufeng and Jiang, Junzhe and Liu, Xu and Teo, Yon Shin and Lin, Shang-wei and Liu, Yang},
+	journal = {arXiv preprint arXiv:2401.09042},
+	title = {LLMs for Relational Reasoning: How Far are We?},
+	year = {2024}}
+
+@inproceedings{han2024lm,
+	author = {Han, Chi and Wang, Qifan and Peng, Hao and Xiong, Wenhan and Chen, Yu and Ji, Heng and Wang, Sinong},
+	booktitle = {Proceedings of the 2024 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies},
+	pages = {3991--4008},
+	title = {LM-Infinite: Zero-Shot Extreme Length Generalization for Large Language Models},
+	year = {2024}}
+
+@inproceedings{wei2024cot,
+	author = {Wei, Jason and Wang, Xuezhi and Schuurmans, Dale and Bosma, Maarten and Ichter, Brian and Xia, Fei and Chi, Ed H. and Le, Quoc V. and Zhou, Denny},
+	numpages = {14},
+	booktitle = {Proceedings of the Thirty-Sixth Annual Conference on Neural Information Processing Systems},
+	series = {NeurIPS},
+	title = {Chain-of-thought prompting elicits reasoning in large language models},
+	year = {2024}}
+
+@article{jin2024llm,
+	author = {Jin, Hongye and Han, Xiaotian and Yang, Jingfeng and Jiang, Zhimeng and Liu, Zirui and Chang, Chia-Yuan and Chen, Huiyuan and Hu, Xia},
+	journal = {arXiv preprint arXiv:2401.01325},
+	title = {Llm maybe longlm: Self-extend llm context window without tuning},
+	year = {2024}}
+
+@article{arnaoudova2016linguistic,
+	author = {Arnaoudova, Venera and Di Penta, Massimiliano and Antoniol, Giuliano},
+	journal = {Empirical Software Engineering},
+	pages = {104--158},
+	publisher = {Springer},
+	title = {Linguistic antipatterns: What they are and how developers perceive them},
+	volume = {21},
+	year = {2016}}
+
+@inproceedings{dagenais2010creating,
+	author = {Dagenais, Barth{\'e}l{\'e}my and Robillard, Martin P},
+	booktitle = {Proceedings of the eighteenth ACM SIGSOFT International Symposium on Foundations of Software Engineering},
+	series = {FSE},
+	pages = {127--136},
+	title = {Creating and evolving developer documentation: understanding the decisions of open source contributors},
+	year = {2010}}
+
+@inproceedings{aghajani2020software,
+	author = {Aghajani, Emad and Nagy, Csaba and Linares-V{\'a}squez, Mario and Moreno, Laura and Bavota, Gabriele and Lanza, Michele and Shepherd, David C},
+	booktitle = {Proceedings of the ACM/IEEE 42nd International Conference on Software Engineering},
+	series = {ICSE},
+	pages = {590--601},
+	title = {Software documentation: the practitioners' perspective},
+	year = {2020}}
+
+@inproceedings{head2018not,
+	author = {Head, Andrew and Sadowski, Caitlin and Murphy-Hill, Emerson and Knight, Andrea},
+	booktitle = {Proceedings of the 40th International Conference on Software Engineering},
+	series = {ICSE},
+	pages = {643--653},
+	title = {When not to comment: Questions and tradeoffs with API documentation for C++ projects},
+	year = {2018}}
+
+@inproceedings{liu2020generating,
+	author = {Liu, Yang and Liu, Mingwei and Peng, Xin and Treude, Christoph and Xing, Zhenchang and Zhang, Xiaoxin},
+	booktitle = {Proceedings of the 35th IEEE/ACM International Conference on Automated Software Engineering},
+	series = {ASE},
+	pages = {834--845},
+	title = {Generating concept based API element comparison using a knowledge graph},
+	year = {2020}}
+
+@article{monperrus2012should,
+	author = {Monperrus, Martin and Eichberg, Michael and Tekes, Elif and Mezini, Mira},
+	journal = {Empirical Software Engineering},
+	pages = {703--737},
+	publisher = {Springer},
+	title = {What should developers be aware of? An empirical study on the directives of API documentation},
+	volume = {17},
+	year = {2012}}
+
+@inproceedings{saied2015observational,
+	author = {Saied, Mohamed Aymen and Sahraoui, Houari and Dufour, Bruno},
+	booktitle = {2015 IEEE 22nd International conference on software analysis, evolution, and reengineering (SANER)},
+	organization = {IEEE},
+	pages = {33--42},
+	title = {An observational study on API usage constraints and their documentation},
+	year = {2015}}
+
+@inproceedings{shi2011empirical,
+	author = {Shi, Lin and Zhong, Hao and Xie, Tao and Li, Mingshu},
+	booktitle = {14th International Conference on Fundamental Approaches to Software Engineering (FASE), Held as Part of the Joint European Conferences on Theory and Practice of Software (ETAPS), Saarbr{\"u}cken, Germany, March 26--April 3, 2011. Proceedings 14},
+	organization = {Springer},
+	pages = {416--431},
+	title = {An empirical study on evolution of API documentation},
+	year = {2011}}
+
+@inproceedings{zhong2020empirical,
+	author = {Zhong, Hao and Meng, Na and Li, Zexuan and Jia, Li},
+	booktitle = {Proceedings of the ACM/IEEE 42nd International Conference on Software Engineering},
+	series = {ICSE},
+	pages = {899--911},
+	title = {An empirical study on API parameter rules},
+	year = {2020}}
+
+@article{kang2021active,
+	author = {Kang, Hong Jin and Lo, David},
+	journal = {IEEE Transactions on Software Engineering},
+	number = {8},
+	pages = {2761--2783},
+	publisher = {IEEE},
+	title = {Active learning of discriminative subgraph patterns for api misuse detection},
+	volume = {48},
+	year = {2021}}
+
+@inproceedings{ruttkay1994fuzzy,
+	author = {Ruttkay, Zsofi},
+	booktitle = {Proceedings of 1994 IEEE 3rd International Fuzzy Systems Conference},
+	organization = {IEEE},
+	pages = {1263--1268},
+	title = {Fuzzy constraint satisfaction},
+	year = {1994}}
+
+@article{canfora1998conditioned,
+	author = {Canfora, Gerardo and Cimitile, Aniello and De Lucia, Andrea},
+	journal = {Information and Software Technology},
+	number = {11-12},
+	pages = {595--607},
+	publisher = {Elsevier},
+	title = {Conditioned program slicing},
+	volume = {40},
+	year = {1998}}
+
+@article{xu2005brief,
+	author = {Xu, Baowen and Qian, Ju and Zhang, Xiaofang and Wu, Zhongqiang and Chen, Lin},
+	journal = {ACM SIGSOFT Software Engineering Notes},
+	number = {2},
+	pages = {1--36},
+	publisher = {ACM New York, NY, USA},
+	title = {A brief survey of program slicing},
+	volume = {30},
+	year = {2005}}
+
+@article{weiser1984program,
+	author = {Weiser, Mark},
+	journal = {IEEE Transactions on Software Engineering},
+	series = {TSE},
+	number = {4},
+	pages = {352--357},
+	publisher = {IEEE},
+	title = {Program slicing},
+	year = {1984}}
+
+@article{agrawal1990dynamic,
+	author = {Agrawal, Hiralal and Horgan, Joseph R},
+	journal = {ACM SIGPlan Notices},
+	number = {6},
+	pages = {246--256},
+	publisher = {ACM New York, NY, USA},
+	title = {Dynamic program slicing},
+	volume = {25},
+	year = {1990}}
+
+@article{kennedy1978use,
+	author = {Kennedy, Ken},
+	journal = {Computer Languages},
+	number = {3},
+	pages = {163--179},
+	publisher = {Elsevier},
+	title = {Use-definition chains with applications},
+	volume = {3},
+	year = {1978}}
+
+@article{harrold1994efficient,
+	author = {Harrold, Mary Jean and Soffa, Mary Lou},
+	journal = {ACM Transactions on Programming Languages and Systems (TOPLAS)},
+	number = {2},
+	pages = {175--204},
+	publisher = {ACM New York, NY, USA},
+	title = {Efficient computation of interprocedural definition-use chains},
+	volume = {16},
+	year = {1994}}
+
+@inproceedings{zhang2024codeinconsistencyfse,
+	author = {Zhang, Yichi},
+	booktitle = {Companion Proceedings of the 32nd ACM International Conference on the Foundations of Software Engineering},
+	series = {FSE},
+	pages = {683--685},
+	publisher = {Association for Computing Machinery},
+	title = {Detecting Code Comment Inconsistencies using LLM and Program Analysis},
+	year = {2024}}
+
+@inproceedings{zhang2024codeinconsistencyase,
+	author = {Zhang, Yichi and Liu, Zixi and Feng, Yang and Xu, Baowen},
+	booktitle = {Proceedings of the 39th IEEE/ACM International Conference on Automated Software Engineering},
+	pages = {356--366},
+	publisher = {Association for Computing Machinery},
+	series = {ASE},
+	title = {Leveraging Large Language Model to Assist Detecting Rust Code Comment Inconsistency},
+	year = {2024}}
+
+@article{zadeh1965fuzzy,
+	author = {Zadeh, Lotfi A},
+	journal = {Information and Control},
+	title = {Fuzzy sets},
+	year = {1965}}
+
+@inproceedings{aghajani2019software,
+	author = {Aghajani, Emad and Nagy, Csaba and Vega-M{\'a}rquez, Olga Lucero and Linares-V{\'a}squez, Mario and Moreno, Laura and Bavota, Gabriele and Lanza, Michele},
+	booktitle = {2019 IEEE/ACM 41st International Conference on Software Engineering},
+	series = {ICSE},
+	organization = {IEEE},
+	pages = {1199--1210},
+	title = {Software documentation issues unveiled},
+	year = {2019}}
+
+@article{rai2022review,
+	author = {Rai, Sawan and Belwal, Ramesh Chandra and Gupta, Atul},
+	journal = {ACM Transactions on Intelligent Systems and Technology (TIST)},
+	number = {5},
+	pages = {1--44},
+	publisher = {ACM New York, NY},
+	title = {A review on source code documentation},
+	volume = {13},
+	year = {2022}}
+
+@article{wei2022chain,
+	author = {Wei, Jason and Wang, Xuezhi and Schuurmans, Dale and Bosma, Maarten and Xia, Fei and Chi, Ed and Le, Quoc V and Zhou, Denny and others},
+	journal = {Advances in neural information processing systems},
+	pages = {24824--24837},
+	title = {Chain-of-thought prompting elicits reasoning in large language models},
+	volume = {35},
+	year = {2022}}
+
+@article{brailsford1999constraint,
+	author = {Brailsford, Sally C and Potts, Chris N and Smith, Barbara M},
+	journal = {European journal of operational research},
+	number = {3},
+	pages = {557--581},
+	publisher = {Elsevier},
+	title = {Constraint satisfaction problems: Algorithms and applications},
+	volume = {119},
+	year = {1999}}
+
+@incollection{meseguer2006soft,
+	author = {Meseguer, Pedro and Rossi, Francesca and Schiex, Thomas},
+	booktitle = {Foundations of Artificial Intelligence},
+	pages = {281--328},
+	publisher = {Elsevier},
+	title = {Soft constraints},
+	volume = {2},
+	year = {2006}}
+
+@inproceedings{schiex1992possibilistic,
+	author = {Schiex, Thomas},
+	booktitle = {Uncertainty in Artificial Intelligence},
+	organization = {Elsevier},
+	pages = {268--275},
+	title = {Possibilistic constraint satisfaction problems or ``How to handle soft constraints?''},
+	year = {1992}}
+
+@inproceedings{ratol2017detecting,
+	author = {Ratol, Inderjot Kaur and Robillard, Martin P},
+	booktitle = {2017 32nd IEEE/ACM International Conference on Automated Software Engineering},
+	series = {ASE},
+	organization = {IEEE},
+	pages = {112--122},
+	title = {Detecting fragile comments},
+	year = {2017}}
+
+@article{liu2021just,
+	author = {Liu, Zhongxin and Xia, Xin and Lo, David and Yan, Meng and Li, Shanping},
+	journal = {IEEE Transactions on Software Engineering},
+	number = {1},
+	pages = {1--23},
+	publisher = {IEEE},
+	title = {Just-in-time obsolete comment detection and update},
+	volume = {49},
+	year = {2021}}
+
+@inproceedings{liu2020automating,
+	author = {Liu, Zhongxin and Xia, Xin and Yan, Meng and Li, Shanping},
+	booktitle = {Proceedings of the 35th IEEE/ACM International Conference on Automated Software Engineering},
+	series = {ASE},
+	pages = {585--597},
+	title = {Automating just-in-time comment updating},
+	year = {2020}}
+
+@inproceedings{lin2021automated,
+	author = {Lin, Bo and Wang, Shangwen and Liu, Kui and Mao, Xiaoguang and Bissyand{\'e}, Tegawend{\'e} F},
+	booktitle = {2021 IEEE/ACM 29th International Conference on Program Comprehension},
+	series = {ICPC},
+	organization = {IEEE},
+	pages = {36--46},
+	title = {Automated comment update: How far are we?},
+	year = {2021}}
+
+@inproceedings{zhong2013detecting,
+	author = {Zhong, Hao and Su, Zhendong},
+	booktitle = {Proceedings of the 2013 ACM SIGPLAN international conference on Object oriented programming systems languages \& applications},
+	pages = {803--816},
+	title = {Detecting API documentation errors},
+	year = {2013}}
+
+@article{lee2019automatic,
+	author = {Lee, Seonah and Wu, Rongxin and Cheung, Shing-Chi and Kang, Sungwon},
+	journal = {IEEE Transactions on Software Engineering},
+	number = {4},
+	pages = {653--675},
+	publisher = {IEEE},
+	title = {Automatic detection and update suggestion for outdated API names in documentation},
+	volume = {47},
+	year = {2019}}
+
+@inproceedings{blasi2018replicomment,
+	author = {Blasi, Arianna and Gorla, Alessandra},
+	booktitle = {Proceedings of the 26th Conference on Program Comprehension},
+	pages = {320--323},
+	title = {Replicomment: identifying clones in code comments},
+	year = {2018}}
+
+@inproceedings{habib2018class,
+	author = {Habib, Andrew and Pradel, Michael},
+	booktitle = {Proceedings of the 33rd ACM/IEEE International Conference on Automated Software Engineering},
+	series = {ASE},
+	pages = {41--52},
+	title = {Is this class thread-safe? inferring documentation using graph-based learning},
+	year = {2018}}
+
+@inproceedings{liu2014automatic,
+	author = {Liu, Shuang and Sun, Jun and Liu, Yang and Zhang, Yue and Wadhwa, Bimlesh and Dong, Jin Song and Wang, Xinyu},
+	booktitle = {Proceedings of the 29th ACM/IEEE International Conference on Automated Software Engineering},
+	series = {ASE},
+	pages = {785--790},
+	title = {Automatic early defects detection in use case documents},
+	year = {2014}}
+
+@inproceedings{nie2019framework,
+	author = {Nie, Pengyu and Rai, Rishabh and Li, Junyi Jessy and Khurshid, Sarfraz and Mooney, Raymond J and Gligoric, Milos},
+	booktitle = {Proceedings of the 27th ACM Joint Meeting on European Software Engineering Conference and Symposium on the Foundations of Software Engineering},
+	series = {ESEC/FSE},
+	pages = {385--396},
+	title = {A framework for writing trigger-action todo comments in executable format},
+	year = {2019}}
+
+@inproceedings{panthaplackel2021deep,
+	author = {Panthaplackel, Sheena and Li, Junyi Jessy and Gligoric, Milos and Mooney, Raymond J},
+	booktitle = {Proceedings of the AAAI Conference on Artificial Intelligence},
+	number = {1},
+	pages = {427--435},
+	title = {Deep just-in-time inconsistency detection between comments and source code},
+	volume = {35},
+	year = {2021}}
+
+@inproceedings{steidl2013quality,
+	author = {Steidl, Daniela and Hummel, Benjamin and Juergens, Elmar},
+	booktitle = {2013 21st International Conference on Program Comprehension},
+	series = {ICPC},
+	organization = {IEEE},
+	pages = {83--92},
+	title = {Quality analysis of source code comments},
+	year = {2013}}
+
+@inproceedings{zhai2020cpc,
+	author = {Zhai, Juan and Xu, Xiangzhe and Shi, Yu and Tao, Guanhong and Pan, Minxue and Ma, Shiqing and Xu, Lei and Zhang, Weifeng and Tan, Lin and Zhang, Xiangyu},
+	booktitle = {Proceedings of the ACM/IEEE 42nd International Conference on Software Engineering},
+	series = {ICSE},
+	pages = {1359--1371},
+	title = {CPC: Automatically classifying and propagating natural language comments via program analysis},
+	year = {2020}}
+
+@inproceedings{wen2019large,
+	author = {Wen, Fengcai and Nagy, Csaba and Bavota, Gabriele and Lanza, Michele},
+	booktitle = {2019 IEEE/ACM 27th International Conference on Program Comprehension},
+	series = {ICPC},
+	organization = {IEEE},
+	pages = {53--64},
+	title = {A large-scale empirical study on code-comment inconsistencies},
+	year = {2019}}
+
+@online{zenodo,
+	author = {Xu, Xiufeng},
+	year = {2025},
+	title = {MPChecker},
+	url = {https://doi.org/10.5281/zenodo.15365409},
+	lastaccessed ={June 16, 2025},
 }

@@ -1,0 +1,33 @@
+\section{Methodology}\label{sec:method}
+
+
+\begin{figure*}[h]
+	\vspace{2mm}
+    \centering
+    \includegraphics[width=\linewidth]{Figures/Chapter4/arch.pdf}
+    \caption{The architectural overview of \tool.}
+    \label{fig:arch}
+    \vspace{-5pt}
+\end{figure*}
+
+In this section, we define the issue of code-documentation inconsistency caused by multi-parameter
+constraints and provide a detailed description of our approach. An API documentation error is an inconsistency between the library source code and its API documentation. Multi-parameter constraints refer to conditional dependency relationships that exist among multiple parameters within functions or classes. If a constraint is never violated across all execution paths in the code, it is considered as a benign constraint, or it indicates a potential documentation error. According to literature~\cite{uddin2015api,zhou2017analyzing, zhu2022identifying}, API documentation inconsistency can be categorized into two types: incorrectness and incompleteness. Incorrectness refers to cases where the documentation describes behavior that is not implemented in the code, while incompleteness arises when certain code behaviors are not reflected in the documentation. Typically, incorrectness issues are considered more critical than incompleteness.
+
+In addition, when it comes to constraint extraction, compared to single-parameter constraints, we need to classify the multi-parameter constraint extraction problem into two types, as discussed in Section~\ref{sec:eg}, 1) explicit constraint and 2) implicit constraint.
+
+\tool aims to accurately extract multi-parameter constraints from API documentation and detect both types of inconsistency. As the architecture depicted in Figure~\ref{fig:arch}, we have designed a three-phase workflow comprising the \textbf{1) Data Preprocessing; 2) Constraint Extraction; 3) Inconsistency Detection}. During the preprocessing phase, we separate the code and documentation within the project.
+\tool will then automatically rewrite each function to be compatible with the symbolic
+execution tool. This includes replacing advanced Python syntax that the tool cannot handle with
+simpler constructs and symbolizing external function calls, such as replacing ternary conditional
+expressions with if-else statements. These modifications do not alter the path constraints of the
+original program.
+In the constraint extraction and expression generation phase, on the one hand, we leverage large language models to extract constraints in a specific format from the documentation. On the other hand, the symbolic execution tool dynamically analyzes the code and solves the constraint paths. Those constraints are then converted into expressions that can be processed by the SMT solver. In the fuzzy constraint checking phase (Phase III), a constraint checker with SMT solver and fuzzy constraint reasoner performs comprehensive reasoning to detect inconsistencies. It is worth noting that we propose and implement an extended fuzzy constraint satisfaction to mitigate the hallucination issues often introduced by large language models, and reduce the risk of false positives and missed detections.
+
+
+
+
+\input{Chapters/Chapter4/031.preprocessing.tex}
+\input{Chapters/Chapter4/032.extracting.tex}
+\input{Chapters/Chapter4/033.detecting.tex}
+
+

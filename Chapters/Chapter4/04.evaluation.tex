@@ -1,0 +1,199 @@
+\section{Evaluation}\label{sec:eval}
+This section describes our evaluation of \tool. We first present our research questions, then detail the experiment setup and evaluation subjects. Finally, we analyze our experimental results and answer each research question. Our evaluation was guided by the following research questions:
+
+\begin{enumerate}
+  \item \textbf{RQ1:} How accurate is \tool in extracting constraints from API documentation?
+  \item \textbf{RQ2:} How effective is \tool in detecting errors related to multi-parameter constraints in API documentation?
+  \item \textbf{RQ3:} How effective can \tool detect unknown inconsistency issues?
+\end{enumerate}
+
+\subsection{Experiment Setup}
+\subsubsection{Dataset.}
+There is currently no well-established dataset specifically focusing on multi-parameter API
+documentation errors. To better evaluate the effectiveness of our tool, we constructed two datasets: a constraint dataset and an inconsistency dataset.
+
+\paragraph{Constraint Dataset}
+We constructed a dataset containing 72 constraints from 4 popular open-source data science libraries with well-maintained documentation, including \texttt{scikit-learn}, \texttt{scipy}, \texttt{numpy}, and \texttt{pandas}. The constraints were gathered by analyzing commits from each GitHub repository, focusing on developers' modifications to documentation related to multi-parameter constraints. To streamline this process, we developed an automated script to collect all documentation-related commits and identify changes within parameter (including attribute) descriptions, adhering to two distinct docstring styles (see details in Figure~\ref{fig:docstring}). By mapping parameter names to their descriptions, it then cross-checks if any parameter names appear within others' descriptions to keep potential constraint-related documentation. Approximately 90\% to 95\% of irrelevant commits are excluded, leaving a smaller subset of commits that may contain constraints. Additionally, we perform a random sampling of the excluded commits to assess and minimize the impact of this heuristic. Despite the approach's proven effectiveness, the remaining subset still contains a substantial number of submissions. Each of the four repositories has over 30,000 commits, requiring manual verification of approximately 1,500 commits per repository to further identify multi-parameter constraints. For each constraint, we log its source information (repository name, SHA, file path, etc.) and retain the code file, enabling swift extraction of documentation and code for reproducibility. 
+In some cases, the condition enforcing the constraint is located not in the current function but in a function it calls, leading to a mismatch between documentation and code. To address this, we record such mismatches and relocate the constraint description to the function where the check actually occurs.
+
+
+
+
+\paragraph{Inconsistency Dataset}
+Based on constraint dataset, we constructed an inconsistency dataset comprising 126 multi-parameter constraints that lead to code-documentation inconsistencies. We analyzed around 20 resolved GitHub issues related to multi-parameter constraints and identified eight common patterns that may cause CDI: (1) Parameter name change; (2) Value Change; (3) Logic Change; (4) Remove Parameter; (5) Add Constraints; (6) Remove Constraints; (7) Missing Documentation; (8) Modify Description. To better evaluate the capabilities of our tool, we applied these eight patterns to mutate the dataset based on the \emph{Constraint Dataset}. For each constraint, we applied two types of modifications, resulting in an inconsistency dataset containing 216 constraints. We feed the mutated constraints and the original constraints into an SMT solver to verify if the mutations violate the original constraints. We also manually inspected each of them to ensure the constraint was inconsistent. It is important to note that modifying a correct constraint does not necessarily turn it into an incorrect one. As a result, we obtained an \emph{Inconsistency Dataset} containing 126 inconsistent constraints and 90 consistent constraints. In a sense, our dataset can be considered as potential inconsistencies that may realistically occur during development.
+
+\begin{landscape}
+\begin{table}[]
+\caption{Data science libraries used in the experiments}
+\begin{tabular}{lrrrrrrr}
+\hline
+\multicolumn{1}{c}{Project} & \multicolumn{1}{c}{class} & \multicolumn{1}{c}{class w/ doc} & \multicolumn{1}{c}{func} & \multicolumn{1}{c}{func w/ doc} & \multicolumn{1}{c}{KLOC} & \multicolumn{1}{c}{avg. params} & \multicolumn{1}{c}{\#Stars} \\ \hline
+scikit-learn                & 878                       & 306                              & 9,332                    & 1,535                            & 400.1                    & 1.42                            & 61.8K                      \\
+pandas                      & 2,211                     & 102                              & 28,880                   & 1,432                            & 620.6                    & 1.14                            & 45.2K                      \\
+scipy                       & 2,570                     & 142                              & 22,059                   & 1,705                            & 517.9                    & 1.30                            & 13.6K                      \\
+numpy                       & 2,000                     & 51                               & 12,618                   & 902                             & 276.3                    & 0.83                            & 29.4K                      \\ \hline
+keras                       & 1,370                     & 254                              & 9,877                    & 724                             & 218.5                    & 1.42                            & 62.9K                     \\
+dask                        & 284                       & 26                               & 6,914                    & 368                             & 157.5                    & 1.33                            & 13.1K                      \\
+statsmodels                 & 2,184                     & 273                              & 11,590                   & 1,894                           & 424.6                    & 1.32                            & 10.6K                      \\ \hline
+\end{tabular}
+\label{tab:subjects}
+\end{table}
+\end{landscape}
+
+\subsubsection{Subjects}
+Table~\ref{tab:subjects} lists 7 popular libraries that \tool evaluated on, first four for dataset construction and last three for assessing \tool's ability to detect unknown issues. The selected libraries are of high quality and widely used, with tens of thousands of stars on GitHub. These libraries are substantial third-party libraries, averaging 1,642 classes, 14,467 functions, with an average of 373.6 thousand lines of code, and each function containing an average of 1.3 parameters. Our tool extracts documentation constraints and path constraints from these libraries and uses a fuzzy constraint reasoner to detect inconsistencies.
+
+\tool was implemented in Python. All the experiments were performed on an Intel(R) Xeon(R) Silver 4214 CPU @ 2.20GHz machine with 252GB of RAM, running Ubuntu 18.04, with Python 3.8.19 and Z3 4.13.0.
+When evaluating the constraint extraction performance (RQ1), we access the GPT-4 model through OpenAI's API. For result validation, given the absence of established benchmarks in this domain, two volunteer researchers independently reviewed the constraint extraction results from GPT-4, manually assessing each constraint's consistency with the original Python documentation. Any discrepancies were resolved through consensus discussion.
+
+
+\subsection{Results}
+\subsubsection{Accuracy of LLM in extracting constraints from API documentation.}
+We display the result of RQ1 in Table~\ref{tab:rq1}. Our experiment shows that our tool correctly identified and extracted 66 out of 72 constraints contained in the Python documentation collected in our benchmark, achieving an accuracy of 91.7\%, which demonstrates that our tool can successfully extract most of the constraints accurately, with few errors or omissions.
+Next, we look into the remaining failed cases and investigate the reasons for the inaccuracy. We found that out of the 6 incorrect cases, 4 involved missing constraints during the documentation processing. For example, one of the missing constraints is: ``(batch\_size = auto) $\rightarrow$ (batch\_size = min(200, n\_samples))''. Although this case involves a constraint between multiple parameters, the format is tricky because one of the parameters is within a function, which may have misled GPT-4 and caused it to miss this constraint during extraction. In the last 2 cases, the constraint information was identified but converted into incorrect logic expressions due to the complex logic or sentence structure.
+
+We further explore \tool's abilities by conducting an ablation study. The results show that \tool without few-shot learning achieves an accuracy of 62.5\%. Most failures occur in the incorrect extraction of constraints. This indicates that including few-shot learning is important for \tool to generate accurate constraints.
+Next, \tool without applying chain-of-thought techniques results in an accuracy of 79.2\%, with the number of missed constraints accounting for more than half of total non-equivalent cases. This suggests that GPT tends to miss more details in documentation when chain-of-thought is removed.
+After including chain-of-thought and few-shot learning, \tool's performance shows a clear improvement.
+
+\begin{table}[t]
+	\vspace{2mm}
+	\caption{Results of \tool on constraint extraction}
+	\label{tab:rq1}
+	\centering
+  \small
+	\begin{tabularx}{\linewidth}{l *{4}{>{\centering\arraybackslash}X}}
+		\hline
+		& \textbf{Equivalent} 
+		& \multicolumn{2}{c}{\textbf{Non-Equivalent}} 
+		& \textbf{Accuracy} \\ \hline
+		& Correct extraction 
+		& Incorrect extraction 
+		& Missing constraints 
+		& \\ \hline
+		\textbf{\tool w/o few-shot learning} & 45 & 20 & 7 & 62.5\% \\ \hline
+		\textbf{\tool w/o chain-of-thought}  & 57 & 7  & 8 & 79.2\% \\ \hline
+		\textbf{\tool}                       & 66 & 2  & 4 & 91.7\% \\ \hline
+	\end{tabularx}
+\end{table}
+
+\smallskip
+\noindent\shadowbox{%
+  \begin{minipage}{0.98\columnwidth}
+    \textbf{Answer to RQ1:} \tool correctly extracted 66 constraints out of 72 in total, achieving an accuracy of 91.7\%. This demonstrates that \tool is effective in extracting constraints from Python documentation.
+  \end{minipage}}
+
+
+
+% ===== RQ2 =====
+\subsubsection{\tool's effectiveness in detecting multi-parameter API documentation errors}
+To measure \tool's effectiveness in detecting multi-parameter API documentation errors, we evaluated our tool on the inconsistency dataset. Table~\ref{tab:res} shows the results of \tool in detecting multi-parameter CDI on the inconsistency dataset.
+
+The \vanillatool does not include fuzzy words or apply fuzzy constraint satisfaction theory, limiting its ability to handle implicit constraints. Despite these limitations, it achieved an impressive 69\% recall by detecting 87 inconsistencies. With fuzzy words and fuzzy constraints logic, \tool's performance significantly improved, successfully identifying 117 inconsistencies with a recall of 92.8\% and  an accuracy $=\frac{TP+TN}{TP+TN+FP+FN}=\frac{117+88}{216}=94.9\%$. This demonstrates that incorporating fuzzy words and fuzzy constraints can expand the range of detectable constraints. However, we identified two false positives because the constraints lie between the parameters and method calls, rather than among the parameters. One example is shown below:
+
+
+\texttt{$($shape $=$ None$)$ $\wedge$ $($axes $\neq$ None$)$ $\rightarrow$ $($shape $=$ numpy.take$($x.shape,axes,axis=0$))$}
+
+
+where, the value for ``shape'' is the function ``take()'' from numpy library. Modern software increasingly emphasizes code maintainability and reusability, leading to highly complex function calls, often involving nested or chained calls. To avoid the high risk of path explosion in symbolic execution, we alternate function calls with symbolic inputs during the preprocessing phase, which leads to misclassification of these two inconsistencies. 
+
+
+
+The remaining 9 unresolved inconsistent constraints stem from external function dependencies. While incorporating external function code could resolve these constraints, this approach risks infinite recursive dependencies and path explosion. For us, best practices suggest that constraints should be handled within the documented function itself.
+
+
+
+
+\begin{table}[]
+	\vspace{2mm}
+	\captionsetup{aboveskip=6pt, belowskip=-8pt}
+	\begin{threeparttable}
+		
+  \caption{Results of LLM and \tool on detecting multi-parameter CDIs}
+  \begin{tabularx}{0.91\linewidth}{p{0.75\linewidth}lrrrr}
+  \hline
+   Checker  & FN  & TP  & Recall\\ \hline
+  LLM        & 119  & 7  & 5.6\% \\
+  LLM+C      & 74  & 52  & 41.3\% \\
+  \vanillatool   & 39  & 87  & 69.0\%\\
+  \fuzzytool  & 9 & 117 & 92.8\% \\ \hline
+  \end{tabularx}
+  \begin{tablenotes}
+  	\small
+  	\item LLM: raw documentation and corresponding code; LLM+C: extracted \emph{doc-constraints} from documentation and corresponding code; \vanillatool: \tool without fuzzy words and fuzzy constraint logic; \fuzzytool: \tool with fuzzy words and fuzzy constraint logic.
+  \end{tablenotes}
+  \label{tab:res}
+\end{threeparttable}
+\vspace{-12pt}
+\end{table}
+
+
+A notable situation arose during one of our issue reporting, even though our issue had been confirmed, we encountered dissatisfaction from one of the developers. He believed we were an automated tool or bot based on AI because of our anonymous status, which diminished his enthusiasm for addressing the issue. With a mass of LLM-based program analysis or inconsistency checkers now available, while they offer insights sometimes, their results often cost more manual verification than traditional tools due to higher uncertainty.
+
+\paragraph{Comparative Study}
+Therefore, we conducted a comparative experiment between our tool and the approach of using only LLMs as a constraint checker on the same dataset. To align with our experiment settings, we chose GPT-4, one of the leading models, for comparison and evaluated its performance under two settings: 1) LLM: providing the raw documentation and code as input, directly prompting GPT to check for consistency, and 2) LLM+C: This is a two-phase processing. Extracting constraints using the LLM first, and then providing both these constraints and their corresponding code to the LLM for consistency check. In addition, we also require LLM to provide justifications for its answers.
+
+
+As shown in the Table~\ref{tab:res}, when raw documentation and the corresponding code were provided as inputs to the LLM, LLM demonstrated significant limitations in detecting multi-parameter CDIs, finding only 7 inconsistencies with a recall of 5.6\%. When extracted constraints and code were given as inputs, LLM+C demonstrated heightened awareness of the task and had a higher probability of locating the constraint-related code segments. However, it still struggled to determine inconsistency. Out of 126 inconsistent constraints, 52 were identified correctly, yielding a recall of 41.3\%. After a thorough review of LLM's responses, we found that LLM+C gave correct results in many cases but provided unreasonable or even wrong explanations. These results demonstrate that the LLM still has limitations in detecting complicated multi-parameter CDIs, highlighting that our method’s design is the key factor in enhancing detection performance rather than any reliance on potential pretraining data leakage.
+
+
+
+\smallskip
+\noindent\shadowbox{%
+  \begin{minipage}{0.98\columnwidth}
+    \textbf{Answer to RQ2:}
+		Large language model (LLM) exhibits limited capability in handling multi-parameter CDIs. Compared to LLM+C with a recall of 41.3\%, \fuzzytool successfully detected 117 out of 126 inconsistent constraints, achieving a recall of 92.8\%. Notably, \fuzzytool demonstrated a 23.8\% higher recall than \vanillatool, substantiating the effectiveness of the implementation of fuzzy words and fuzzy constraint logic.
+  \end{minipage}}
+
+
+
+% ===== RQ4 =====
+\subsubsection{Practical effect of \tool}
+Our tool's effectiveness in detecting unknown multi-parameter inconsistencies was validated by manual review and developer feedback. We reported 14 inconsistencies identified by \tool to the library maintenance team, receiving positive engagement and warm responses. Two of them even sparked further discussions about potential issues. This not only affirmed our reports' quality but also reflected the enthusiasm of the open-source community.
+
+For example, an issue confirmed by the \texttt{scikit-learn} team originates from the independent function ``lars\_path'', as shown in Figure~\ref{fig:eg3}. Apparently, an inconsistency exists between the documentation and code regarding whether ``Gram'' is None when ``X'' is None. Therefore, we reported the issue~\cite{issue30099} and detailed the documentation sections with inconsistencies alongside its corresponding code snippet. The developer made a bit of archeology, admitted the documentation needed to be updated, and asked if we wanted make a PR to correct this error. Finally, the documentation description was fixed to ``If X is None, Gram must also be None''.
+
+For most issue reports, we received quick feedback, and 11 inconsistencies were confirmed and improvements were made to documentation or code. Of the remaining three cases, two were reported at the initial phase of our experiments when our understanding of the project architecture was insufficient. The checks for these two constraints are done in other deeper files, but we were unable to verify them accurately at that time. The third inconsistency stemmed from ambiguity in the natural language, which resulted in a different interpretation diverged from the developers' original intent. Furthermore, these reported issues have contributed to four DS/ML repositories (\texttt{scikit-learn}, \texttt{keras}, \texttt{statsmodels}, \texttt{dask}), which emphasizes the generalization of our tool. 
+
+At the time of writing, 10 out of 11 confirmed inconsistencies have been resolved: 7 through documentation fixes and 3 through updates to both documentation and code. This aligns with intuition: code errors are more likely to cause runtime failures and are thus easier to detect, whereas documentation errors and their potential efficiency impacts are often subtler and harder to identify.
+
+
+\begin{figure*}[t]
+	\vspace{2mm}
+    \begin{subfigure}{\linewidth}
+        \begin{tcolorbox}[colback=Emerald!10,colframe=cyan!40!black,title=\textbf{Constraint description of \texttt{X} and \texttt{Gram} in function \texttt{lars\_path}}]
+            {\sffamily \textbf{> X } : None or ndarray of shape (n\_samples, n\_features)
+            \\
+            Input data. Note that \colorbox{blue!20}{\textbf{if X is None then the Gram matrix must be specified}}, i.e, cannot None or False.}
+        \end{tcolorbox}
+        \label{fig:eg3-doc}
+    \end{subfigure}
+    \begin{subfigure}{\linewidth}
+\begin{tcolorbox}[colback=Salmon!20, colframe=Salmon!90!Black,title=\textbf{Corresponding code snippet in function \texttt{lars\_path}}]
+\begin{lstlisting}[escapechar=@]
+def lars_path(...):
+    @\colorbox{blue!20}{if X is None and Gram is not None:}@
+        raise ValueError("X cannot be None if Gram is not None. Use lars_path_gram to avoid passing X and y.")
+\end{lstlisting}
+\end{tcolorbox}
+        \label{fig:eg3-code}
+    \end{subfigure}
+     \begin{subfigure}{\linewidth}
+    	\begin{tcolorbox}[colback=Emerald!10,colframe=LimeGreen!60!black,title=\textbf{Fixed Constraint description of \texttt{X} and \texttt{Gram} in function \texttt{lars\_path}}]
+    		{\sffamily \textbf{> X } : None or ndarray of shape (n\_samples, n\_features)
+    			\\
+    			Input data. Note that \colorbox{blue!20}{\textbf{if X is None, Gram must also be None.}}, If only the Gram matrix is available, use lars\_path\_gram instead.}
+    	\end{tcolorbox}
+    	\label{fig:eg3-fixed-doc}
+    \end{subfigure}
+    \caption{Example of the fixed documentation from \texttt{Scikit-learn}.}
+    \label{fig:eg3}
+    \vspace{-10pt}
+\end{figure*}
+
+
+\smallskip
+\noindent\shadowbox{%
+  \begin{minipage}{0.98\columnwidth}
+    \textbf{Answer to RQ3:}  We reported 14 multi-parameter inconsistencies detected by \tool to library developers, who have already confirmed 11 inconsistencies by the time of submission (confirmation rate = 78.6\%)~\cite{issue28469,issue28470,issue28473,issue29440,issue29463,issue29464,issue9304,issue29509,issue11336,issue20141, issue30099}. These results demonstrate that \tool can effectively detect unknown API documentation errors. Some of them are even in unseen libraries which highlights its strong generalization capability.
+  \end{minipage}}

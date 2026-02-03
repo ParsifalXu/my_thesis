@@ -1,0 +1,80 @@
+\section{Introduction}\label{sec:intro}
+
+Machine learning (ML) and Artificial Intelligence (AI) have consistently garnered widespread
+attention, achieving remarkable breakthroughs in diverse domains including natural language
+processing, recommendation systems, autonomous vehicles, and robotics.
+Behind the rapid advancement of these transformative technologies, data science and machine
+learning libraries play a crucial role in AI and ML development.
+By providing extensive APIs for complex mathematical operations and algorithmic implementations,
+these libraries enable researchers and practitioners to focus on solving domain-specific problems
+rather than reimplementing fundamental algorithms.
+
+A well-designed API documentation not only provides detailed descriptions of interfaces,
+including the purpose and range of parameters or attributes, returns, and exceptions thrown, but may also specify logical constraints or dependencies among multiple parameters.
+For data science and machine learning libraries, multi-parameter constraints are commonly mentioned
+in their API documentation and users of these libraries are expected to follow them closely when
+using the APIs.
+However, frequent version updates may lead to the documentation out of sync with the corresponding
+code, known as the \underline{\textbf{C}}ode-\underline{\textbf{D}}ocumentation
+\underline{\textbf{I}}nconsistency (CDI) issue~\cite{aghajani2019software, rai2022review}.
+Such CDI issues are particularly pronounced in data science libraries.
+On one hand, the underlying mathematical models of DS/ML libraries inherently come with various
+constraints, such as \emph{``a model X can only be chosen when a parameter Y is provided''}, and
+incorrect parameter configurations not satisfying their constraints may lead to unexpected outcomes.
+On the other hand, the number of parameters/attributes of these libraries can be significantly more
+than a typical library API, sometimes over a few dozen.
+Therefore, it is unrealistic to track all parameter constraints manually.
+
+Detecting errors in multi-parameter constraints from Python API documentation is challenging for
+several reasons.
+(1) The quality of API documentation varies and lacks standardized writing guidelines.
+Some API documentation uses ambiguous language, contains typos, and may not follow a consistent
+styling guide.
+This makes simple rule-based pattern-matching approaches ineffective.
+(2) Existing approaches~\cite{ratol2017detecting, liu2020automating} for detecting documentation errors focus on a single parameter
+only: e.g., checking whether the information provided on parameter ranges, nullness, and identifier
+names is correct.
+It is more challenging to extract multi-parameter constraints precisely from free-style descriptions
+written in natural languages.
+(3) For the same reason, a semantic-aware code analysis approach is essential, as logical relations among
+multiple parameters cannot be easily identified through purely syntactic analysis. The challenge is further compounded by Python's dynamic nature, where variable types, attributes, and behaviors can change at runtime.
+
+
+
+To detect multi-parameter constraint inconsistencies from data science library documentation, we
+propose an automated tool \tool.
+\tool identifies inconsistencies between API documentation and the corresponding library code by
+combining symbolic execution-based program analysis techniques with constraint extraction methods
+powered by large language models (LLMs).
+We first extract multi-parameter constraints from documentation (a.k.a. \emph{doc-constraints}),
+leveraging the powerful natural language understanding capability of LLMs.
+We incorporate a few optimizations, such as Chain of Thought (CoT)~\cite{wei2022chain} and few-shot
+learning to improve the accuracy of constraint extraction.
+Then we use dynamic symbolic execution to collect all path constraints from the corresponding
+Python source code.
+The symbolic path constraints (a.k.a. \emph{code-constraints}) capture the real constraints that
+the parameters have to follow according to the library code, which are then used to evaluate the
+correctness of the \emph{doc-constraints}.
+
+
+Then, in order to mitigate minor discrepancies that may arise from the \emph{doc-constraints} extracted by
+LLMs, we design and implement a \emph{Fuzzy Constraint Logic} (FCL) framework to estimate how
+logically consistent a \emph{doc-constraint} is with a set of given \emph{code-constraints}.
+Intuitively, in the absence of LLM-induced unpredictability, a \emph{doc-constraint} must be evaluated as true
+under the assumption of \emph{code-constraints}.
+Through fuzzy constraint satisfaction, we can accommodate many \emph{nearly-correct} constraints
+produced by LLMs and thus improve the accuracy of the overall approach.
+
+
+\paragraph{Contributions}
+Our work aims to integrate precise symbolic reasoning with the inherently fuzzy outputs of large language models.
+To summarize, we make the following contributions.
+\begin{enumerate}
+    \item We proposed an automated multi-parameter code-documentation inconsistency detection technique and developed an end-to-end command-line tool called \tool. Existing techniques in the same area are only designed to handle single parameter inconsistencies, without considering inter-parameter constraints.
+    \item We introduced a customized fuzzy constraint satisfaction framework to mitigate the
+    uncertainties introduced by LLM outputs. We provide a theoretical derivation of the membership
+    function based on constraint similarity.
+    \item We constructed a documentation constraint dataset comprising 72 real-world constraints sourced from widely used data science libraries, and derived a mutation-based inconsistency dataset with 216 constraints.
+    Our dataset and tool implementation are made available online: \url{https://github.com/ParsifalXu/MPChecker}.
+    \item We evaluated our tool on four real-world popular data science libraries. We reported 14 inconsistency issues discovered by \tool to the developers, who have confirmed 11 inconsistencies at the time of writing.
+\end{enumerate}

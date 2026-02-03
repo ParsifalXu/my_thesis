@@ -1,0 +1,157 @@
+\section{Background}\label{sec:bg}
+In this section, we review the essential terminology and background necessary for understanding the
+remainder of the paper.
+
+\subsection{Multi-Parameter Constraints}\label{sec:eg}
+We use two examples to illustrate inconsistencies between API documentation and the corresponding code
+caused by multi-parameter interdependence.
+Both of them come from open-source Python data science libraries and were successfully
+detected by \tool.
+In general, there are two types of constraints found in the API documentation.
+(1) An \emph{explicit constraint} clearly specifies the logical relationship among two or more
+interrelated parameters.
+(2) An \emph{implicit constraint} is an unstated or indirectly implied relationship among two or
+more interrelated parameters, where the constraint is inferred through contexts or convention
+rather than explicitly specified.
+
+
+\subsubsection{Example 1: Explicit Constraint}\label{sec:eg1}
+
+The first example comes from \texttt{statsmodels}~\cite{github:statsmodels}, which provides a
+complement to \texttt{scipy} for statistical computations including descriptive statistics and
+estimation and inference for statistical models.
+\texttt{Statsmodels} has more than 10K stars on GitHub and is actively maintained.
+\cref{fig:eg1} illustrates an inconsistency caused by an explicit constraint from the class
+\textit{AutoReg}.
+The relevant portions for the \emph{doc-} and \emph{code-constraints} are highlighted.
+As mentioned in the documentation of \texttt{deterministic}, the trigger condition for the warning
+is that ``trend is not n, \textbf{and} seasonal is not False''.
+However, it is apparent that the \emph{code-constraint} for \texttt{trend} and \texttt{seasonal} (to be
+used together correctly and avoid any warning) implemented is \textbf{or} instead of \textbf{and}.
+One way to fix the documentation is to change ``and'' to ``or''.
+
+
+\begin{figure*}[t]
+	\vspace{2mm}
+    \begin{subfigure}{\linewidth}
+        \begin{tcolorbox}[colback=Emerald!10,colframe=cyan!40!black,title=\textbf{Constraint description of \texttt{trend} and \texttt{seasonal} in class \texttt{AutoReg}}]
+            {\sffamily \textbf{> deterministic: } DeterministicProcess
+            \\
+            A deterministic process. If provided, trend and seasonal are ignored. \colorbox{blue!20}{A warning is raised if} \colorbox{blue!20}{trend is not "n" and seasonal is not False.}}
+        \end{tcolorbox}
+        \label{fig:eg1-doc}
+    \end{subfigure}
+    \begin{subfigure}{\linewidth}
+\begin{tcolorbox}[colback=Salmon!20, colframe=Salmon!90!Black,title=\textbf{Corresponding code snippet in class \texttt{AutoReg}}]
+\begin{lstlisting}[escapechar=@]
+class AutoReg(tsa_model.TimeSeriesModel):
+    def __init__(...):
+        if deterministic is not None and @\colorbox{blue!20}{(self.trend != "n" or self.seasonal)}@:
+            warnings.warn('When using deterministic, trend must be "n"
+                and seasonal must be False.', SpecificationWarning, stacklevel=2)
+\end{lstlisting}
+\end{tcolorbox}
+        \label{fig:eg1-code}
+    \end{subfigure}
+    \caption{Examples of an explicit constraint from \Code{Statsmodels}.}
+    \label{fig:eg1}
+    \vspace{-5pt}
+\end{figure*}
+
+
+
+\subsubsection{Example 2: Implicit Constraint}\label{sec:eg2}
+
+The second example comes from \texttt{scikit-learn}~\cite{github:scikit}, which is a widely-used
+(more than 60K stars on GitHub) open-source ML library in Python, designed to offer simple
+and efficient tools for data mining and data analysis.
+\ref{fig:eg2} displays an inconsistency caused by an implicit constraint from the class
+\textit{SpectralClustering}.
+It is evident that the highlighted part of the documentation only explicitly mentions one parameter
+\textit{affinity}, omitting the subject ``gamma''.
+More importantly, ``ignore'' is not a specific identifier or value but rather a description of
+the program logic---if the parameter \textit{affinity} is set to \textit{nearest\_neighbors}, then
+the parameter \textit{gamma} will not be used.
+Whereas, above constraint does not faithfully reflect the behavior implemented in code.
+According to the code snippet, ``gamma'' is not only ignored within the \textit{nearest\_neighbors}
+branch, but also ignored within the \textit{precomputed\_nearest\_neighbors} and
+\textit{precomputed} branches.
+This indicates that the constraint is inaccurate and demonstrates a form of inconsistency.
+
+For this type of implicit constraint, traditional pattern-based approaches are not able to extract
+the \emph{doc-constraint} correctly, thus fail to detect the inconsistencies.
+To solve this issue, we design a customized constraint that incorporates fuzzy words, and adopt
+few-shot learning to teach LLMs how to generate such constraints (details in
+\cref{sec:llm}).
+In this case, the \emph{doc-constraint} should be \textit{``(affinity = "nearest\_neighbors") $\rightarrow$
+(ignore(gamma))''}, where a special predicate \textit{``ignore(x)''} is used to indicate that a parameter
+\textit{x} is ignored (see \cref{sec:fuzzword}).
+
+
+\begin{figure*}[t]
+	\vspace{2mm}
+    \begin{subfigure}{\linewidth}
+        \begin{tcolorbox}[colback=Emerald!10,colframe=cyan!40!black,title=\textbf{Constraint description of \texttt{gamma} and \texttt{affinity} in class \texttt{SpectralClustering}}]
+            {\sffamily \textbf{> gamma} : float, default=10
+            \\
+            Kernel coefficient for rbf, poly, sigmoid, laplacian and chi2 kernels. \colorbox{blue!20}{\textbf{Ignored for}} \colorbox{blue!20}{\textbf{affinity="nearest\_neighbors".}}}
+        \end{tcolorbox}
+        \label{fig:eg2-doc}
+    \end{subfigure}
+    \begin{subfigure}{\linewidth}
+\begin{tcolorbox}[colback=Salmon!20, colframe=Salmon!90!Black,title=\textbf{Corresponding code snippet in class \texttt{SpectralClustering}}]
+\begin{lstlisting}[escapechar=@]
+class SpectralClustering(ClusterMixin, BaseEstimator):
+    def fit(self, X, y=None):
+        if @\colorbox{blue!20}{self.affinity == "nearest\_neighbors"}@:
+            ...
+        elif @\colorbox{blue!20}{self.affinity == "precomputed\_nearest\_neighbors"}@:
+            ...
+        elif @\colorbox{blue!20}{self.affinity == "precomputed"}@:
+            ...
+        else:
+            params = self.kernel_params
+            if params is None:
+                params = {}
+            if not callable(self.affinity):
+            @\colorbox{blue!20}{params["gamma"] = self.gamma}@
+                params["degree"] = self.degree
+                params["coef0"] = self.coef0
+\end{lstlisting}
+\end{tcolorbox}
+        \label{fig:eg2-code}
+    \end{subfigure}
+    \caption{Examples of implicit constraint from \texttt{Scikit-learn}.}
+    \label{fig:eg2}
+    \vspace{-5pt}
+\end{figure*}
+
+
+
+\subsection{Fuzzy Logic and Fuzzy Constraint Satisfaction}
+Unlike traditional Boolean logic, fuzzy logic~\cite{kosko1993fuzzy} is a multi-valued logic that
+allows for values between 0 and 1 to represent varying degrees of truth, where 0 represents
+absolute false, and 1 represents absolute true.
+The human brain can process vague statements or claims that involve uncertainties or subjective
+judgments, such as ``the weather is hot'', ``that man runs so fast'', or ``she is beautiful''.
+Unlike computers, humans possess common sense, allowing them to reason effectively in situations
+where things are only partially true.
+Fuzzy logic is primarily used to model uncertainty and vagueness, making it highly applicable in
+real-world scenarios where precision may be difficult or impossible to achieve.
+
+A traditional constraint satisfaction problem (CSP)~\cite{brailsford1999constraint} requires all constraints to be fully
+satisfied.
+Constraints are either completely satisfied or unsatisfied, which is why these strict,
+non-fuzzy constraints are referred to as ``\emph{crisp constraints}''.
+An extension of CSP, known as soft CSP~\cite{meseguer2006soft, schiex1992possibilistic}, introduces a distinction between hard
+constraints and soft constraints.
+Hard constraints must be absolutely satisfied, while soft constraints are typically assigned a
+weight or priority, allowing for lower-weighted constraints to be only partially satisfied or even
+unsatisfied under certain conditions during problem-solving.
+Another extension is Fuzzy CSP~\cite{ruttkay1994fuzzy}, which differs from soft constraints in that it
+incorporates fuzzy logic and allows each constraint to be ``partially satisfied'' to a degree,
+quantified by a ``satisfaction degree''.
+This satisfaction degree usually ranges from 0 to 1, indicating the extent to which a constraint is
+fulfilled.
+The goal in fuzzy constraint satisfaction is to find a solution that maximizes satisfaction, rather
+than strictly satisfying all constraints.
