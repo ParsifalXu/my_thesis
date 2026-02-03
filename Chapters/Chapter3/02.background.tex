@@ -1,0 +1,175 @@
+\section{Dataset Creation}\label{creation}
+
+In this section, we outline the methodology and process employed to
+create the \toolcompsuite dataset.
+
+\subsection{Subjects Selection}
+
+\begin{table*}[ht]
+    \setlength{\abovecaptionskip}{5pt}
+    \caption{Details of clients and libraries included in \toolcompsuite.}
+  \small
+    \begin{tabular}{lrrclr}
+        \cline{1-3} \cline{5-6}
+        \textbf{Client}         & \textbf{\#LoC} & \textbf{\#Star} &  & \textbf{Library}                            & \textbf{\#Maven Usage} \\ \cline{1-3} \cline{5-6}
+        retrofit                & 29.7K          & 41.5K           &  & org.slf4j:slf4j-api                         & 62.5K                   \\
+        apollo                  & 61.3K          & 28K             &  & com.google.guava:guava                      & 34.4K                   \\
+        druid                   & 441.9K         & 26.8K           &  & org.scala-lang:scala-library                & 34K                     \\
+        webmagic                & 17.4K          & 10.8K           &  & com.fasterxml.jackson.core:jackson-databind & 25.8K                   \\
+        languagetool            & 171.2K         & 8.5K            &  & ch.qos.logback:logback-classic              & 25.5K                   \\ \cline{1-3} \cline{5-6}
+        Other 83 clients (mean) & 371.6K         & 1.3K            &  & Other 99 libraries (mean)                   & 3.2K                    \\ \cline{1-3} \cline{5-6}
+        All clients (mean)      & 358.7K         & 2.5K            &  & All libraries (mean)                        & 4.8K                    \\ \cline{1-3} \cline{5-6}
+    \end{tabular}
+    \label{client-library}
+\end{table*}
+
+To ensure the representativeness and reproducibility of the \toolcompsuite dataset, we
+focus on including high-quality and popular client projects and
+libraries. The selection of client projects was sourced from
+GitHub~\cite{github}, a widely recognized online community for hosting
+open-source codebases. To ensure the inclusion of the most
+popular projects, we systematically sorted all the available projects
+in descending order based on their number of stars on GitHub and
+selected the target clients from the top of the list. The selection of
+libraries was sourced from Maven Central~\cite{mvnrepo}, which hosts
+33.5M of Java libraries and their associated binaries, making it
+a widely used repository of libraries for Java API and library
+research~\cite{mostafa2017study,wu2016exploratory,qiu2016understanding,kula2014visualizing}. We include a library in the dataset only
+if it has more than 100 usages (i.e., clients) on Maven
+Central. Our selection criteria aimed to ensure the inclusion of
+popular and widely used client projects and libraries in the dataset,
+thereby maximizing its relevance and usefulness to the research
+community.
+
+Among the highly-rated client projects, our selection criteria focused
+on those that use Maven~\cite{mvn} as their build systems, given its
+widespread adoption and maturity. Maven provides a standardized
+approach to managing Java projects and their dependencies, where each
+library dependency in a Maven client project is represented as an item
+in a \Code{pom.xml} file, making it easy to identify and edit library
+versions programmatically. Furthermore, Maven offers built-in
+functionality for running unit tests and generating test reports,
+which simplifies the identification and diagnosis of incompatibility
+issues arising from test executions. Since Maven projects typically rely on Maven Central as their
+centralized repository for hosting and downloading libraries, the process of obtaining and managing
+libraries in our dataset is simplified.
+
+\cref{client-library} presents the top 5 client projects and libraries in the \toolcompsuite dataset, ranked by popularity. For
+each client project, we provide information on its lines of code (LoC)
+and the number of stars it has received on GitHub, while for each
+library, we include its number of usages by other projects from Maven Central.
+
+In total, \toolcompsuite comprises 123 incompatible client-library pairs. These pairs encompass 88 distinct
+clients and 104 libraries altogether. On average, the affected clients have 2.5K stars on GitHub
+and 358.7K lines of code, while incompatible libraries have 4.8K usages on Maven Central.
+Thus, we believe that the incompatibility issues present in
+the \toolcompsuite dataset have a significant impact on a large number of
+codebases and can affect many users of the libraries, either directly
+or indirectly.
+
+
+
+To ensure that all client projects in the dataset are executable and
+the runs are reproducible, we performed a series of checks on each
+project. First, we checked out the project to the version (SHA) at the time of
+the dataset creation, which we refer to as the \emph{base version}.
+Next, we ran the standard Maven project compilation command to verify if the
+project compiles successfully. If the project fails to compile, we
+excluded it from the dataset. Subsequently, we ran the standard Maven
+test command to execute all the tests in the project, ensuring that
+all tests pass on the base version. We excluded any project that fails
+to pass tests at this stage. Finally, we only included the client
+projects that successfully compile and pass all tests on the base version,
+thereby ensuring that the dataset is only consist of projects which can
+be executed and whose executions can be reproduced.
+
+
+\subsection{Data Collection}\label{sec:data:collect-compsuite}
+
+\begin{figure*}[ht]
+  \setlength{\abovecaptionskip}{5pt}
+  \setlength{\belowcaptionskip}{0pt}
+  \centering
+  \includegraphics[width=0.9\textwidth]{Figures/Chapter3/architecture.pdf}
+  \caption{The architecture of \toolcompsuite.}
+  \label{fig:architecture}
+\end{figure*}
+
+
+
+We collected the data following the below procedures.
+\cref{fig:architecture} visualizes the overall architecture of \toolcompsuite.
+In the upper left portion of \cref{fig:architecture}, we
+illustrate the approach taken by \toolcompsuite to identify incompatibilities
+between a client project and its dependent libraries. Specifically,
+for each client project on its base version, we upgraded each of its
+dependent libraries and tested if the upgrade caused any test
+failures. Our intuition behind this approach is that since all the
+tests in the client passed on the base version, if upgrading any
+library causes a test failure, that library upgrade must have
+introduced incompatibility issues. We refer to the test that flips
+from passing to failing as an \emph{incompatibility-revealing test}.
+
+To automatically upgrade the libraries and run the tests, we utilized
+the Maven Versions Plugin~\cite{mvnplugin}. For a given client project, we
+scanned its dependency list using this plugin to identify all the
+libraries that had newer versions available on Maven Central. If a
+library had a newer version, we marked it as upgradable. Next, for
+each upgradable library, we used the plugin to upgrade it by updating
+the \Code{pom.xml} file to the most recent version on Maven
+Central. We then re-executed the test suite of the client. If any
+tests failed during this run, we marked the client-library pair as
+having an incompatibility issue and marked the test as an
+incompatibility-revealing test of this issue. It is crucial to note
+that we only upgraded one library at a time to isolate failures caused
+by different libraries. To ensure the accuracy and dependability of
+the dataset, we carried out a manual verification process for each
+identified incompatibility issue. In particular, we carefully examined
+the test failure messages and reports to confirm that they were indeed
+caused by the upgraded library. For each incompatible client-library
+pair, we selected a single incompatibility-revealing test to be
+included in the final dataset. In cases where a client-library pair
+had multiple incompatibility issues, we chose the one that we deemed
+most representative and easy to comprehend.
+
+
+
+
+
+
+% test fail due to upgrades
+\begin{figure}
+    \setlength{\abovecaptionskip}{5pt}
+    \setlength{\belowcaptionskip}{0pt}
+    \centering
+\begin{Verbatim}[fontsize=\small,breaklines,linenos,xleftmargin=8pt,numbersep=5pt,commandchars=\\\{\}]
+\PYG{p}{\PYGZob{}}
+\PYG{+w}{  }\PYG{n+nt}{\PYGZdq{}id\PYGZdq{}}\PYG{p}{:}\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}i\PYGZhy{}49\PYGZdq{}}\PYG{p}{,}
+\PYG{+w}{  }\PYG{n+nt}{\PYGZdq{}client\PYGZdq{}}\PYG{p}{:}\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}wasabi\PYGZdq{}}\PYG{p}{,}
+\PYG{+w}{  }\PYG{n+nt}{\PYGZdq{}sha\PYGZdq{}}\PYG{p}{:}\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}9f2aa5f92e49c3844d787320e2d22e15317aa8e2\PYGZdq{}}\PYG{p}{,}
+\PYG{+w}{  }\PYG{n+nt}{\PYGZdq{}url\PYGZdq{}}\PYG{p}{:}\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}https://github.com/intuit/wasabi\PYGZdq{}}\PYG{p}{,}
+\PYG{+w}{  }\PYG{n+nt}{\PYGZdq{}lib\PYGZdq{}}\PYG{p}{:}\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}org.apache.httpcomponents:httpclient\PYGZdq{}}\PYG{p}{,}
+\PYG{+w}{  }\PYG{n+nt}{\PYGZdq{}old\PYGZdq{}}\PYG{p}{:}\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}4.5.1\PYGZdq{}}\PYG{p}{,}
+\PYG{+w}{  }\PYG{n+nt}{\PYGZdq{}new\PYGZdq{}}\PYG{p}{:}\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}4.5.10\PYGZdq{}}\PYG{p}{,}
+\PYG{+w}{  }\PYG{n+nt}{\PYGZdq{}test\PYGZdq{}}\PYG{p}{:}\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}DefaultRestEndPointTest\PYGZsh{}testGetRestEndPointURI\PYGZdq{}}\PYG{p}{,}
+\PYG{+w}{  }\PYG{n+nt}{\PYGZdq{}submodule\PYGZdq{}}\PYG{p}{:}\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}modules/export\PYGZdq{}}\PYG{p}{,}
+\PYG{+w}{  }\PYG{n+nt}{\PYGZdq{}test\PYGZus{}cmd\PYGZdq{}}\PYG{p}{:}\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}mvn org.apache.maven.plugins:maven\PYGZhy{}surefire\PYGZhy{}plugin:2.20:test \PYGZhy{}fn \PYGZhy{}Drat.ignoreErrors=true \PYGZhy{}DtrimStackTrace=false \PYGZhy{}Dtest=DefaultRestEndPointTest\PYGZsh{}testGetRestEndPointURI\PYGZdq{}}
+\PYG{p}{\PYGZcb{}}
+\end{Verbatim}
+\caption{The data schema of \toolcompsuite}\label{fig:json}
+\end{figure}
+
+Finally, we persisted the metadata of all the selected incompatibility
+issues in a collection of \Code{json} files.
+\cref{fig:json} presents the metadata of an incompatibility
+issue in the \toolcompsuite dataset. The data schema includes the ID of the
+issue, client project name, SHA of the client base version, URL of the
+client project, library name, versions of the old and new libraries,
+the name of the incompatibility-revealing test, the submodule
+containing the incompatibility-revealing test, and the command to run
+the test. The majority of the information is
+self-explanatory. However, it is worth noting that the old version of
+the library is the one utilized at the base version of the client,
+while the new version is the most recent version found on Maven
+Central that triggers the incompatibility when upgrading, as described in \cref{sec:data:collect-compsuite}.
+

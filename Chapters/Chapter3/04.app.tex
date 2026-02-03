@@ -1,0 +1,71 @@
+\section{Application Scenarios}\label{sec:app-compsuite}
+
+We anticipate that both researchers and practitioners can benefit from
+\toolcompsuite to facilitate their investigations and research on errors
+and test failures induced by library upgrades. \toolcompsuite supports the evaluation of
+various program analysis techniques, such as software upgrade compatibility checking, debugging,
+and module-level regression test selection techniques.
+
+
+As an overview, authors of compatibility checkers and detectors
+may use \toolcompsuite as a benchmark to evaluate the performance of their
+techniques against other baseline approaches. Furthermore, authors of
+debugging techniques can utilize \toolcompsuite as a dataset of compatibility
+bugs, where each bug corresponds to a test case that verifies the
+existence or absence of the bug. Finally, authors of module-level
+regression test selection techniques can use \toolcompsuite to assess the
+safety of their approaches. A safe module-level RTS technique should
+select all the corresponding incompatibility-revealing test cases when
+the library changes.
+
+
+
+We detail the three usage scenarios as follows.
+\begin{itemize}[leftmargin=*,topsep=2pt]
+    \item \textbf{Compatibility Checkers and Detectors.}
+      The existing techniques for compatibility checking and detection
+      in Java can be categorized into three groups: i) Techniques for
+      detecting API incompatibility that focus on detecting
+      API-breaking changes, such as renaming of code entities and
+      changes in parameter types~\cite{li2018cid,he2018understanding,scalabrino2019data,wei2019pivot,huang2018understanding}. ii)
+      Techniques for detecting behavioral incompatibility that focus
+      on identifying behavioral differences that cause test failures
+      when a library is upgraded in a client, such as changes in
+      program states~\cite{zhuclient,mora2018client}. iii) Techniques for
+      detecting dependency conflicts~\cite{wang2021will,wang2018dependency,wang2019could},
+      which aim to identify library APIs that exhibit inconsistent
+      semantics between libraries due to class path shading. We
+      believe that developers of techniques in the first two
+      categories can use \toolcompsuite as a benchmark to evaluate their tools'
+      performance, such as precision and recall. They can run their
+      tools on the \toolcompsuite dataset and compare the results with the
+      incompatibility issues present in the dataset. On the other
+      hand, developers of techniques for detecting dependency
+      conflicts can slightly modify \toolcompsuite's dataset by placing both
+      old and new libraries on the class path, running library
+      conflict detection, and checking if the issues can be detected.
+
+    \item \textbf{Module-Level Regression Test Selection.}  Regression
+      test selection (RTS) is a technique that aims to reduce the cost
+      of regression testing by selecting a subset of tests that may
+      change the behavior due to code changes on each program
+      version~\cite{gligoric2015practical,legunsen2016extensive,zhang2018hybrid,zhu2019framework}. Module-level
+      RTS focuses on selecting the affected client tests when a
+      dependent library is updated~\cite{gyori2018evaluating}. The developers of
+      module-level RTS techniques can evaluate the safety of their
+      tools using \toolcompsuite. For each client-library pair in \toolcompsuite, a
+      module-level RTS tool should select all the corresponding
+      incompatibility-revealing tests when upgrading the library from
+      the old version to the new version.
+
+    \item \textbf{Debugging.}  The existing debugging techniques for
+      Java, include symbolic execution~\cite{baldoni2018survey}, delta
+      debugging~\cite{zeller1999yesterday}, fault localization~\cite{wong2016survey}, etc. These techniques aim to identify the root
+      cause of errors or failures in software. Developers of debugging
+      techniques can use \toolcompsuite as a dataset of compatibility bugs,
+      where each compatibility bug corresponds to a test case that
+      checks the presence or absence of the bug. They can use \toolcompsuite to
+      evaluate their techniques' ability to perform root cause
+      analysis by trying to identify the corresponding library change
+      that caused the compatibility issue.
+\end{itemize}

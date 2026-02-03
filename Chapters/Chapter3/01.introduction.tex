@@ -1,0 +1,84 @@
+\section{Introduction}\label{sec:introduction-compsuite}
+
+Modern software systems are becoming increasingly complex due to the
+need for integrating various components developed by different teams
+or organizations. These components are often subject to continuous
+evolution, and as a result, ensuring that new
+upgrades to third-party libraries do not cause any compatibility
+issues with the existing software system is a challenging task. The
+complexity of these systems and the number of dependencies involved
+make it difficult to anticipate and identify incompatibilities that
+may arise from updates to external components. Incompatibility issues resulting from upgrades to external components can
+compromise the reliability of software systems, potentially leading to
+significant financial losses for the organizations that rely on these systems.
+
+Many techniques have been proposed to address third-party library
+compatibility issues, including regression
+testing~\cite{mezzetti2018type,moller2019model}, static
+analysis~\cite{foo2018efficient}, dependency conflict
+detection~\cite{wang2021will}, and client-specific compatibility
+checking~\cite{mora2018client,zhu2019framework}. These techniques address
+library compatibility issues in different dimensions and have been
+evaluated with their own isolated datasets.
+
+
+An excellent dataset has the potential to serve as a valuable reference for future research in
+this field. However, composing the dataset requires intricate
+manual validation, e.g., confirming whether the cause of a test
+failure is due to runtime exception, assertion violation, or other reasons.
+Therefore, we propose \toolcompsuite, the first incompatibility issue dataset focusing on
+library behavioral incompatibility with concrete reproducible test cases.
+Each test case is isolated and validated, enabling the direct manifestation of the
+incompatibilities.
+
+
+\toolcompsuite comprises 123 real-world Java client-library pairs such that upgrading any library results in
+incompatibility issues for the corresponding client.
+Every incompatibility issue in \toolcompsuite contains a test case created by developers, allowing for the
+reproduction of the issue.
+On top of this dataset, we also developed an automated command-line interface, which streamlines
+all processes of the reproduction, such as downloading and compiling a projects, running target
+tests and re-runing the tests after a library upgrade.
+With this infrastructure, users may reproduce an incompatibility issue programmatically with
+minimal efforts.
+
+
+
+
+% In this study, we present \toolcompsuite, a dataset comprising 123 real-world Java client-library pairs in which upgrading the library results in compatibility problems for the respective client. Each compatibility issue in CompSuite is linked to a test case created by developers, allowing for the reproduction of the issue. Additionally, the dataset features an automated tool that streamlines the execution and verification of each problem. This setup enables users to swiftly assess any compatibility issue with a single click or to reproduce the issue methodically for an in-depth examination.
+
+
+\textbf{Contribution}
+To summarize, we make the following contributions in this paper:%
+\begin{enumerate}[leftmargin=*,topsep=2pt]
+\item We construct a dataset, \toolcompsuite, including 123
+  reproducible, real-world client-library pairs that manifest
+  incompatibility issues when upgrading the library. These data points
+  originate from 88 clients and 104 libraries.
+  %% We forked each project and identified the base version that
+  %% passed all tests before encountering incompatibility
+  %% issues. Based on that version, we performed library updates and
+  %% utilized a version control system to create isolated commits,
+  %% with each version differing only in the library version.
+\item We created an automated command-line interface for the dataset.
+With this interface, users are able to programmatically replicate an incompatibility issue
+from the dataset with a single command.
+The interface also offers separate commands for each step involved in the reproduction of
+incompatibility issues.
+\end{enumerate}
+
+
+% \todo{TODO: Add a paragraph here: We envision that \toolcompsuite can power various
+%   program analysis techniques including xxx, xxx, and xxx. Briefly
+%   describe how each of these techniques would use \toolcompsuite.}
+
+We envision that \toolcompsuite to be used to evaluate various program analysis techniques, including
+compatibility checking, module-level regression testing selection, and debugging techniques.
+%For example, compatibility checkers and detecters can use \toolcompsuite as a performance evaluator, while
+%module-level RTS tools utilize it as a safety evaluator to verify whether all relevant test cases
+%have been selected. Additionally, \toolcompsuite is able to assist debugging techniques to do better root
+%cause analysis.
+More detailed information can be found in \cref{sec:app-compsuite}.
+
+The dataset and tool are available at: \url{https://github.com/compsuite-team/compsuite}.
+
