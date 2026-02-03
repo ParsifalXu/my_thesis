@@ -1,7 +1,7 @@
 %\vspace{0.3cm}
 \section{Related Work}\label{sec:related-mpchecker}
 
-\paragraph{API Documentation Analysis}
+\textbf{API Documentation Analysis}
 Numerous empirical studies have revealed the challenges of maintaining high-quality API
 documentation~\cite{aghajani2018large,arnaoudova2016linguistic, dagenais2010creating,
 aghajani2020software, head2018not, liu2020generating, monperrus2012should, saied2015observational,
@@ -22,7 +22,7 @@ Another related field is code comments inconsistency~\cite{blasi2018replicomment
 \toolchecker focuses on a distinct problem, specifically on API documentation errors arising from multi-parameter constraints. These issues are more subtle and challenging to detect, particularly within data science libraries built on the dynamic language Python.
 
 
-\paragraph{LLM-based Program Analysis}
+\textbf{LLM-based Program Analysis}
 A line of research~\cite{wadhwa2024codequality,jin2023programrepair, yang2024programrepair, xia2024programrepair, nam2024codeunderstand,zhang2024codeinconsistency, zhang2024codeinconsistency} focuses on using LLMs on program analysis. Wadhwa et al.~\cite{wadhwa2024codequality} focus on using LLMs to resolve code quality issues in multiple code languages. Several recent researches~\cite{jin2023programrepair, yang2024programrepair, xia2024programrepair} address applying LLMs on program repairing issues. Nam et al.~\cite{nam2024codeunderstand} apply the GPT model to explain code and provide usage details.
 The existing approaches focus on different purposes compared to \toolchecker.
 Zhang et al.~\cite{zhang2024codeinconsistencyfse, zhang2024codeinconsistencyase} use LLMs to extract constraints from code comments, and apply AST-based program analysis to identify inconsistencies.

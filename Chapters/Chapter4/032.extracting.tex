@@ -70,25 +70,25 @@ In this step, we extract constraints from Python documentation by applying LLMs.
 Since Python documentation can vary in quality and may contain informal writing~\cite{rani2021comments}, the important task is to understand the parameter information within the documentation. To achieve this, we resort to SOTA LLMs. Given Python documentation as input, the LLM is asked to first extract constraint-related sentences and then output them in a standard logical expression format. This includes two steps, model selection and prompt design.
 
 
-\paragraph{Model Selection} We adopt GPT-4, which is pretrained on a diverse corpus and shows
+\textbf{Model Selection} We adopt GPT-4, which is pretrained on a diverse corpus and shows
 excellent performance in natural language understanding. Based on our preliminary study, GPT-4's
 performance stands out compared to Gemini-1.5~\cite{gemini} and LLaMA-3~\cite{llama3} due to its
 ability to capture details, and it is also well-acquainted with the context of code
 documentation~\cite{dvivedi2024comparative}.
 
 
-\paragraph{Prompt Design} Because the constraint extraction task is relatively complex and can be
+\textbf{Prompt Design} Because the constraint extraction task is relatively complex and can be
 broken down into clear steps, we apply the chain-of-thought approach~\cite{wei2024cot}, which has
 been widely proven effective in improving GPT-based model performance. We first divide the prompt
 task into two steps, document input and constraint extraction. Figure~\ref{fig:prompt} shows the
 structure and some details of the used prompt.
 Below, we detail our prompt mechanism for each step.
 
-\paragraph{Document Input Prompt}
+\textbf{Document Input Prompt}
 We observe that some documentation may be too lengthy to provide to GPT-4 in a single input, considering that GPT-4 has a maximum token length limit of 8,192 tokens~\cite{modeltoken}. We also find that LLMs exhibit lower performance when dealing with long and complex text inputs as noted in previous research~\cite{han2024lm, jin2024llm}. Thus, we decide to segment the lengthy documents into smaller sections. To determine a heuristic chunk size, we randomly select ten lengthy Python documentation files, split them into chunks of varying word lengths, and use these as inputs for GPT-4. We then evaluate the constraint extraction task performance of GPT-4 based on these inputs to determine which chunk size yields better results. Based on our findings, we decide to standardize the chunk size to 1,500 words (around 2,048 tokens~\cite{tokencount}).
 We also input the parameter list obtained in Section~\ref{sec:preprocess-mpchecker} into GPT-4 to help model better recognize the information related to parameters. The details of the document input prompt are shown in Prompt 1 in Figure~\ref{fig:prompt}.
 
-\paragraph{Constraint Extraction Prompt}
+\textbf{Constraint Extraction Prompt}
 For the constraint extraction task, our prompt is divided into three parts to guide GPT-4 in recognizing text related to constraints in the original documentation, and then, based on that text, to generate a formatted logical expression of the constraint.
 
 The first part involves defining the logical symbols that can be used in the logical format, including implication, negation NOT, logical AND, logical OR, and also defining parentheses to indicate the precedence of logical expressions.
