@@ -1,10 +1,10 @@
-\subsection{Constraint Extraction}\label{sec:extraction}
+\subsection{Constraint Extraction}\label{sec:extraction-mpchecker}
 
 We now specially explain how to extract path constraints from code and convert them into expressions which are solvable by SMT solver, as well as how to use LLM to extract constraints from documentation and transform them into expressions containing fuzzy words.
 
 \subsubsection{Code Constraint Expression Extraction}
 
-The goal of \tool is to verify whether the constraints between multiple parameters in documentation align with the logic during actual code execution. This requires our tool to understand and analyze deeper constraint relationships. Therefore, we employ symbolic execution to capture as many path conditions as possible and precisely handle complex paths and constraints.
+The goal of \toolchecker is to verify whether the constraints between multiple parameters in documentation align with the logic during actual code execution. This requires our tool to understand and analyze deeper constraint relationships. Therefore, we employ symbolic execution to capture as many path conditions as possible and precisely handle complex paths and constraints.
 
 We modified current advanced dynamic symbolic execution tools~\cite{github:pyexsmt, github:pyexz3, github:pysmt, ball2015deconstructing, bruni2011peer} for path exploration. Unfortunately, supporting dynamic languages like Python is more challenging compared to symbolic execution tools designed for static languages such as Java and C. Despite Python's rapid evolution, symbolic execution tools specifically designed for Python have developed slowly, struggling to keep pace with the growing new syntax and features. This forces us to make reasonable modifications to the source code extracted directly from repositories. However, these modifications must not alter the path constraints of the original code; they should be equivalent code transformations that do not affect path exploration. We mainly made the following modifications:
 
@@ -18,9 +18,9 @@ We modified current advanced dynamic symbolic execution tools~\cite{github:pyexs
 \end{enumerate}
 
 
-In the limit, \tool strives to explore all feasible paths in a Python function by following these processes: 1) Running the function with specific input to trace a path through the control flow of the function; 2) Symbolic executing the path to determine how its conditions depend on the function's input parameters; 3) Utilizing Z3 to generate new parameter values that guide the function toward paths that haven't been covered yet.
+In the limit, \toolchecker strives to explore all feasible paths in a Python function by following these processes: 1) Running the function with specific input to trace a path through the control flow of the function; 2) Symbolic executing the path to determine how its conditions depend on the function's input parameters; 3) Utilizing Z3 to generate new parameter values that guide the function toward paths that haven't been covered yet.
 
-Although \tool supports a certain level of external function call analysis, in complex real-world code, an external function call often corresponds to extra more function calls, leading to path explosion. Furthermore, documentation constraints are usually handled within the target function, so we still prefer not to introduce external function calls and to focus the analysis within the target function. Additionally, similar to the current concolic symbolic execution tools for Python, \tool does not yet provide strong support for theorem of strings. Thus, during the actual execution process, we replace the string with a unique large number, which does not affect the exploration of condition constraints.
+Although \toolchecker supports a certain level of external function call analysis, in complex real-world code, an external function call often corresponds to extra more function calls, leading to path explosion. Furthermore, documentation constraints are usually handled within the target function, so we still prefer not to introduce external function calls and to focus the analysis within the target function. Additionally, similar to the current concolic symbolic execution tools for Python, \toolchecker does not yet provide strong support for theorem of strings. Thus, during the actual execution process, we replace the string with a unique large number, which does not affect the exploration of condition constraints.
 
 
 \begin{figure*}[t]
@@ -64,7 +64,7 @@ We will use an example depicted in Figure~\ref{fig:extractpath} to illustrate th
 
 
 
-\subsubsection{Documentation Constraint Expression Extraction}\label{sec:llm}
+\subsubsection{Documentation Constraint Expression Extraction}\label{sec:llm-mpchecker}
 
 In this step, we extract constraints from Python documentation by applying LLMs.
 Since Python documentation can vary in quality and may contain informal writing~\cite{rani2021comments}, the important task is to understand the parameter information within the documentation. To achieve this, we resort to SOTA LLMs. Given Python documentation as input, the LLM is asked to first extract constraint-related sentences and then output them in a standard logical expression format. This includes two steps, model selection and prompt design.
@@ -86,7 +86,7 @@ Below, we detail our prompt mechanism for each step.
 
 \paragraph{Document Input Prompt}
 We observe that some documentation may be too lengthy to provide to GPT-4 in a single input, considering that GPT-4 has a maximum token length limit of 8,192 tokens~\cite{modeltoken}. We also find that LLMs exhibit lower performance when dealing with long and complex text inputs as noted in previous research~\cite{han2024lm, jin2024llm}. Thus, we decide to segment the lengthy documents into smaller sections. To determine a heuristic chunk size, we randomly select ten lengthy Python documentation files, split them into chunks of varying word lengths, and use these as inputs for GPT-4. We then evaluate the constraint extraction task performance of GPT-4 based on these inputs to determine which chunk size yields better results. Based on our findings, we decide to standardize the chunk size to 1,500 words (around 2,048 tokens~\cite{tokencount}).
-We also input the parameter list obtained in Section~\ref{sec:preprocess} into GPT-4 to help model better recognize the information related to parameters. The details of the document input prompt are shown in Prompt 1 in Figure~\ref{fig:prompt}.
+We also input the parameter list obtained in Section~\ref{sec:preprocess-mpchecker} into GPT-4 to help model better recognize the information related to parameters. The details of the document input prompt are shown in Prompt 1 in Figure~\ref{fig:prompt}.
 
 \paragraph{Constraint Extraction Prompt}
 For the constraint extraction task, our prompt is divided into three parts to guide GPT-4 in recognizing text related to constraints in the original documentation, and then, based on that text, to generate a formatted logical expression of the constraint.

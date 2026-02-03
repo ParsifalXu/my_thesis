@@ -1,12 +1,12 @@
-\section{Background}\label{sec:bg}
+\section{Background}\label{sec:bg-mpchecker}
 In this section, we review the essential terminology and background necessary for understanding the
 remainder of the paper.
 
-\subsection{Multi-Parameter Constraints}\label{sec:eg}
+\subsection{Multi-Parameter Constraints}\label{sec:eg-mpchecker}
 We use two examples to illustrate inconsistencies between API documentation and the corresponding code
 caused by multi-parameter interdependence.
 Both of them come from open-source Python data science libraries and were successfully
-detected by \tool.
+detected by \toolchecker.
 In general, there are two types of constraints found in the API documentation.
 (1) An \emph{explicit constraint} clearly specifies the logical relationship among two or more
 interrelated parameters.
@@ -15,7 +15,7 @@ more interrelated parameters, where the constraint is inferred through contexts 
 rather than explicitly specified.
 
 
-\subsubsection{Example 1: Explicit Constraint}\label{sec:eg1}
+\subsubsection{Example 1: Explicit Constraint}\label{sec:eg1-mpchecker}
 
 The first example comes from \texttt{statsmodels}~\cite{github:statsmodels}, which provides a
 complement to \texttt{scipy} for statistical computations including descriptive statistics and
@@ -60,7 +60,7 @@ class AutoReg(tsa_model.TimeSeriesModel):
 
 
 
-\subsubsection{Example 2: Implicit Constraint}\label{sec:eg2}
+\subsubsection{Example 2: Implicit Constraint}\label{sec:eg2-mpchecker}
 
 The second example comes from \texttt{scikit-learn}~\cite{github:scikit}, which is a widely-used
 (more than 60K stars on GitHub) open-source ML library in Python, designed to offer simple
@@ -82,10 +82,10 @@ For this type of implicit constraint, traditional pattern-based approaches are n
 the \emph{doc-constraint} correctly, thus fail to detect the inconsistencies.
 To solve this issue, we design a customized constraint that incorporates fuzzy words, and adopt
 few-shot learning to teach LLMs how to generate such constraints (details in
-\cref{sec:llm}).
+\cref{sec:llm-mpchecker}).
 In this case, the \emph{doc-constraint} should be \textit{``(affinity = "nearest\_neighbors") $\rightarrow$
 (ignore(gamma))''}, where a special predicate \textit{``ignore(x)''} is used to indicate that a parameter
-\textit{x} is ignored (see \cref{sec:fuzzword}).
+\textit{x} is ignored (see \cref{sec:fuzzword-mpchecker}).
 
 
 \begin{figure*}[t]

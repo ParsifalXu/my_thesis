@@ -1,10 +1,10 @@
-\section{Evaluation}\label{sec:eval}
-This section describes our evaluation of \tool. We first present our research questions, then detail the experiment setup and evaluation subjects. Finally, we analyze our experimental results and answer each research question. Our evaluation was guided by the following research questions:
+\section{Evaluation}\label{sec:eval-mpchecker}
+This section describes our evaluation of \toolchecker. We first present our research questions, then detail the experiment setup and evaluation subjects. Finally, we analyze our experimental results and answer each research question. Our evaluation was guided by the following research questions:
 
 \begin{enumerate}
-  \item \textbf{RQ1:} How accurate is \tool in extracting constraints from API documentation?
-  \item \textbf{RQ2:} How effective is \tool in detecting errors related to multi-parameter constraints in API documentation?
-  \item \textbf{RQ3:} How effective can \tool detect unknown inconsistency issues?
+  \item \textbf{RQ1:} How accurate is \toolchecker in extracting constraints from API documentation?
+  \item \textbf{RQ2:} How effective is \toolchecker in detecting errors related to multi-parameter constraints in API documentation?
+  \item \textbf{RQ3:} How effective can \toolchecker detect unknown inconsistency issues?
 \end{enumerate}
 
 \subsection{Experiment Setup}
@@ -41,9 +41,9 @@ statsmodels                 & 2,184                     & 273                   
 \end{landscape}
 
 \subsubsection{Subjects}
-Table~\ref{tab:subjects} lists 7 popular libraries that \tool evaluated on, first four for dataset construction and last three for assessing \tool's ability to detect unknown issues. The selected libraries are of high quality and widely used, with tens of thousands of stars on GitHub. These libraries are substantial third-party libraries, averaging 1,642 classes, 14,467 functions, with an average of 373.6 thousand lines of code, and each function containing an average of 1.3 parameters. Our tool extracts documentation constraints and path constraints from these libraries and uses a fuzzy constraint reasoner to detect inconsistencies.
+Table~\ref{tab:subjects} lists 7 popular libraries that \toolchecker evaluated on, first four for dataset construction and last three for assessing \toolchecker's ability to detect unknown issues. The selected libraries are of high quality and widely used, with tens of thousands of stars on GitHub. These libraries are substantial third-party libraries, averaging 1,642 classes, 14,467 functions, with an average of 373.6 thousand lines of code, and each function containing an average of 1.3 parameters. Our tool extracts documentation constraints and path constraints from these libraries and uses a fuzzy constraint reasoner to detect inconsistencies.
 
-\tool was implemented in Python. All the experiments were performed on an Intel(R) Xeon(R) Silver 4214 CPU @ 2.20GHz machine with 252GB of RAM, running Ubuntu 18.04, with Python 3.8.19 and Z3 4.13.0.
+\toolchecker was implemented in Python. All the experiments were performed on an Intel(R) Xeon(R) Silver 4214 CPU @ 2.20GHz machine with 252GB of RAM, running Ubuntu 18.04, with Python 3.8.19 and Z3 4.13.0.
 When evaluating the constraint extraction performance (RQ1), we access the GPT-4 model through OpenAI's API. For result validation, given the absence of established benchmarks in this domain, two volunteer researchers independently reviewed the constraint extraction results from GPT-4, manually assessing each constraint's consistency with the original Python documentation. Any discrepancies were resolved through consensus discussion.
 
 
@@ -52,13 +52,13 @@ When evaluating the constraint extraction performance (RQ1), we access the GPT-4
 We display the result of RQ1 in Table~\ref{tab:rq1}. Our experiment shows that our tool correctly identified and extracted 66 out of 72 constraints contained in the Python documentation collected in our benchmark, achieving an accuracy of 91.7\%, which demonstrates that our tool can successfully extract most of the constraints accurately, with few errors or omissions.
 Next, we look into the remaining failed cases and investigate the reasons for the inaccuracy. We found that out of the 6 incorrect cases, 4 involved missing constraints during the documentation processing. For example, one of the missing constraints is: ``(batch\_size = auto) $\rightarrow$ (batch\_size = min(200, n\_samples))''. Although this case involves a constraint between multiple parameters, the format is tricky because one of the parameters is within a function, which may have misled GPT-4 and caused it to miss this constraint during extraction. In the last 2 cases, the constraint information was identified but converted into incorrect logic expressions due to the complex logic or sentence structure.
 
-We further explore \tool's abilities by conducting an ablation study. The results show that \tool without few-shot learning achieves an accuracy of 62.5\%. Most failures occur in the incorrect extraction of constraints. This indicates that including few-shot learning is important for \tool to generate accurate constraints.
-Next, \tool without applying chain-of-thought techniques results in an accuracy of 79.2\%, with the number of missed constraints accounting for more than half of total non-equivalent cases. This suggests that GPT tends to miss more details in documentation when chain-of-thought is removed.
-After including chain-of-thought and few-shot learning, \tool's performance shows a clear improvement.
+We further explore \toolchecker's abilities by conducting an ablation study. The results show that \toolchecker without few-shot learning achieves an accuracy of 62.5\%. Most failures occur in the incorrect extraction of constraints. This indicates that including few-shot learning is important for \toolchecker to generate accurate constraints.
+Next, \toolchecker without applying chain-of-thought techniques results in an accuracy of 79.2\%, with the number of missed constraints accounting for more than half of total non-equivalent cases. This suggests that GPT tends to miss more details in documentation when chain-of-thought is removed.
+After including chain-of-thought and few-shot learning, \toolchecker's performance shows a clear improvement.
 
 \begin{table}[t]
 	\vspace{2mm}
-	\caption{Results of \tool on constraint extraction}
+	\caption{Results of \toolchecker on constraint extraction}
 	\label{tab:rq1}
 	\centering
   \small
@@ -71,25 +71,25 @@ After including chain-of-thought and few-shot learning, \tool's performance show
 		& Incorrect extraction 
 		& Missing constraints 
 		& \\ \hline
-		\textbf{\tool w/o few-shot learning} & 45 & 20 & 7 & 62.5\% \\ \hline
-		\textbf{\tool w/o chain-of-thought}  & 57 & 7  & 8 & 79.2\% \\ \hline
-		\textbf{\tool}                       & 66 & 2  & 4 & 91.7\% \\ \hline
+		\textbf{\toolchecker w/o few-shot learning} & 45 & 20 & 7 & 62.5\% \\ \hline
+		\textbf{\toolchecker w/o chain-of-thought}  & 57 & 7  & 8 & 79.2\% \\ \hline
+		\textbf{\toolchecker}                       & 66 & 2  & 4 & 91.7\% \\ \hline
 	\end{tabularx}
 \end{table}
 
 \smallskip
 \noindent\shadowbox{%
   \begin{minipage}{0.98\columnwidth}
-    \textbf{Answer to RQ1:} \tool correctly extracted 66 constraints out of 72 in total, achieving an accuracy of 91.7\%. This demonstrates that \tool is effective in extracting constraints from Python documentation.
+    \textbf{Answer to RQ1:} \toolchecker correctly extracted 66 constraints out of 72 in total, achieving an accuracy of 91.7\%. This demonstrates that \toolchecker is effective in extracting constraints from Python documentation.
   \end{minipage}}
 
 
 
 % ===== RQ2 =====
-\subsubsection{\tool's effectiveness in detecting multi-parameter API documentation errors}
-To measure \tool's effectiveness in detecting multi-parameter API documentation errors, we evaluated our tool on the inconsistency dataset. Table~\ref{tab:res} shows the results of \tool in detecting multi-parameter CDI on the inconsistency dataset.
+\subsubsection{\toolchecker's effectiveness in detecting multi-parameter API documentation errors}
+To measure \toolchecker's effectiveness in detecting multi-parameter API documentation errors, we evaluated our tool on the inconsistency dataset. Table~\ref{tab:res} shows the results of \toolchecker in detecting multi-parameter CDI on the inconsistency dataset.
 
-The \vanillatool does not include fuzzy words or apply fuzzy constraint satisfaction theory, limiting its ability to handle implicit constraints. Despite these limitations, it achieved an impressive 69\% recall by detecting 87 inconsistencies. With fuzzy words and fuzzy constraints logic, \tool's performance significantly improved, successfully identifying 117 inconsistencies with a recall of 92.8\% and  an accuracy $=\frac{TP+TN}{TP+TN+FP+FN}=\frac{117+88}{216}=94.9\%$. This demonstrates that incorporating fuzzy words and fuzzy constraints can expand the range of detectable constraints. However, we identified two false positives because the constraints lie between the parameters and method calls, rather than among the parameters. One example is shown below:
+The \vanillatool does not include fuzzy words or apply fuzzy constraint satisfaction theory, limiting its ability to handle implicit constraints. Despite these limitations, it achieved an impressive 69\% recall by detecting 87 inconsistencies. With fuzzy words and fuzzy constraints logic, \toolchecker's performance significantly improved, successfully identifying 117 inconsistencies with a recall of 92.8\% and  an accuracy $=\frac{TP+TN}{TP+TN+FP+FN}=\frac{117+88}{216}=94.9\%$. This demonstrates that incorporating fuzzy words and fuzzy constraints can expand the range of detectable constraints. However, we identified two false positives because the constraints lie between the parameters and method calls, rather than among the parameters. One example is shown below:
 
 
 \texttt{$($shape $=$ None$)$ $\wedge$ $($axes $\neq$ None$)$ $\rightarrow$ $($shape $=$ numpy.take$($x.shape,axes,axis=0$))$}
@@ -109,7 +109,7 @@ The remaining 9 unresolved inconsistent constraints stem from external function 
 	\captionsetup{aboveskip=6pt, belowskip=-8pt}
 	\begin{threeparttable}
 		
-  \caption{Results of LLM and \tool on detecting multi-parameter CDIs}
+  \caption{Results of LLM and \toolchecker on detecting multi-parameter CDIs}
   \begin{tabularx}{0.91\linewidth}{p{0.75\linewidth}lrrrr}
   \hline
    Checker  & FN  & TP  & Recall\\ \hline
@@ -120,7 +120,7 @@ The remaining 9 unresolved inconsistent constraints stem from external function 
   \end{tabularx}
   \begin{tablenotes}
   	\small
-  	\item LLM: raw documentation and corresponding code; LLM+C: extracted \emph{doc-constraints} from documentation and corresponding code; \vanillatool: \tool without fuzzy words and fuzzy constraint logic; \fuzzytool: \tool with fuzzy words and fuzzy constraint logic.
+  	\item LLM: raw documentation and corresponding code; LLM+C: extracted \emph{doc-constraints} from documentation and corresponding code; \vanillatool: \toolchecker without fuzzy words and fuzzy constraint logic; \fuzzytool: \toolchecker with fuzzy words and fuzzy constraint logic.
   \end{tablenotes}
   \label{tab:res}
 \end{threeparttable}
@@ -148,8 +148,8 @@ As shown in the Table~\ref{tab:res}, when raw documentation and the correspondin
 
 
 % ===== RQ4 =====
-\subsubsection{Practical effect of \tool}
-Our tool's effectiveness in detecting unknown multi-parameter inconsistencies was validated by manual review and developer feedback. We reported 14 inconsistencies identified by \tool to the library maintenance team, receiving positive engagement and warm responses. Two of them even sparked further discussions about potential issues. This not only affirmed our reports' quality but also reflected the enthusiasm of the open-source community.
+\subsubsection{Practical effect of \toolchecker}
+Our tool's effectiveness in detecting unknown multi-parameter inconsistencies was validated by manual review and developer feedback. We reported 14 inconsistencies identified by \toolchecker to the library maintenance team, receiving positive engagement and warm responses. Two of them even sparked further discussions about potential issues. This not only affirmed our reports' quality but also reflected the enthusiasm of the open-source community.
 
 For example, an issue confirmed by the \texttt{scikit-learn} team originates from the independent function ``lars\_path'', as shown in Figure~\ref{fig:eg3}. Apparently, an inconsistency exists between the documentation and code regarding whether ``Gram'' is None when ``X'' is None. Therefore, we reported the issue~\cite{issue30099} and detailed the documentation sections with inconsistencies alongside its corresponding code snippet. The developer made a bit of archeology, admitted the documentation needed to be updated, and asked if we wanted make a PR to correct this error. Finally, the documentation description was fixed to ``If X is None, Gram must also be None''.
 
@@ -195,5 +195,5 @@ def lars_path(...):
 \smallskip
 \noindent\shadowbox{%
   \begin{minipage}{0.98\columnwidth}
-    \textbf{Answer to RQ3:}  We reported 14 multi-parameter inconsistencies detected by \tool to library developers, who have already confirmed 11 inconsistencies by the time of submission (confirmation rate = 78.6\%)~\cite{issue28469,issue28470,issue28473,issue29440,issue29463,issue29464,issue9304,issue29509,issue11336,issue20141, issue30099}. These results demonstrate that \tool can effectively detect unknown API documentation errors. Some of them are even in unseen libraries which highlights its strong generalization capability.
+    \textbf{Answer to RQ3:}  We reported 14 multi-parameter inconsistencies detected by \toolchecker to library developers, who have already confirmed 11 inconsistencies by the time of submission (confirmation rate = 78.6\%)~\cite{issue28469,issue28470,issue28473,issue29440,issue29463,issue29464,issue9304,issue29509,issue11336,issue20141, issue30099}. These results demonstrate that \toolchecker can effectively detect unknown API documentation errors. Some of them are even in unseen libraries which highlights its strong generalization capability.
   \end{minipage}}

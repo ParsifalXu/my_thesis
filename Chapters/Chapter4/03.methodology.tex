@@ -1,11 +1,11 @@
-\section{Methodology}\label{sec:method}
+\section{Methodology}\label{sec:method-mpchecker}
 
 
 \begin{figure*}[h]
 	\vspace{2mm}
     \centering
     \includegraphics[width=\linewidth]{Figures/Chapter4/arch.pdf}
-    \caption{The architectural overview of \tool.}
+    \caption{The architectural overview of \toolchecker.}
     \label{fig:arch}
     \vspace{-5pt}
 \end{figure*}
@@ -13,10 +13,10 @@
 In this section, we define the issue of code-documentation inconsistency caused by multi-parameter
 constraints and provide a detailed description of our approach. An API documentation error is an inconsistency between the library source code and its API documentation. Multi-parameter constraints refer to conditional dependency relationships that exist among multiple parameters within functions or classes. If a constraint is never violated across all execution paths in the code, it is considered as a benign constraint, or it indicates a potential documentation error. According to literature~\cite{uddin2015api,zhou2017analyzing, zhu2022identifying}, API documentation inconsistency can be categorized into two types: incorrectness and incompleteness. Incorrectness refers to cases where the documentation describes behavior that is not implemented in the code, while incompleteness arises when certain code behaviors are not reflected in the documentation. Typically, incorrectness issues are considered more critical than incompleteness.
 
-In addition, when it comes to constraint extraction, compared to single-parameter constraints, we need to classify the multi-parameter constraint extraction problem into two types, as discussed in Section~\ref{sec:eg}, 1) explicit constraint and 2) implicit constraint.
+In addition, when it comes to constraint extraction, compared to single-parameter constraints, we need to classify the multi-parameter constraint extraction problem into two types, as discussed in Section~\ref{sec:eg-mpchecker}, 1) explicit constraint and 2) implicit constraint.
 
-\tool aims to accurately extract multi-parameter constraints from API documentation and detect both types of inconsistency. As the architecture depicted in Figure~\ref{fig:arch}, we have designed a three-phase workflow comprising the \textbf{1) Data Preprocessing; 2) Constraint Extraction; 3) Inconsistency Detection}. During the preprocessing phase, we separate the code and documentation within the project.
-\tool will then automatically rewrite each function to be compatible with the symbolic
+\toolchecker aims to accurately extract multi-parameter constraints from API documentation and detect both types of inconsistency. As the architecture depicted in Figure~\ref{fig:arch}, we have designed a three-phase workflow comprising the \textbf{1) Data Preprocessing; 2) Constraint Extraction; 3) Inconsistency Detection}. During the preprocessing phase, we separate the code and documentation within the project.
+\toolchecker will then automatically rewrite each function to be compatible with the symbolic
 execution tool. This includes replacing advanced Python syntax that the tool cannot handle with
 simpler constructs and symbolizing external function calls, such as replacing ternary conditional
 expressions with if-else statements. These modifications do not alter the path constraints of the

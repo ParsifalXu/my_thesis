@@ -1,5 +1,5 @@
 %\vspace{0.3cm}
-\section{Related Work}\label{sec:related}
+\section{Related Work}\label{sec:related-mpchecker}
 
 \paragraph{API Documentation Analysis}
 Numerous empirical studies have revealed the challenges of maintaining high-quality API
@@ -19,18 +19,18 @@ focus on names of Java classes, methods, and fields.
 
 Another related field is code comments inconsistency~\cite{blasi2018replicomment, habib2018class, liu2014automatic, nie2019framework, panthaplackel2021deep, steidl2013quality, zhai2020cpc, wen2019large}. Existing research on code comment analysis predominantly follows two approaches. The traditional method employs program analysis and heuristic rules to detect inconsistencies between comments and the code. Technologies like CUP~\cite{liu2020automating}, CUP2~\cite{liu2021just}, and HebCup~\cite{lin2021automated} exemplify this approach, focusing on automatic just-in-time comment updates when corresponding code changes. The alternative approach leverages NLP techniques to retrieve and extract information from software artifacts.
 
-\tool focuses on a distinct problem, specifically on API documentation errors arising from multi-parameter constraints. These issues are more subtle and challenging to detect, particularly within data science libraries built on the dynamic language Python.
+\toolchecker focuses on a distinct problem, specifically on API documentation errors arising from multi-parameter constraints. These issues are more subtle and challenging to detect, particularly within data science libraries built on the dynamic language Python.
 
 
 \paragraph{LLM-based Program Analysis}
 A line of research~\cite{wadhwa2024codequality,jin2023programrepair, yang2024programrepair, xia2024programrepair, nam2024codeunderstand,zhang2024codeinconsistency, zhang2024codeinconsistency} focuses on using LLMs on program analysis. Wadhwa et al.~\cite{wadhwa2024codequality} focus on using LLMs to resolve code quality issues in multiple code languages. Several recent researches~\cite{jin2023programrepair, yang2024programrepair, xia2024programrepair} address applying LLMs on program repairing issues. Nam et al.~\cite{nam2024codeunderstand} apply the GPT model to explain code and provide usage details.
-The existing approaches focus on different purposes compared to \tool.
+The existing approaches focus on different purposes compared to \toolchecker.
 Zhang et al.~\cite{zhang2024codeinconsistencyfse, zhang2024codeinconsistencyase} use LLMs to extract constraints from code comments, and apply AST-based program analysis to identify inconsistencies.
 Rong et al.~\cite{rong2024code} propose C4RLLaMA, a fine-tuned large language model based on the open-source Code Llama, to detect and correct code comment inconsistencies.
 
 
-Overall, \tool's approach is distinct in two aspects.
-First, \tool specifically focuses on detecting inconsistencies in multi-parameter constraints, which is a missing piece in state-of-the-art works.
-Next, \tool deals with code documentation, which involves longer and more complex text, and is more diverse than most code comments.
+Overall, \toolchecker's approach is distinct in two aspects.
+First, \toolchecker specifically focuses on detecting inconsistencies in multi-parameter constraints, which is a missing piece in state-of-the-art works.
+Next, \toolchecker deals with code documentation, which involves longer and more complex text, and is more diverse than most code comments.
 
 
