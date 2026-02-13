@@ -24,6 +24,80 @@ These three challenges correspond respectively to external adaptation, internal 
 
 \section{Contributions}\label{sec:contribution}
 
+\begin{figure}[htbp]
 
-\section{Outline of the Thesis}
+\begin{tikzpicture}[
+    node distance = 1.5cm and 0.2em,
+    chapter_node/.style = {
+        align=center,
+        font=\sffamily\small,
+        % text width=0.28\textwidth,
+        inner sep=2pt,
+    },
+    arrow/.style = {
+        -{Stealth[scale=1.2]},
+        thin
+    }
+]
+
+    \node[chapter_node] (c1) {
+        \textcolor{blue}{\underline{\textbf{Chapter 1}}} \\ 
+        Introduction
+    };
+
+    \node[chapter_node, below=of c1] (c2) {
+        \textcolor{blue}{\underline{\textbf{Chapter 2}}} \\
+        Background and Literature Review
+    };
+
+    \node[chapter_node, below=1.5cm of c2] (c4) {
+        \textcolor{blue}{\underline{\textbf{Chapter 4}}} \\
+        \textbf{\textsc{MPChecker}:} Multi-parameter \\ 
+        Code-Doc Inconsistency Detection\\ 
+        \textcolor{blue}{$\bullet$ new approach}
+    };
+
+    \node[chapter_node, left= of c4] (c3) {
+        \textcolor{blue}{\underline{\textbf{Chapter 3}}} \\
+        \textbf{\textsc{CompSuite}:} A Dataset of Lib-\\ 
+        rary Upgrade Incompatibilities\\
+        \textcolor{blue}{$\bullet$ new dataset}
+    };
+
+    \node[chapter_node, right= of c4] (c5) {
+        \textcolor{blue}{\underline{\textbf{Chapter 5}}} \\
+        \textbf{\textsc{DataLoc}:} Neurosymbolic \\ 
+        Repo-level Code Localization\\ 
+        \textcolor{blue}{$\bullet$ findings \& new approach}
+    };
+
+    \node[chapter_node, below=1.5cm of c4] (c6) {
+        \textcolor{blue}{\underline{\textbf{Chapter 6}}} \\
+        Conclusion and Future Work
+    };
+
+    \draw[arrow] (c1.south) -- (c2.north);
+
+    \coordinate (split) at ($(c2.south)!0.3!(c4.north)$);
+    \draw (c2.south) -- (split); 
+
+    \draw[arrow] (split) .. controls ++(0,-1.2) and ++(0,1.2) .. (c3.north);
+    \draw[arrow] (split) -- (c4.north);
+    \draw[arrow] (split) .. controls ++(0,-1.2) and ++(0,1.2) .. (c5.north);
+
+    \coordinate (merge) at ($(c4.south)!0.7!(c6.north)$);
+
+    \draw[arrow] (merge) -- (c6.north); 
+    \draw (c3.south) .. controls ++(0,-1.2) and ++(0,1.2) .. (merge);
+    \draw (c4.south) -- (merge);
+    \draw (c5.south) .. controls ++(0,-1.2) and ++(0,1.2) .. (merge);
+
+\end{tikzpicture}
+\caption{The Structure of the Thesis}\label{fig:thesis_structure}
+\end{figure}
+
+
+
+\section{Organization}\label{sec:organization}
+
 
