@@ -3,69 +3,27 @@
 
 \chapter{Introduction} % Main chapter title
 \chaptermark{Introduction}
-\label{ch:introduction} % For referencing the chapter elsewhere, use \ref{Chapter1} 
+\label{ch:introduction}
 
-%----------------------------------------------------------------------------------------
-%	SECTION 1
-%----------------------------------------------------------------------------------------
+\section{Motivation}\label{sec:motivation}
+In the context of rapid digital transformation and the accelerated advancedment of Artificial Intelligence (AI), software systems have evoloved from relatively static artifacts into dynamic entities capable of continuously adapting to changing requirements. To remain effective in the face of evolving requirements, technological innovations, and emerging security threats, ongoing modification and extension, collectively known as software evolution, have become an inherent and unavoidable characteristic of modern software engineering. Broadly, software evolution is primarily driven by two forces: \textbf{external adaptation}, which responds to changes in the third-party ecosystem, and \textbf{internal improvement}, which systematically modify code and update corresponding documentation to satisfy new functional and quality requirements.
 
-\section{Some useful hints}
+In recent years, the deep integration of AI, especially Large Language Models (LLMs), into the software development lifecycle has signaled a significant paradigm shift in software evolution. Empowered by advances in artificial intelligence, intelligent development tools and autonomous agents are increasingly capable of understanding and processing large-scale codebases alongside natural language requirements, while progressively demonstrating higher-level reasoning abilities such as cross-context analysis and complicated problem decomposition. Leveraging these capabilities, AI systems can automate a wide range of labor-intensive and high-complexity tasks, such as code generation, bug fixing, documentation synchronization, and system maintenance, thereby reshaping critical stages of software evolution and enabling complex software systems to achieve continuous iteration and scalable growth at unprecedented speed. Meanwhile, this AI-driven development paradigm introduce new technical pathways for managing long-term software evolution, propelling software engineering beyond human-centered development model toward a new stage characterized by the coexistence of human–AI collaboration and autonomous intelligent.
 
-My figure citation: \fref{fig:demo1}. (command: fref)
+Despite these advances, the application of LLMs in software evolution remains fundamentally constrained by their probabilistic generative nature. Although large-scale parameterization facilitates the emergence of complex reasoning capabilities, LLMs generate outputs based on learned statistical patterns rather than deterministic logic, making it a probabilistic mirage that lacks the deterministic guarantees required for absolute reliability. At the same time, modern software systems have evolved into highly interconnected dependency networks: a project is not only an internal system but also a third-party library for other projects. Allowing AI agents to arbitrarily modify code and documentation is highly risky, may inadvertently introduce new vulnerabilities or disrupt existing functionalities. In this context, even seemingly minor modifications, such as a library upgrade or internal refactoring, can propagate cascading effects that compromise system reliability, security, and maintainability at scale. 
 
-My section citation: \sref{sec:contribution}. (command: sref)
+Consequently, ensuring the reliability and robustness throughout AI-assisted software evolution can be distilled into three interrelated core challenges:
 
-My Chaptere citation: \cref{ch:introduction}. (command: cref)
-
-My Paper citation: \cite{bauschke2011convex}. (notice back reference to page from bibliograph)
-
-My equation citation: \eqref{eq:equ2}. (command: eqref), or cite equation by tag: \eqref{eq:equ1}.
-
-\begin{equation}\label{eq:equ1}
-F(\theta)=\sum_{i=1}^mf_i(\theta) \tag{DOP}
-\end{equation}
-
-\begin{equation}\label{eq:equ2}
-F(\theta)=\sum_{i=1}^mf_i(\theta)
-\end{equation}
-
-\begin{figure}[htbp]
-  \centering
-    \includegraphics[width=0.85\textwidth]{Chapter1/demo1}
-  \caption{An illustration.}
-  \label{fig:demo1}
-\end{figure}
-
-
-
-%----------------------------------------------------------------------------------------
-\section{Major Contributions}\label{sec:contribution}
-Our main contributions can be stated as follows:
 \begin{itemize}
-\item \emph{First part}: My first contributions, several lines
-
-
-\item \emph{Second}: Second contributions, several lines
-
-
-\item \emph{Third name}: 
-Third contributions, several lines
-
+  \item \textbf{How to handle external ecosystem changes?} The lack of high-quality, real-world benchmark data that captures intricate patterns of breaking changes caused by third-party library upgrades limits AI’s ability to understand and solve external dependency risks.
+  \item \textbf{How to preserve internal semantic consistency?} Code and documentation are often updated asynchronously. Since a project simultaneously functions as a third-party dependency for others, its documentation forms the outward semantic interface; internal inconsistencies therefore directly amplify external usage risks.
+  \item \textbf{How to perform intelligent code modification?} Accurate code localization is the prerequisite for all automated modification tasks. However, existing LLM-driven approaches still rely heavily on superficial textual cues rather than deep semantic and logical reasoning over program structure, leading to imprecise identification of modification scopes and degraded evolution quality. 
 \end{itemize}
 
-%----------------------------------------------------------------------------------------
-% SECTION 2
-%----------------------------------------------------------------------------------------
+These three challenges correspond respectively to external adaptation, internal consistency, and reliable execution of evolution, together forming the central bottleneck in AI-enabled software evolution and providing the systematic research motivation and theoretical foundation for this dissertation.
+
+\section{Contributions}\label{sec:contribution}
+
+
 \section{Outline of the Thesis}
-
-\cref{ch:introduction} introduces ...
-
-\cref{ch:literature_review} reviews ...
-
-
-
-More chapters ....
-
-
-....
 
