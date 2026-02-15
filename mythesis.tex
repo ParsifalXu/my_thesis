@@ -53,9 +53,6 @@
 %\usepackage{algpseudocode}
 \usepackage[square, numbers, comma, sort&compress]{natbib} % Use the natbib reference package - read up on this to edit the reference style; if you want text (e.g. Smith et al., 2012) for the in-text references (instead of numbers), remove 'numbers'
 
-% CompSuite specific commands
-\newcommand{\toolcompsuite}{\textsc{CompSuite}\xspace}
-\newcommand{\runner}{\textsc{CompRunner}\xspace}
 
 \makeatletter
 \def\PYG@reset{\let\PYG@it=\relax \let\PYG@bf=\relax%
@@ -157,12 +154,19 @@
 \def\PYGZrb{]}
 \makeatother
 
-
+% CompSuite specific commands
+\newcommand{\toolcompsuite}{\textsc{CompSuite}\xspace}
+\newcommand{\runner}{\textsc{CompRunner}\xspace}
 % MPChecker specific commands
 \newcommand{\toolchecker}{\textsc{MPChecker}\xspace}
 \newcommand{\vanillatool}{\textsc{Vanilla MPChecker}\xspace}
 \newcommand{\fuzzytool}{\textsc{Fuzzy MPChecker}\xspace}
 \newcommand{\Code}[1]{$\mathtt{#1}$}
+% DataLoc specific commands
+\newcommand{\tooldataloc}{\textsc{DataLoc}\xspace}
+\newcommand{\dataset}{\textsc{KA-LogicQuery}\xspace}
+\newcommand{\negset}{\textsc{KA-LogicQuery-Neg}\xspace}
+\newcommand{\souffle}{Soufflé}
 
 \definecolor{dkgreen}{rgb}{0,0.6,0}
 \definecolor{gray}{rgb}{0.5,0.5,0.5}
@@ -190,12 +194,6 @@
 \usepackage[T1]{fontenc}
 
 
-
-% DataLoc specific commands
-\newcommand{\tooldataloc}{\textsc{DataLoc}\xspace}
-\newcommand{\dataset}{\textsc{KA-LogicQuery}\xspace}
-\newcommand{\negset}{\textsc{KA-LogicQuery-Neg}\xspace}
-\newcommand{\souffle}{Soufflé}
 
 \title{\ttitle} % Defines the thesis title - don't touch this
 
