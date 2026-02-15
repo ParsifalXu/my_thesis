@@ -3,8 +3,7 @@
 
 \chapter{Introduction} % Main chapter title
 \chaptermark{Introduction}
-\label{ch:introduction}
-
+\label{ch:chapter1} 
 \section{Motivation}\label{sec:motivation}
 In the context of rapid digital transformation and the accelerated advancement of Artificial Intelligence (AI), software systems have evolved from relatively static artifacts into dynamic entities. To remain effective in the face of changing requirements, technological innovations, and emerging security threats, ongoing modification and extension, collectively known as software evolution, have become an inherent and unavoidable characteristic of modern software engineering. Broadly, software evolution is primarily driven by two forces: \textbf{external adaptation}, which responds to changes in the third-party ecosystem, and \textbf{internal improvement}, which necessitates the synchronous co-evolution of implementation logic (code) and semantic interface (documentation) to satisfy evolving functional and quality requirements.
 
@@ -51,38 +50,38 @@ Central to these solutions is the paradigm of neurosymbolic AI, which serves as 
 ]
 
     \node[chapter_node] (c1) {
-        \textcolor{blue}{\underline{\textbf{Chapter 1}}} \\ 
+        \textcolor{blue}{\hyperref[ch:chapter1]{\underline{\textbf{Chapter 1}}}} \\ 
         Introduction
     };
 
     \node[chapter_node, below=of c1] (c2) {
-        \textcolor{blue}{\underline{\textbf{Chapter 2}}} \\
+        \textcolor{blue}{\hyperref[ch:chapter2]{\underline{\textbf{Chapter 2}}}} \\
         Background and Literature Review
     };
 
     \node[chapter_node, below=1.5cm of c2] (c4) {
-        \textcolor{blue}{\underline{\textbf{Chapter 4}}} \\
+        \textcolor{blue}{\hyperref[ch:chapter4]{\underline{\textbf{Chapter 4}}}} \\
         \textbf{\textsc{MPChecker}:} Multi-parameter \\ 
         Code-Doc Inconsistency Detection\\ 
         \textcolor{blue}{$\bullet$ new approach}
     };
 
     \node[chapter_node, left= of c4] (c3) {
-        \textcolor{blue}{\underline{\textbf{Chapter 3}}} \\
+        \textcolor{blue}{\hyperref[ch:chapter3]{\underline{\textbf{Chapter 3}}}} \\
         \textbf{\textsc{CompSuite}:} A Dataset of Lib-\\ 
         rary Upgrade Incompatibilities\\
         \textcolor{blue}{$\bullet$ new dataset}
     };
 
     \node[chapter_node, right= of c4] (c5) {
-        \textcolor{blue}{\underline{\textbf{Chapter 5}}} \\
+        \textcolor{blue}{\hyperref[ch:chapter5]{\underline{\textbf{Chapter 5}}}} \\
         \textbf{\textsc{DataLoc}:} Neurosymbolic \\ 
         Repo-level Code Localization\\ 
         \textcolor{blue}{$\bullet$ findings \& new framework}
     };
 
     \node[chapter_node, below=1.5cm of c4] (c6) {
-        \textcolor{blue}{\underline{\textbf{Chapter 6}}} \\
+        \textcolor{blue}{\hyperref[ch:chapter6]{\underline{\textbf{Chapter 6}}}} \\
         Conclusion and Future Work
     };
 
@@ -107,7 +106,13 @@ Central to these solutions is the paradigm of neurosymbolic AI, which serves as 
 \end{figure}
 
 
-
 \section{Organization}\label{sec:organization}
+The rest of the thesis is organized as follows:
 
-
+\begin{itemize}
+  \item \hyperref[ch:chapter2]{\underline{\textbf{\cref{ch:chapter2}}}} provides essential background and key concepts necessary for understanding the thesis.
+  \item \hyperref[ch:chapter3]{\underline{\textbf{\cref{ch:chapter3}}}} presents \toolcompsuite, a dataset of real-world library upgrade incompatibilities, detailing its construction, characteristics, and potential applications.
+  \item \hyperref[ch:chapter4]{\underline{\textbf{\cref{ch:chapter4}}}} introduces \toolchecker, a multi-parameter code-documentation inconsistency detection tool, describing its design, implementation, and evaluation on real-world libraries.
+  \item \hyperref[ch:chapter5]{\underline{\textbf{\cref{ch:chapter5}}}} formalizes the keyword shortcut bias in code localization, introduces diagnostic benchmarks, \dataset and \negset, and presents \tooldataloc, a neurosymbolic agent framework for repository-level code localization, along with its evaluation results.
+  \item \hyperref[ch:chapter6]{\underline{\textbf{\cref{ch:chapter6}}}} concludes the thesis by summarizing the contributions, discussing the implications of the findings, and outlining directions for future research in AI-enabled software evolution.
+\end{itemize}

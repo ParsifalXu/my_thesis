@@ -203,7 +203,7 @@
 
 %Your thesis title - this is used in the title and abstract
 %-------------------------------------------------
-\thesistitle{The Greatest Thesis in the World} %
+\thesistitle{Enhancing Software Evolution Reliability through Neurosymbolic Reasoning} %
 %-------------------------------------------------
 \supervisor{Prof. Yi Li} % You supervisor's name - this is used in the title page
 %-------------------------------------------------
