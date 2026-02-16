@@ -1,53 +1,53 @@
-\section{Background}\label{sec:bg-dataloc}
-This section introduces the background on program facts and Datalog that forms the symbolic reasoning component of our framework.
+% \section{Background}\label{sec:bg-dataloc}
+% This section introduces the background on program facts and Datalog that forms the symbolic reasoning component of our framework.
 
-\subsection{Program Facts}
-Program facts are a structured representation of information extracted from source code for the purpose of automated reasoning and analysis. They encode observable properties of a program, such as the existence of entities (e.g., functions, classes, variables), their attributes (e.g., names, locations, modifiers), and relations between them (e.g., containment, calls, inheritance), in a form suitable for systematic querying and inference.
+% \subsection{Program Facts}
+% Program facts are a structured representation of information extracted from source code for the purpose of automated reasoning and analysis. They encode observable properties of a program, such as the existence of entities (e.g., functions, classes, variables), their attributes (e.g., names, locations, modifiers), and relations between them (e.g., containment, calls, inheritance), in a form suitable for systematic querying and inference.
 
-Program facts are derived mechanically from source code through language-specific frontends, typically by parsing the code and traversing intermediate representations such as abstract syntax trees or control-flow graphs. Each extracted fact captures a single, well-defined aspect of the program, and together they provide a precise, machine-readable abstraction of the program’s structure and behavior. Importantly, program facts are \emph{descriptive}: they record what is present in the program, rather than how analyses should be performed.
-
-
-\subsection{Datalog}
-
-Datalog is a declarative logic programming language rooted in first-order logic and database theory. A Datalog specification consists of a set of rules that describe how new facts can be derived from existing ones.
-
-\begin{definition}[Datalog Rule]
-A Datalog rule has the form:
-\begin{equation}
-    R_0(t_1, \dots, t_k) \leftarrow R_1(u_1^{(1)}, \dots, u_{m_1}^{(1)}), \dots, R_n(u_1^{(n)}, \dots, u_{m_n}^{(n)})
-\end{equation}
-where each $R_i$ is a predicate symbol. The atom on the left-hand side is called the \emph{head}, and the atoms on the right-hand side form the \emph{body}.
-Each argument $t_j$ or $u_j^{(i)}$ is either a constant or a variable.
-\end{definition}
-
-The rule is interpreted as follows: for any assignment of variables to constants that makes all body atoms simultaneously true, the corresponding instantiated head atom is also true. Variables thus serve as placeholders that allow a rule to match and relate multiple facts.
-
-\begin{definition}[Datalog Program]
-A Datalog program is a finite set of Datalog rules evaluated over a given set of ground facts. Its semantics is defined as the least fixpoint of rule application: rules are repeatedly applied to derive new ground facts until no further facts can be inferred.
-\end{definition}
-
-Datalog supports recursion and operates under a monotonic, set-based semantics, making it well suited for expressing transitive and structural properties such as reachability, dependency propagation, and hierarchical relations in program analysis.
+% Program facts are derived mechanically from source code through language-specific frontends, typically by parsing the code and traversing intermediate representations such as abstract syntax trees or control-flow graphs. Each extracted fact captures a single, well-defined aspect of the program, and together they provide a precise, machine-readable abstraction of the program’s structure and behavior. Importantly, program facts are \emph{descriptive}: they record what is present in the program, rather than how analyses should be performed.
 
 
+% \subsection{Datalog}
+
+% Datalog is a declarative logic programming language rooted in first-order logic and database theory. A Datalog specification consists of a set of rules that describe how new facts can be derived from existing ones.
+
+% \begin{definition}[Datalog Rule]
+% A Datalog rule has the form:
+% \begin{equation}
+%     R_0(t_1, \dots, t_k) \leftarrow R_1(u_1^{(1)}, \dots, u_{m_1}^{(1)}), \dots, R_n(u_1^{(n)}, \dots, u_{m_n}^{(n)})
+% \end{equation}
+% where each $R_i$ is a predicate symbol. The atom on the left-hand side is called the \emph{head}, and the atoms on the right-hand side form the \emph{body}.
+% Each argument $t_j$ or $u_j^{(i)}$ is either a constant or a variable.
+% \end{definition}
+
+% The rule is interpreted as follows: for any assignment of variables to constants that makes all body atoms simultaneously true, the corresponding instantiated head atom is also true. Variables thus serve as placeholders that allow a rule to match and relate multiple facts.
+
+% \begin{definition}[Datalog Program]
+% A Datalog program is a finite set of Datalog rules evaluated over a given set of ground facts. Its semantics is defined as the least fixpoint of rule application: rules are repeatedly applied to derive new ground facts until no further facts can be inferred.
+% \end{definition}
+
+% Datalog supports recursion and operates under a monotonic, set-based semantics, making it well suited for expressing transitive and structural properties such as reachability, dependency propagation, and hierarchical relations in program analysis.
 
 
-\subsection{Program Facts in Datalog}
-
-In program analysis, program facts are represented in Datalog as \emph{ground predicate instances}. Each predicate schema corresponds to a specific kind of program entity or relation, while each extracted program fact instantiates that schema with concrete constants derived from the source code.
-
-For example, a predicate describing function definitions may be declared as:
-\begin{minted}{prolog}
-.decl function_definition(file_path: symbol, function_name: symbol, start_line: number, end_line: number, param_count: number, is_async: symbol, containing_class: symbol)
-\end{minted}
-
-An extracted function definition in the source code gives rise to a ground fact of this predicate, with all arguments bound to concrete values such as file paths, names, and line numbers.
-
-Datalog rules operate over these ground program facts using variables to range over matching predicate instances. The body of a rule specifies patterns over existing program facts, while the head defines a new fact to be derived whenever the body is satisfied under some variable assignment. Through repeated rule application, Datalog derives higher-level program properties—such as reachability, dependency relations, or structural patterns—from the underlying set of extracted program facts.
-
-This representation cleanly separates \emph{fact extraction}, which records concrete observations about the program, from \emph{logical inference}, which declaratively specifies how additional properties are derived.
 
 
-\subsection{Motivating Example}\label{sec:example-dataloc}
+% \subsection{Program Facts in Datalog}
+
+% In program analysis, program facts are represented in Datalog as \emph{ground predicate instances}. Each predicate schema corresponds to a specific kind of program entity or relation, while each extracted program fact instantiates that schema with concrete constants derived from the source code.
+
+% For example, a predicate describing function definitions may be declared as:
+% \begin{minted}{prolog}
+% .decl function_definition(file_path: symbol, function_name: symbol, start_line: number, end_line: number, param_count: number, is_async: symbol, containing_class: symbol)
+% \end{minted}
+
+% An extracted function definition in the source code gives rise to a ground fact of this predicate, with all arguments bound to concrete values such as file paths, names, and line numbers.
+
+% Datalog rules operate over these ground program facts using variables to range over matching predicate instances. The body of a rule specifies patterns over existing program facts, while the head defines a new fact to be derived whenever the body is satisfied under some variable assignment. Through repeated rule application, Datalog derives higher-level program properties—such as reachability, dependency relations, or structural patterns—from the underlying set of extracted program facts.
+
+% This representation cleanly separates \emph{fact extraction}, which records concrete observations about the program, from \emph{logical inference}, which declaratively specifies how additional properties are derived.
+
+
+\section{Motivating Example}\label{sec:example-dataloc}
 % To demonstrate how the aforementioned definitions are applied to code localization, we consider a practical query designed to identify functions with more than 15 parameters that are not \_\_init\_\_ methods.
 
 \begin{figure}

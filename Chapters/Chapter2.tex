@@ -1,7 +1,7 @@
 %!TEX root=../mythesis.tex
 % Chapter Template
 
-\chapter{background} % Main chapter title
+\chapter{Background} % Main chapter title
 \chaptermark{Background}  % replace the chapter name with its abbreviated form
 \label{ch:chapter2} % Change X to a consecutive number; for referencing this chapter elsewhere, use \ref{ChapterX}
 
@@ -9,5 +9,97 @@
 %-----------------------------------
 % SECTION 1
 %-----------------------------------
+This chapter presents the essential background and terminology used in subsequent chapters.
 
-\section{Software Evolution and Maintenance}
+\section{Neuro-Symbolic AI}
+Symbolic AI focuses on formalized, declarative representations of knowledge through logic and rules, offering high interpretability but struggling with unstructured data. Conversely, Sub-symbolic AI, exemplified by modern deep learning and generative models, learns implicit representations directly from data autonomously. While these methods excel at pattern recognition and scalability, they often lack the explicit logical structures required for rigorous reasoning, transparency, and formal verification~\cite{colelough2025neuro}.
+
+Neuro-symbolic AI draws inspiration from the System 1 and System 2 framework proposed by Kahneman et al.~\cite{kahneman2011thinking}. 
+System 1 is fast, intuitive, and parallel,
+akin to the capabilities of deep learning, while System 2 is slow, deliberate, and sequential, resembling symbolic reasoning. Neuro-symbolic AI seeks to integrate these two approaches to create systems that leverage the strengths of both and ultimately produce a superior hybrid AI model possessing reasoning abilities. In the context of software engineering, neuro-symbolic AI can be applied to tasks such as program analysis, bug detection, and code localization by leveraging both data-driven learning and rule-based reasoning to achieve more accurate and explainable results.
+
+\section{Symbolic Execution and SMT Solvers}
+Symbolic execution is a formal program analysis technique that explores multiple execution paths by treating program inputs as symbolic constants rather than concrete values. Unlike concrete execution, which evaluates a single control-flow path per input, a single symbolic execution represents a class of program behaviors sharing the same execution path. During this process, the execution state is maintained as a functional mapping from program variables to symbolic expressions. For every conditional branch encountered, the analysis identifies the logical conditions necessary to follow different path, accumulating these conditions into a path constraint ($\pi$).
+
+The feasibility of an execution path is determined by Satisfiability Modulo Theories (SMT) solvers like Z3 and CVC5. An SMT solver decides whether there exists a concrete assignment of values to the symbolic constants that satisfies the path constraint $\pi$. If the constraint is Satisfiable (SAT), the solver provides a model (a concrete test case); if it is Unsatisfiable (UNSAT), the path is unreachable and can be pruned.This mechanism highlights a key trade-off: while symbolic execution is generally less exhaustive than abstract interpretation (which often over-approximates to ensure termination), it achieves higher precision. Any error discovered corresponds to a feasible execution path, effectively eliminating false positives that are common in static analysis. 
+
+To bridge the gap between idealized symbolic analysis and real-world program complexity, Concolic Execution (a portmanteau of concrete and symbolic) was introduced. It maintains two simultaneous states: a concrete state tracking actual values, and a symbolic state tracking logical expressions along the same path. The execution typically starts with a random concrete input. As the program runs, the engine records the path constraints. To explore unexplored branches, the engine selects a constraint, negates it, and queries the SMT solver for new concrete inputs. 
+
+
+% To provide deterministic guarantees in software analysis, Symbolic Execution has emerged as a rigorous technique for exhaustive path exploration. Unlike concrete execution, it assigns symbolic values to inputs and accumulates path constraints, which are subsequently resolved by SMT solvers to verify program properties. In the context of this dissertation, symbolic execution functions as the deterministic anchor within our neurosymbolic framework. Specifically, in the analysis of API constraints, it enables the extraction of precise logical predicates from implementation code, serving as a formal baseline to detect semantic drifts and inconsistencies when reconciled with LLM-generated interpretations of natural language documentation.
+
+
+\section{Fuzzy Logic and Fuzzy Constraint Satisfaction}
+Unlike traditional Boolean logic, fuzzy logic~\cite{kosko1993fuzzy} is a multi-valued logic that
+allows for values between 0 and 1 to represent varying degrees of truth, where 0 represents
+absolute false, and 1 represents absolute true.
+The human brain can process vague statements or claims that involve uncertainties or subjective
+judgments, such as ``the weather is hot'', ``that man runs so fast'', or ``she is beautiful''.
+Unlike computers, humans possess common sense, allowing them to reason effectively in situations
+where things are only partially true.
+Fuzzy logic is primarily used to model uncertainty and vagueness, making it highly applicable in
+real-world scenarios where precision may be difficult or impossible to achieve.
+
+A traditional constraint satisfaction problem (CSP)~\cite{brailsford1999constraint} requires all constraints to be fully
+satisfied.
+Constraints are either completely satisfied or unsatisfied, which is why these strict,
+non-fuzzy constraints are referred to as ``\emph{crisp constraints}''.
+An extension of CSP, known as soft CSP~\cite{meseguer2006soft, schiex1992possibilistic}, introduces a distinction between hard
+constraints and soft constraints.
+Hard constraints must be absolutely satisfied, while soft constraints are typically assigned a
+weight or priority, allowing for lower-weighted constraints to be only partially satisfied or even
+unsatisfied under certain conditions during problem-solving.
+Another extension is Fuzzy CSP~\cite{ruttkay1994fuzzy}, which differs from soft constraints in that it
+incorporates fuzzy logic and allows each constraint to be ``partially satisfied'' to a degree,
+quantified by a ``satisfaction degree''.
+This satisfaction degree usually ranges from 0 to 1, indicating the extent to which a constraint is
+fulfilled.
+The goal in fuzzy constraint satisfaction is to find a solution that maximizes satisfaction, rather
+than strictly satisfying all constraints.
+
+
+\section{Program Facts and Datalog}
+Program facts are a structured representation of information extracted from source code for the purpose of automated reasoning and analysis. They encode observable properties of a program, such as the existence of entities (e.g., functions, classes, variables), their attributes (e.g., names, locations, modifiers), and relations between them (e.g., containment, calls, inheritance), in a form suitable for systematic querying and inference.
+
+Program facts are derived mechanically from source code through language-specific frontends, typically by parsing the code and traversing intermediate representations such as abstract syntax trees or control-flow graphs. Each extracted fact captures a single, well-defined aspect of the program, and together they provide a precise, machine-readable abstraction of the program’s structure and behavior. Importantly, program facts are \emph{descriptive}: they record what is present in the program, rather than how analyses should be performed.
+
+
+\subsection{Datalog}
+
+Datalog is a declarative logic programming language rooted in first-order logic and database theory. A Datalog specification consists of a set of rules that describe how new facts can be derived from existing ones.
+
+\begin{definition}[Datalog Rule]
+A Datalog rule has the form:
+\begin{equation}
+    R_0(t_1, \dots, t_k) \leftarrow R_1(u_1^{(1)}, \dots, u_{m_1}^{(1)}), \dots, R_n(u_1^{(n)}, \dots, u_{m_n}^{(n)})
+\end{equation}
+where each $R_i$ is a predicate symbol. The atom on the left-hand side is called the \emph{head}, and the atoms on the right-hand side form the \emph{body}.
+Each argument $t_j$ or $u_j^{(i)}$ is either a constant or a variable.
+\end{definition}
+
+The rule is interpreted as follows: for any assignment of variables to constants that makes all body atoms simultaneously true, the corresponding instantiated head atom is also true. Variables thus serve as placeholders that allow a rule to match and relate multiple facts.
+
+\begin{definition}[Datalog Program]
+A Datalog program is a finite set of Datalog rules evaluated over a given set of ground facts. Its semantics is defined as the least fixpoint of rule application: rules are repeatedly applied to derive new ground facts until no further facts can be inferred.
+\end{definition}
+
+Datalog supports recursion and operates under a monotonic, set-based semantics, making it well suited for expressing transitive and structural properties such as reachability, dependency propagation, and hierarchical relations in program analysis.
+
+
+\subsection{Program Facts in Datalog}
+
+In program analysis, program facts are represented in Datalog as \emph{ground predicate instances}. Each predicate schema corresponds to a specific kind of program entity or relation, while each extracted program fact instantiates that schema with concrete constants derived from the source code.
+
+For example, a predicate describing function definitions may be declared as:
+\begin{minted}{prolog}
+.decl function_definition(file_path: symbol, function_name: symbol, start_line: number, end_line: number, param_count: number, is_async: symbol, containing_class: symbol)
+\end{minted}
+
+An extracted function definition in the source code gives rise to a ground fact of this predicate, with all arguments bound to concrete values such as file paths, names, and line numbers.
+
+Datalog rules operate over these ground program facts using variables to range over matching predicate instances. The body of a rule specifies patterns over existing program facts, while the head defines a new fact to be derived whenever the body is satisfied under some variable assignment. Through repeated rule application, Datalog derives higher-level program properties—such as reachability, dependency relations, or structural patterns—from the underlying set of extracted program facts.
+
+This representation cleanly separates \emph{fact extraction}, which records concrete observations about the program, from \emph{logical inference}, which declaratively specifies how additional properties are derived.
+
+
+

@@ -1,8 +1,6 @@
-\section{Background}\label{sec:bg-mpchecker}
-In this section, we review the essential terminology and background necessary for understanding the
-remainder of the paper.
-
-\subsection{Multi-Parameter Constraints}\label{sec:eg-mpchecker}
+% \section{Motivating Example}\label{sec:bg-mpchecker}
+% In this section, we review the essential terminology and background necessary for understanding the remainder of the paper.
+\section{Multi-Parameter Constraints}\label{sec:eg-mpchecker}
 We use two examples to illustrate inconsistencies between API documentation and the corresponding code
 caused by multi-parameter interdependence.
 Both of them come from open-source Python data science libraries and were successfully
@@ -128,30 +126,30 @@ class SpectralClustering(ClusterMixin, BaseEstimator):
 
 
 
-\subsection{Fuzzy Logic and Fuzzy Constraint Satisfaction}
-Unlike traditional Boolean logic, fuzzy logic~\cite{kosko1993fuzzy} is a multi-valued logic that
-allows for values between 0 and 1 to represent varying degrees of truth, where 0 represents
-absolute false, and 1 represents absolute true.
-The human brain can process vague statements or claims that involve uncertainties or subjective
-judgments, such as ``the weather is hot'', ``that man runs so fast'', or ``she is beautiful''.
-Unlike computers, humans possess common sense, allowing them to reason effectively in situations
-where things are only partially true.
-Fuzzy logic is primarily used to model uncertainty and vagueness, making it highly applicable in
-real-world scenarios where precision may be difficult or impossible to achieve.
+% \subsection{Fuzzy Logic and Fuzzy Constraint Satisfaction}
+% Unlike traditional Boolean logic, fuzzy logic~\cite{kosko1993fuzzy} is a multi-valued logic that
+% allows for values between 0 and 1 to represent varying degrees of truth, where 0 represents
+% absolute false, and 1 represents absolute true.
+% The human brain can process vague statements or claims that involve uncertainties or subjective
+% judgments, such as ``the weather is hot'', ``that man runs so fast'', or ``she is beautiful''.
+% Unlike computers, humans possess common sense, allowing them to reason effectively in situations
+% where things are only partially true.
+% Fuzzy logic is primarily used to model uncertainty and vagueness, making it highly applicable in
+% real-world scenarios where precision may be difficult or impossible to achieve.
 
-A traditional constraint satisfaction problem (CSP)~\cite{brailsford1999constraint} requires all constraints to be fully
-satisfied.
-Constraints are either completely satisfied or unsatisfied, which is why these strict,
-non-fuzzy constraints are referred to as ``\emph{crisp constraints}''.
-An extension of CSP, known as soft CSP~\cite{meseguer2006soft, schiex1992possibilistic}, introduces a distinction between hard
-constraints and soft constraints.
-Hard constraints must be absolutely satisfied, while soft constraints are typically assigned a
-weight or priority, allowing for lower-weighted constraints to be only partially satisfied or even
-unsatisfied under certain conditions during problem-solving.
-Another extension is Fuzzy CSP~\cite{ruttkay1994fuzzy}, which differs from soft constraints in that it
-incorporates fuzzy logic and allows each constraint to be ``partially satisfied'' to a degree,
-quantified by a ``satisfaction degree''.
-This satisfaction degree usually ranges from 0 to 1, indicating the extent to which a constraint is
-fulfilled.
-The goal in fuzzy constraint satisfaction is to find a solution that maximizes satisfaction, rather
-than strictly satisfying all constraints.
+% A traditional constraint satisfaction problem (CSP)~\cite{brailsford1999constraint} requires all constraints to be fully
+% satisfied.
+% Constraints are either completely satisfied or unsatisfied, which is why these strict,
+% non-fuzzy constraints are referred to as ``\emph{crisp constraints}''.
+% An extension of CSP, known as soft CSP~\cite{meseguer2006soft, schiex1992possibilistic}, introduces a distinction between hard
+% constraints and soft constraints.
+% Hard constraints must be absolutely satisfied, while soft constraints are typically assigned a
+% weight or priority, allowing for lower-weighted constraints to be only partially satisfied or even
+% unsatisfied under certain conditions during problem-solving.
+% Another extension is Fuzzy CSP~\cite{ruttkay1994fuzzy}, which differs from soft constraints in that it
+% incorporates fuzzy logic and allows each constraint to be ``partially satisfied'' to a degree,
+% quantified by a ``satisfaction degree''.
+% This satisfaction degree usually ranges from 0 to 1, indicating the extent to which a constraint is
+% fulfilled.
+% The goal in fuzzy constraint satisfaction is to find a solution that maximizes satisfaction, rather
+% than strictly satisfying all constraints.
