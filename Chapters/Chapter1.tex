@@ -4,7 +4,30 @@
 \chapter{Introduction} % Main chapter title
 \chaptermark{Introduction}
 \label{ch:chapter1} 
-\section{Motivation}\label{sec:motivation}
+\section{Preamble}\label{sec:preamble}
+% 软件演进是不可避免的，软件演进以前由人来完成，非常的费力且容易出错，以前有很多帮助软件演进的工作。
+% AI为软件演进带来了新的可能性。另外modern software developement范式也发生了改变。出现了很多AI工具来提升开发者的效率甚至是替代开发者直接参与到软件演进的过程中。coderabbit，AIDE等等。
+% AI在软件开发生命周期的各个阶段都发挥着重要作用，从需求分析、设计、编码、测试到维护和演进，AI工具正在改变软件开发的方式和效率。但是AI的生成式特性和软件系统的复杂性使得AI在软件演进中的应用面临着可靠性和安全性的挑战。AI生成的代码可能包含错误或漏洞，尤其是在处理复杂的软件系统时，这些问题可能会被放大，导致严重的后果。因此，确保AI辅助的软件演进的可靠性和安全性成为一个重要的研究问题。
+% AI的幻觉始终是一个隐患，
+
+% preamble
+% 1.软件演进：介绍什么是软件演进，为什么重要，为什么不可避免
+% 2.软件演进的管理为什么困难 + survey (statistics)
+% 3.AI是什么，AI Agent是什么，AI开始重塑软件开发和软件演进的各个环节。可以介绍AIDE等
+% 4.但是AI事实上缺少严格的逻辑推理和依然依赖概率，这带来了很多新的问题和挑战。
+% 5.过去的研究做了什么努力，数据集上方法上，例如swe-benchmark，以及别的research。
+% 6.本文是为了更好地利用AI的能力并帮助软件更安全更可靠地演进，从external和internal两个方向进行
+% How AI assist software evolution? Gaps identified in this thesis
+% 图：讲解文档，代码，依赖网络 / 开发者是监控重要一环
+% 
+% contribution
+% 以上挑战暴露了AI在处理软件演进过程中的问题：1.AI在处理项目时忽略了其只是一个高度依赖网络中的一个节点，仍然缺少对复杂的依赖关系的理解。AI依赖于训练数据，因此对于library会导致的后果难以预测。2.缺少真正的逻辑推断能力，依然是概率游戏。
+% 我们将站在client的视角将AI-assisted的软件演进的挑战大体分为external和internal。external的难点主要来源于数据的缺乏，训练数据直接影响AI对外部library对client项目的产生影响的理解。因此需要搞定数据。对于AI而言，internal和external的桥梁是documentation，因此需要保持code-documentation的一致性。人作为重要的监控者，文档也是极其重要的接口。对代码进行演进时最重要的前置步骤是代码定位，但是现在的AI真的可以很好地胜任这一过程吗？
+
+
+
+
+
 In the context of rapid digital transformation and the accelerated advancement of Artificial Intelligence (AI), software systems have evolved from relatively static artifacts into dynamic entities. To remain effective in the face of changing requirements, technological innovations, and emerging security threats, ongoing modification and extension, collectively known as software evolution, have become an inherent and unavoidable characteristic of modern software engineering. Broadly, software evolution is primarily driven by two forces: \textbf{external adaptation}, which responds to changes in the third-party ecosystem, and \textbf{internal improvement}, which necessitates the synchronous co-evolution of implementation logic (code) and semantic interface (documentation) to satisfy evolving functional and quality requirements.
 
 The deep integration of AI, especially Large Language Models (LLMs), into the software development lifecycle has signaled a significant paradigm shift in software evolution. Empowered by advances in artificial intelligence, intelligent development tools and autonomous agents are increasingly capable of understanding and processing large-scale codebases alongside natural language requirements, while progressively demonstrating higher-level reasoning abilities such as cross-context analysis and complicated problem decomposition. Leveraging these capabilities, AI systems can automate a wide range of labor-intensive and high-complexity tasks, such as code generation, bug fixing, documentation synchronization, and system maintenance, thereby reshaping critical stages of software evolution and enabling complex software systems to achieve continuous iteration and scalable growth at unprecedented speed. Meanwhile, this AI-driven development paradigm introduces new technical pathways for managing long-term software evolution, propelling software engineering beyond human-centered development model toward a new stage characterized by the coexistence of human–AI collaboration and autonomous intelligence.

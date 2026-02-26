@@ -19,7 +19,7 @@ The first example comes from \texttt{statsmodels}~\cite{github:statsmodels}, whi
 complement to \texttt{scipy} for statistical computations including descriptive statistics and
 estimation and inference for statistical models.
 \texttt{Statsmodels} has more than 10K stars on GitHub and is actively maintained.
-\cref{fig:eg1} illustrates an inconsistency caused by an explicit constraint from the class
+\fref{fig:eg1} illustrates an inconsistency caused by an explicit constraint from the class
 \textit{AutoReg}.
 The relevant portions for the \emph{doc-} and \emph{code-constraints} are highlighted.
 As mentioned in the documentation of \texttt{deterministic}, the trigger condition for the warning
@@ -63,7 +63,7 @@ class AutoReg(tsa_model.TimeSeriesModel):
 The second example comes from \texttt{scikit-learn}~\cite{github:scikit}, which is a widely-used
 (more than 60K stars on GitHub) open-source ML library in Python, designed to offer simple
 and efficient tools for data mining and data analysis.
-\ref{fig:eg2} displays an inconsistency caused by an implicit constraint from the class
+\fref{fig:eg2} displays an inconsistency caused by an implicit constraint from the class
 \textit{SpectralClustering}.
 It is evident that the highlighted part of the documentation only explicitly mentions one parameter
 \textit{affinity}, omitting the subject ``gamma''.
@@ -80,10 +80,10 @@ For this type of implicit constraint, traditional pattern-based approaches are n
 the \emph{doc-constraint} correctly, thus fail to detect the inconsistencies.
 To solve this issue, we design a customized constraint that incorporates fuzzy words, and adopt
 few-shot learning to teach LLMs how to generate such constraints (details in
-\cref{sec:llm-mpchecker}).
+\sref{sec:llm-mpchecker}).
 In this case, the \emph{doc-constraint} should be \textit{``(affinity = "nearest\_neighbors") $\rightarrow$
 (ignore(gamma))''}, where a special predicate \textit{``ignore(x)''} is used to indicate that a parameter
-\textit{x} is ignored (see \cref{sec:fuzzword-mpchecker}).
+\textit{x} is ignored (see \sref{sec:fuzzword-mpchecker}).
 
 
 \begin{figure*}[t]

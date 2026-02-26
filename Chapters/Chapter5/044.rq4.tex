@@ -1,5 +1,5 @@
 \subsubsection{Ablation Study}\label{sec:ablation-dataloc}
-We design an ablation study to quantify how two mechanisms detailed in~\cref{sec:method:val-dataloc} and \cref{sec:method:int-dataloc} improve the quality of LLM-generated Datalog program.
+We design an ablation study to quantify how two mechanisms detailed in \sref{sec:method:val-dataloc} and \sref{sec:method:int-dataloc} improve the quality of LLM-generated Datalog program.
 
 %where ``quality'' encompasses (i) executability (passing parsing and evaluation), (ii) result usefulness (avoiding silent empty outputs caused by mistakes), and (iii) convergence efficiency (reaching a working query with fewer LLM iterations).
 
@@ -67,7 +67,7 @@ We compare  (i) execution success rate and non-empty result rate, (ii) mean LLM 
   \textbf{Time} reports the mean end-to-end wall-clock time per query, including failed attempts and tool feedback.
 \end{table}
 
-\ref{tab:ablation} summarizes the ablation results under two different LLMs, comparing the baseline system with progressively enabled mechanisms.
+\tref{tab:ablation} summarizes the ablation results under two different LLMs, comparing the baseline system with progressively enabled mechanisms.
 The results show that validation and repair (VAL) substantially improves the quality of LLM-generated Datalog for both models, with a markedly stronger effect on Qwen3 Max than on Claude 3.5 Sonnet. This difference is expected given the models' baseline capabilities: without VAL, Qwen3 Max exhibits a significantly lower execution success rate due to its weaker ability to consistently produce syntactically correct \souffle{} Datalog, whereas Claude already achieves a relatively high baseline level of syntactic validity.
 
 For Qwen3 Max, enabling VAL leads to a dramatic improvement across nearly all metrics. The non-empty result rate increases from 49\% to 75\%, indicating that a large fraction of previously failing or unproductive queries were recoverable once parser-gated validation and conservative repairs were applied. At the same time, the average end-to-end execution time drops sharply from 427 seconds to 104 seconds, reflecting a reduction in wasted iterations caused by unrecoverable parser errors and repeated failed executions. Improvements are also reflected in downstream task quality: function-level correctness metrics show substantial gains, with precision increasing from 18\% to 50\%, demonstrating that VAL does not merely enable execution but also materially improves the semantic adequacy of the resulting queries.

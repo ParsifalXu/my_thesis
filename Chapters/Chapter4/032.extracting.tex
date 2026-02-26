@@ -60,7 +60,7 @@ def fit(sample_weight, strategy, call__check_sample_weight):
     \vspace{-5pt}
 \end{figure*}
 
-We will use an example depicted in Figure~\ref{fig:extractpath} to illustrate the entire extraction phase, containing a simplified original source code and modified code from a popular data science project \texttt{scikit-learn}, and its corresponding path constraints. The \textit{fit} function is a member function within a class, and thus member variables such as ``self.strategy'' also exist within the code. We also modified ``None'' as a string to make it easier to be captured, since it is represented as a number 0 during symbolic execution. Our tool first modifies the code and replaces exception handling and external function calls with symbolic inputs, marked as ``ERROR\_END'' and ``call\_'', respectively. For those paths whose final states are ``ERROR\_END'', the final results of the conjunction of the documentation constraint and these paths will be negated during reasoning phase.
+We will use an example depicted in \fref{fig:extractpath} to illustrate the entire extraction phase, containing a simplified original source code and modified code from a popular data science project \texttt{scikit-learn}, and its corresponding path constraints. The \textit{fit} function is a member function within a class, and thus member variables such as ``self.strategy'' also exist within the code. We also modified ``None'' as a string to make it easier to be captured, since it is represented as a number 0 during symbolic execution. Our tool first modifies the code and replaces exception handling and external function calls with symbolic inputs, marked as ``ERROR\_END'' and ``call\_'', respectively. For those paths whose final states are ``ERROR\_END'', the final results of the conjunction of the documentation constraint and these paths will be negated during reasoning phase.
 
 
 
@@ -80,13 +80,13 @@ documentation~\cite{dvivedi2024comparative}.
 \textbf{Prompt Design} Because the constraint extraction task is relatively complex and can be
 broken down into clear steps, we apply the chain-of-thought approach~\cite{wei2024cot}, which has
 been widely proven effective in improving GPT-based model performance. We first divide the prompt
-task into two steps, document input and constraint extraction. Figure~\ref{fig:prompt} shows the
+task into two steps, document input and constraint extraction. \fref{fig:prompt} shows the
 structure and some details of the used prompt.
 Below, we detail our prompt mechanism for each step.
 
 \textbf{Document Input Prompt}
 We observe that some documentation may be too lengthy to provide to GPT-4 in a single input, considering that GPT-4 has a maximum token length limit of 8,192 tokens~\cite{modeltoken}. We also find that LLMs exhibit lower performance when dealing with long and complex text inputs as noted in previous research~\cite{han2024lm, jin2024llm}. Thus, we decide to segment the lengthy documents into smaller sections. To determine a heuristic chunk size, we randomly select ten lengthy Python documentation files, split them into chunks of varying word lengths, and use these as inputs for GPT-4. We then evaluate the constraint extraction task performance of GPT-4 based on these inputs to determine which chunk size yields better results. Based on our findings, we decide to standardize the chunk size to 1,500 words (around 2,048 tokens~\cite{tokencount}).
-We also input the parameter list obtained in Section~\ref{sec:preprocess-mpchecker} into GPT-4 to help model better recognize the information related to parameters. The details of the document input prompt are shown in Prompt 1 in Figure~\ref{fig:prompt}.
+We also input the parameter list obtained in \sref{sec:preprocess-mpchecker} into GPT-4 to help model better recognize the information related to parameters. The details of the document input prompt are shown in Prompt 1 in \fref{fig:prompt}.
 
 \textbf{Constraint Extraction Prompt}
 For the constraint extraction task, our prompt is divided into three parts to guide GPT-4 in recognizing text related to constraints in the original documentation, and then, based on that text, to generate a formatted logical expression of the constraint.

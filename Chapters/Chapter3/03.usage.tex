@@ -9,7 +9,7 @@ checkpoints in the version histories of the client projects and
 provided tags that guide users to explore any incompatibility issues
 present in the \toolcompsuite dataset.
 
-As illustrated on the right-hand side of \cref{fig:architecture}, our
+As illustrated on the right-hand side of \fref{fig:architecture}, our
 approach to handling incompatible client-library pairs involved
 creating a fork~\cite{gitfork} of the original client project for each
 identified pair, while preserving all code and version history
@@ -23,13 +23,13 @@ identified as $V_{incomp}$. Notably, the only difference between
 $V_{base}$ and $V_{incomp}$ lies in the library version used: the old
 (compatible) version is utilized on $V_{base}$ while the new
 (incompatible) version is utilized on $V_{incomp}$. For instance, in
-\cref{fig:architecture}, the client project employs version 2.2.1 of
+\fref{fig:architecture}, the client project employs version 2.2.1 of
 the \Code{org.restlet.jse-org.restlet} library on its $V_{base}$ and
 version 3.0-M1 on its $V_{incomp}$. In cases where multiple libraries
 exhibit incompatibility issues in the client project, we not only create different branches for each library with its name, but also generate a
 $V_{incomp}$ version tag for each, with accompanying annotations that
 denote the corresponding library name and version, as depicted in
-\cref{fig:architecture}.
+\fref{fig:architecture}.
 
 
 The $V_{incomp}$ tag for each client-library pair also specifies the

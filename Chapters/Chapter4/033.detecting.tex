@@ -6,11 +6,11 @@ In the second phase, we extracted constraints from both documentation and code. 
 The reasoner offers two strategies, from relaxed to strict, to identify inconsistencies from the perspectives of satisfiability and equivalence. Given a \emph{doc-constraint} $c$ and a \emph{code-constraint} set $P$ containing a group of path constraints $p$, the detection strategies are defined as follows:
 \begin{itemize}
 	\item \textbf{Unsatisfiability} checking determines whether the \emph{doc-constraint} $c$ is unsatisfiable under all path constraints. If the conjunction of $c$ and every path constraint $p$ is unsatisfiable, it indicates a contradictory inconsistency, meaning that under all possible execution paths, the code violates the constraint stipulated in the documentation.
-	\begin{equation}\label{eq: uq1}
+	\begin{equation}\label{eq:uq1}
 		\forall p \in P, \neg (c \wedge p)
 	\end{equation}
 	\item \textbf{Nonequivalence} checking determines whether the \emph{doc-constraint} $c$ and \emph{code-constraints} are logically equivalent. If equivalence holds only under specific conditions, a behavioral inconsistency may arise, implying that the constraints implemented in the code are not fully equivalent to the documentation.
-	\begin{equation}\label{eq: uq3}
+	\begin{equation}\label{eq:uq3}
 		\exists p \in P, \neg (c \Leftrightarrow p)
 	\end{equation}
 \end{itemize}
@@ -21,9 +21,9 @@ For constraints containing sub-constraints that do not exist in the code logic, 
 
 \subsubsection{Fuzzy Words}\label{sec:fuzzword-mpchecker}
 
-The example from~\cref{sec:eg2-mpchecker} illustrates a very typical implicit constraint with fuzzy words, where part of constraint is clearly defined while others remain uncertain. We introduce a series of fuzzy words to help LLM extract constraints better. These fuzzy words frequently appear in documentation but don't represent specific values, making it challenging for the LLM to extract them directly. We generally categorize these fuzzy words into two types: \textit{existence} and \textit{non-existence}. In fuzzy words, \textit{non-existence} includes ``ignore'', ``no effect'', ``unused'', ``override'', indicating that a parameter either is unused or does not exist within code segments where other conditions are met. Similarly, \textit{existence} includes ``specify'', ``have an effect'', ``exist'', ``significant'', indicating that the parameter is used or exists when other conditions are met.
+The example from \sref{sec:eg2-mpchecker} illustrates a very typical implicit constraint with fuzzy words, where part of constraint is clearly defined while others remain uncertain. We introduce a series of fuzzy words to help LLM extract constraints better. These fuzzy words frequently appear in documentation but don't represent specific values, making it challenging for the LLM to extract them directly. We generally categorize these fuzzy words into two types: \textit{existence} and \textit{non-existence}. In fuzzy words, \textit{non-existence} includes ``ignore'', ``no effect'', ``unused'', ``override'', indicating that a parameter either is unused or does not exist within code segments where other conditions are met. Similarly, \textit{existence} includes ``specify'', ``have an effect'', ``exist'', ``significant'', indicating that the parameter is used or exists when other conditions are met.
 
-We implement several specialized predicates to evaluate such implicit constraints. \toolchecker will first trace the target variable's define-use chain (DU-chain)~\cite{kennedy1978use, harrold1994efficient} and then check if the definition and usage of it are existed or not under a specific program path. For instance, ``\texttt{exist(x)}'' will check if the definition and usage of a variable \texttt{x} are existed in the program path with other explicit conditions. If found, it will return \texttt{True}; otherwise, it will return \texttt{False}. Similarly, ``\texttt{ignore(x)}'' will check whether the definition and usage of \texttt{x} are absent under the program path with given explicit conditions. It can be further extended to check weak \emph{doc-constraints}. Like the example in~\cref{sec:eg2-mpchecker}, \textit{gamma} will be ignored not only when \texttt{``affinity$=$nearest\_neighbors''} but also ignored when \texttt{``affinity$=$precomputed\_nearest\_neighbors''} as well as \texttt{``affinity$=$precomputed''}.
+We implement several specialized predicates to evaluate such implicit constraints. \toolchecker will first trace the target variable's define-use chain (DU-chain)~\cite{kennedy1978use, harrold1994efficient} and then check if the definition and usage of it are existed or not under a specific program path. For instance, ``\texttt{exist(x)}'' will check if the definition and usage of a variable \texttt{x} are existed in the program path with other explicit conditions. If found, it will return \texttt{True}; otherwise, it will return \texttt{False}. Similarly, ``\texttt{ignore(x)}'' will check whether the definition and usage of \texttt{x} are absent under the program path with given explicit conditions. It can be further extended to check weak \emph{doc-constraints}. Like the example in \sref{sec:eg2-mpchecker}, \textit{gamma} will be ignored not only when \texttt{``affinity$=$nearest\_neighbors''} but also ignored when \texttt{``affinity$=$precomputed\_nearest\_neighbors''} as well as \texttt{``affinity$=$precomputed''}.
 
 
 
@@ -50,7 +50,7 @@ In our case, a constraint needs to be measured on a new scale, assessing ``how l
 extracted \emph{doc-constraint} conforms to the \emph{code-constraints}.
 Therefore, we introduced a unique similarity computation which serves as the membership function.
 
-\cref{fig:ebnf} shows an EBNF grammar for our multi-parameter constraints.
+\fref{fig:ebnf} shows an EBNF grammar for our multi-parameter constraints.
 A multi-parameter constraint is a combination and nesting of binary expressions and Boolean
 operators, which can be viewed as a complete binary tree where leaf nodes are binary expressions
 over single parameters and non-leaf nodes are logical operators connecting them.
@@ -93,7 +93,7 @@ The similarity between two expressions are considered separately for the paramet
 values appeared in the expressions.
 Both $p$ and $v$ can be treated as texts, therefore, Levenshtien Distance (a.k.a.
 edit distance) is used to represent their similarity.
-The normalized Levenshtien Distance (NLD) is given in \cref{eq:ld}, where $s$ denotes strings ($p$
+The normalized Levenshtien Distance (NLD) is given in \eref{eq:ld}, where $s$ denotes strings ($p$
 or $v$) and $|s|$ denotes the length of it.
 
 \begin{equation}\label{eq:ld}
@@ -108,7 +108,7 @@ or $v$) and $|s|$ denotes the length of it.
     cos\theta(\bowtie_1, \bowtie_2) = \frac{\delta_{\bowtie_1} \cdot \delta_{\bowtie_2}}{\|\delta_{\bowtie_1}\| \|\delta_{\bowtie_2}\|}
 \end{equation}
 
-As illustrated in \cref{eq:embedding}, we design an operator embedding across five key dimensions: \underline{\textbf{C}}omparison, \underline{\textbf{E}}quality, \underline{\textbf{G}}reater than, \underline{\textbf{L}}ess than, and \underline{\textbf{N}}egativity.
+As illustrated in \eref{eq:embedding}, we design an operator embedding across five key dimensions: \underline{\textbf{C}}omparison, \underline{\textbf{E}}quality, \underline{\textbf{G}}reater than, \underline{\textbf{L}}ess than, and \underline{\textbf{N}}egativity.
 This way, we may calculate the similarity between two operators by simply calculating the cosine
 similarity between two vectors.
 The result is highly intuitive. For example, with $\delta_{<} = (1, 0, 0, 1, 0)$, $\delta_{>} =
@@ -118,7 +118,7 @@ is 0.5, while the similarity between ``$<$'' and ``$<=$'' is 0.82.
 The weight of operator similarity is set as $\beta$ such that the weights of operators, values, and
 parameters within a given experssion should sum to one.
 Thus, we have $\alpha = \frac{1 - \beta}{2}$ and the similarity $\sigma$ of two single parameter
-expressions (i.e., atomic constraint) can be calculated according to \cref{eq:simexpr}.
+expressions (i.e., atomic constraint) can be calculated according to \eref{eq:simexpr}.
 
 
 \begin{definition}[Constraint Similarity]
@@ -162,8 +162,8 @@ expression $e$ has been replaced by its cloest counterpart from $\Phi_\Omega$.
 \end{definition}
 
 The inconsistency between the modified constraint $\epsilon[e \mapsto e_{\Phi_\Omega}]$ and
-$\Omega$ is then evaluated (according to \cref{eq: uq1} or
-\cref{eq: uq3}), yielding a binary result (\texttt{True} or \texttt{False}).
+$\Omega$ is then evaluated (according to \eref{eq:uq1} or
+\eref{eq:uq3}), yielding a binary result (\texttt{True} or \texttt{False}).
 To enable the probabilistic interpretation, a linear transformation
 ensures complementary probabilities. For instance, ``0.7$\cdot$False = 0.3$\cdot$True'', indicating
 a 70\% probability of inconsistency or a 30\% probability of consistency.

@@ -1,3 +1,33 @@
+\section{Client-specific Upgrade Incompatibility}
+In this section, we delve deeper into the issue of client-specific upgrade incompatibilities.
+
+Modern complex software systems are typically composed of components developed by multiple teams or even distinct organizations. These components continuously evolve throughout their lifecycle. Because developers often lack comprehensive understanding of changes happened in external components, ensuring that a new dependency upgrade will not introduce compatibility issues into an existing system remains a significant challenge.
+
+A primary reason for this difficulty is that third-party component specifications are generally limited to descriptions of their Application Programming Interfaces (APIs). Even when an upgrade does not modify APIs, it may still introduce behavioral changes that compromise the stability of dependent client applications~\cite{rubin2016challenges}. Such behavioral incompatibilities are particularly problematic because they are often undetectable through static analysis.
+
+Empirical studies highlight both the prevalence and severity of this problem. A study examining 408 sampled open-source Java projects reported that 202 of them experienced failures following library upgrades, with 41.3\% of these failures manifesting as runtime test failures that could not be caught by the compiler~\cite{gyori2018evaluating}. These incompatibilities are hard to identify statically, and there is no straightforward and easy way to evaluate their ripple effects on the entire system. Consequently, managing third-party software package upgrades is a daunting task, and many developers avoid it as much as possible due to the associated risks and costs. Another empirical study indicates that 81.5\% of surveyed systems retain outdated dependencies~\cite{kula2018developers}. With respect to security patches, 69\% of interviewed developers reported being unaware of vulnerabilities in the libraries they use. Furthermore, due to the additional efforts and responsibilities associated with upgrading, developers are often reluctant to perform upgrades. This hesitation raises serious security concerns and may leave their systems vulnerable to zero-day attacks. In the context of expanding reliance on AI-assisted development tools, these issues may intensify and become progressively harder to manage.
+
+The decision of whether to upgrade thus becomes a practical dilemma. Fundamentally, an \emph{upgrade incompatibility issue} arises from a mismatch between two independently evolved software entities: the client and the library. compatibility checking has been extensively studied from multiple perspectives. Existing approaches can be categorized based on two dimensions: (1) whether they are target client developers or not (i.e. \emph{client-oriented}), and (2) whether they treat different client applications separately when considering the impacts from a library upgrade (i.e. \emph{client-specific}). 
+
+As shown in \fref{fig:cs-example}, the example illustrates a client-specific incompatibility issue. The function \texttt{lib(s1, s2)} is a library function that takes two input parameters (\texttt{s1} and \texttt{s2}) and returns their longest common substring. In the upgraded version (v1), \texttt{lib(s1, s2)} returns \texttt{null} when the two inputs share no common substring, whereas in the original version (v0), it returns an empty string (\texttt{""}) under the same condition. Such a change may cause a behavioral incompatibility in Client A (potentially triggering a \texttt{NullPointerException}), while Client B is not affected. 
+
+% A client-agnostic technique would miss the subtlety and raise a false alarm for ClientB.
+
+\begin{figure*}[ht]
+  \setlength{\abovecaptionskip}{5pt}
+  \setlength{\belowcaptionskip}{0pt}
+  \centering
+  \includegraphics[width=0.6\textwidth]{Figures/Chapter3/example.pdf}
+  \caption{A client-specific incompatibility issue.}
+  \label{fig:cs-example}
+\end{figure*}
+
+Client-oriented techniques are designed from the perspective of client developers and aim to provide information and actionable insights regarding detected incompatibilities. For instance, the smart alert mechanism~\cite{wang2020empirical} raises an alarm when a library upgrade may affect existing functionality. Framework and API migration techniques, such as AURA~\cite{wu2010aura}, generate transformation rules that map target API methods in earlier versions to their corresponding replacement methods in newer versions. In constrast, library-oriented techniques, such as DeBBI~\cite{chen2020taming}, focus on assisting library developers in improving testing and code quality, thereby reducing the likelihood of introducing breaking changes that affect downstream clients upon release.
+
+It is worth noting that not all client-oriented techniques are truly client-specific. For instance, package compatibility analysis tools such as Dependabot~\cite{dependabot} and GemChecker~\cite{cleare2018gemchecker} provide upgrade recommendations based on historical records of dependency failures. While these approaches benefit from empirical insights derived from prior upgrade incidents, their definitions of compatibility are too generic. They do not incorporate information about how specific client projects actually interact with the upgraded libraries. 
+
+By contrast, Regression testing~\cite{yoo2012regression} operates within the specific context of a given client application and can used to validate modifications to client-side code. Nevertheless, regression testing frequently fails to identify incompatibilities that arise from library upgrades. This shortcoming stems from the fact that regression testing suites are constructed by client developers, who often lack comprehensive knowledge about library modifications. 
+
 \section{Dataset Creation}\label{creation}
 
 In this section, we outline the methodology and process employed to
@@ -55,7 +85,7 @@ issues arising from test executions. Since Maven projects typically rely on Mave
 centralized repository for hosting and downloading libraries, the process of obtaining and managing
 libraries in our dataset is simplified.
 
-\cref{client-library} presents the top 5 client projects and libraries in the \toolcompsuite dataset, ranked by popularity. For
+\tref{client-library} presents the top 5 client projects and libraries in the \toolcompsuite dataset, ranked by popularity. For
 each client project, we provide information on its lines of code (LoC)
 and the number of stars it has received on GitHub, while for each
 library, we include its number of usages by other projects from Maven Central.
@@ -99,8 +129,8 @@ be executed and whose executions can be reproduced.
 
 
 We collected the data following the below procedures.
-\cref{fig:architecture} visualizes the overall architecture of \toolcompsuite.
-In the upper left portion of \cref{fig:architecture}, we
+\fref{fig:architecture} visualizes the overall architecture of \toolcompsuite.
+In the upper left portion of \fref{fig:architecture}, we
 illustrate the approach taken by \toolcompsuite to identify incompatibilities
 between a client project and its dependent libraries. Specifically,
 for each client project on its base version, we upgraded each of its
@@ -162,7 +192,7 @@ most representative and easy to comprehend.
 
 Finally, we persisted the metadata of all the selected incompatibility
 issues in a collection of \Code{json} files.
-\cref{fig:json} presents the metadata of an incompatibility
+\fref{fig:json} presents the metadata of an incompatibility
 issue in the \toolcompsuite dataset. The data schema includes the ID of the
 issue, client project name, SHA of the client base version, URL of the
 client project, library name, versions of the old and new libraries,
@@ -172,5 +202,5 @@ the test. The majority of the information is
 self-explanatory. However, it is worth noting that the old version of
 the library is the one utilized at the base version of the client,
 while the new version is the most recent version found on Maven
-Central that triggers the incompatibility when upgrading, as described in \cref{sec:data:collect-compsuite}.
+Central that triggers the incompatibility when upgrading, as described in \sref{sec:data:collect-compsuite}.
 

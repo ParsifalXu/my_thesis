@@ -204,7 +204,7 @@
 \usepackage{fancybox}
 \usepackage[most]{tcolorbox}
 \usepackage{tikz}
-\usetikzlibrary{arrows.meta, positioning, calc}
+\usetikzlibrary{arrows.meta, positioning, calc, fit}
 
 \newtcolorbox{stepbox}[2][]{
     enhanced,
@@ -263,15 +263,20 @@
 
 \thesisdeclareAuthorship{This thesis contains material from two published peer-reviewed conference papers and one completed manuscript under review, all of which I am listed as an author.}
 {
-	Chapter 4 is published as {\color{blue}Xiufeng Xu, Chenguang Zhu, and Yi Li. Compsuite: A dataset of java library upgrade incompatibility issues. In International Conference on Automated Software Engineering. 2023. DOI: 10.1109/ASE56229.2023.00127.}
+	Chapter 3 contains material from two publications:
+
+    {\color{blue}Chenguang Zhu, Mengshi Zhang, Xiuheng Wu, Xiufeng Xu, and Yi Li. Client-specific upgrade compatibility checking via knowledge-guided discovery. ACM Transactions on Software Engineering and Methodology (TOSEM). 2023. DOI: 10.1145/3582569.}
+
+    {\color{blue}Xiufeng Xu, Chenguang Zhu, and Yi Li. Compsuite: A dataset of java library upgrade incompatibility issues. In International Conference on Automated Software Engineering (ASE). 2023. DOI: 10.1109/ASE56229.2023.00127.}
 	
 	The contributions of the co-authors are as follows:
 	\begin{itemize}[topsep=1pt,itemsep=1pt,partopsep=1pt, parsep=1pt]
+        \item Prof. Yi Li and Dr. Chenguang Zhu proposed the topics, supervised the projects, and revised both manuscripts.
 		\item Prof. Yi Li and Dr. Chenguang Zhu proposed the topic and provided insightful comments on the methodology and experiment design.
 		\item I constructed the dataset, designed and implemented the tool, performed the experiments, analyzed the data and drafted the manuscript.
 	\end{itemize}
 
-	Chapter 5 is published as {\color{blue}Xiufeng Xu, Fuman Xie, Chenguang Zhu, Guangdong Bai, Sarfraz Khurshid, and Yi Li. Identifying Multi-parameter Constraint Errors in Python Data Science Library API Documentation. In Proceedings of the ACM on Software Engineering. 2025. DOI: 10.1145/3728945.}
+	Chapter 4 is published as {\color{blue}Xiufeng Xu, Fuman Xie, Chenguang Zhu, Guangdong Bai, Sarfraz Khurshid, and Yi Li. Identifying Multi-parameter Constraint Errors in Python Data Science Library API Documentation. In Proceedings of the ACM on Software Engineering (ISSTA). 2025. DOI: 10.1145/3728945.}
 	
 	The contributions of the co-authors are as follows:
 	\begin{itemize}[topsep=1pt,itemsep=1pt,partopsep=1pt, parsep=1pt]
@@ -281,7 +286,7 @@
 		\item Prof. Sarfraz Khurshid and Prof. Guangdong Bai provided insightful comments on the methodology design.
 	\end{itemize}
 
-	Chapter 6 is from a completed paper under review.
+	Chapter 5 is from a completed paper under review.
 	
 	The contributions of the co-authors are as follows:
 	\begin{itemize}[topsep=1pt,itemsep=1pt,partopsep=1pt, parsep=1pt]
@@ -301,11 +306,24 @@
 
 \acknowledgements{\addtocontents{toc}{\vspace{0.8em}} % Add a gap in the Contents, for aesthetics
 
+% 这是我的人生到目前为止最令人惊喜的一段人生体验，尽管它并不容易，它开始于一个少年的迷茫的路口，结束在明媚的赤道阳光之下。
+% 读博的这段旅程充满了挑战和收获，我想借此机会感谢所有在这段旅程中给予我支持和帮助的人们。
+
+% 首先，我要感谢我导师李一教授的悉心指导和无私支持。Lei Ma
+% Chenguang zhu
+% 合作者们和同学们，高jianbo师兄，新加坡校友会的各位，合唱团的大家
+% Ming Lei，zhidong zhang以及我所教导的小朋友们
+% uncle wu
+% girl friend Heyang Xu
+% 我要感谢我的家人们，
+
 I wish to express my greatest gratitude to my advisor.
 
-% \begin{flushright}
-% \emph{Jinming Xu, December 2015}
-% \end{flushright}
+\begin{flushright}
+Xiufeng Xu \\
+Singapore \\
+February 2026
+\end{flushright}
 }
 
 %----------------------------------------------------------------------------------------
