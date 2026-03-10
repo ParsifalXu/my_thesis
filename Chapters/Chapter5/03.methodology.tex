@@ -35,14 +35,14 @@ The workflow begins with performing a preliminary analysis to extract the core t
 \subsubsection{Synthesize-Check-Refine Loop}
 As shown in the red box in the \fref{fig:arch}, before execution, \tooldataloc follows a \textit{synthesize-check-refine} loop to mitigate the impact of hallucinations and improve the executability of LLM-generated Datalog programs. It mainly contains two critical, feedback-driven phases (Details in \sref{sec:method:val-dataloc} and \sref{sec:method:int-dataloc}): (1) \textit{Syntax correction}. Each synthesized program will undergo a parser-gated validation to ensure syntactic well-formedness. Our workflow adopts a \emph{best-effort repair, then fallback} strategy: unambiguous cases are handled via conservative rule-based fixes, revalidated with \souffle’s parser, and all other cases return error feedback to the LLM.restructuring. (2) \textit{Intermediate-rule diagnosis}. We instrument the program to track row counts of intermediate relations, thereby identifying rules that produce empty results. Using controlled, mutation-based probing, we differentiate fragile-empty relations caused by over-constraints from stable-empty relations that reflect inherent dataset properties. These feedbacks help the model refine the generated program and ensure its quality before it reaches the inference engine. Validated programs are then executed through \texttt{exec\_dl} tool to generate a list of candidates. Excessive locations are treated as failures, triggering refinement with stricter constraints to reduce noise and improve precision.
 
+\begin{landscape}
 \begin{figure}[t]
 	\centering
-	\includegraphics[width=\textwidth]{Figures/Chapter5/architecture.pdf}
+	\includegraphics[width=\linewidth]{Figures/Chapter5/architecture.pdf}
 	\caption{Overview of \tooldataloc framework}
 	\label{fig:arch}
 \end{figure}
-
-
+\end{landscape}
 
 % Programs undergo an initial syntactic parsing where simple errors are auto-corrected and ambiguous ones trigger an immediate return to the LLM. Survivors then proceed to semantic checks targeting Soufflé-specific constraints, with feedback provided for uncertain cases.
 
