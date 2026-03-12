@@ -37,24 +37,12 @@ Based on the architecture of Transformer, PLMs have branched into three main cat
 
 Guided by scaling laws~\cite{kaplan2020scaling}, model performance improves consistently as model parameters, computational budgets, and data size increase. This growth facilitates the emergence of advanced capabilities, such as zero-shot and few-shot learning, which typically absent in smaller models below a certain scale. Brown et al.~\cite{brown2020language} observed that few-shot performance improves more rapidly as model size increases compared to zero-shot performance, highlighting that larger models possess stronger in-context learning capabilities.
 
-% schulhoff2024prompt
-
-% Users interact with the LLM through prompts. By designing and optimizing input prompts to maximize LLM performance, users can guide the model to generate more accurate, relevant, and useful outputs.
+To effectively harness the emergent capabilities of LLMs, \textit{Prompt Engineering} has become a critical discipline to guide the model's output distribution toward desired outcomes. Much of its efficacy is rooted in \textit{In-context learning (ICL)}~\cite{schulhoff2024prompt}, which allows the model to learn from examples or instructions embedded in the prompt without updating weights. Many prompting techniques have been proposed to enhance the performance of LLMs~\cite{sahoo2024systematic}: (1) \textit{Few-shot prompting} provides the model with a limited number of input-output examples as context, helping it induce an understanding of the given task, recognize task-relevant patterns and respond in appropriate formats. (2) \textit{Zero-shot Prompting}, which relies solely on task descriptions or instructions without any examples, requiring the model to generalize from its pre-trained knowledge without any examples. Common strategies, such as \textit{Role-playing} (e.g., \textit{You are a senior software engineer.}) and \textit{Emotion Prompting} (e.g., \textit{It is really important to my career.}), are also widely used. (3) \textit{Chain-of-Thought (CoT) prompting}, which encourages the model to generate intermediate reasoning steps, improving performance on complicated tasks that require multi-step reasoning. Related techniques such as \textit{Tree-of-Thoughts (ToT)} and \textit{Graph-of-Thoughts (GoT)} extend this idea by structuring the reasoning process, enabling systemic exploration of multiple reasoning paths. Together, all of these techniques have been shown to mitigate hallucinations and improve the accuracy of complex tasks, and have substantially broadened the applicability of LLMs, enabling them to tackle increasingly complex tasks more reliably.
 
 
-To effectively harness these emergent capabilities, Prompt Engineering has become a critical discipline for optimizing the interaction between human intent and model output. One fundamental technique is the use of Role-playing and Contextualization. By assigning a specific persona to the model, users can narrow the output distribution toward a desired professional domain. To further enhance performance, Few-shot Prompting provides the model with a small number of input-output examples within the context window, which enables it to recognize patterns through in-context learning. For tasks requiring complex logical or mathematical deduction, the Chain-of-Thought (CoT) prompting technique encourages the model to generate intermediate reasoning steps. This approach has been shown to significantly reduce hallucinations and improve the accuracy of multi-step problem solving. Furthermore, providing Structured Instructions by utilizing specific output formats like JSON ensures that the model's responses remain consistent, controllable, and easily interpretable for downstream software integration.
 
 
-% basically introduce the history of LLM 
-% decoder-only transformer architecture, gpt, claude, qwen, deepseek, etc.  long context, zero shot learning ==> scaling laws
-% MoE to help balance the tradeoff between model size and inference latency, etc.
-% transformer self-attention pretraing, scaling laws, emergent capabilities.
-% architecture, pretraining, fine-tuning, few-shot prompting, chain-of-thought prompting, prompt engineering, in-context learning, zero-shot prompting, etc.
-
-% prompt engineering: zero/few-shot prompting, in-context learning, chain-of-thought prompting, etc.
-
-
-\subsection{Agentic AI}
+\subsection{Automated Workflows and Autonomous Agents}
 planning, reasoning, tool use, multi-agent collaboration, etc.
 
 \section{Formal Methods in Software Analysis}
@@ -158,3 +146,9 @@ System 1 is fast, intuitive, and parallel, akin to the capabilities of deep lear
 
 
 
+\begin{figure*}[ht]
+  \centering
+  \includegraphics[width=0.8\textwidth]{Figures/Chapter2/neurosymbolic_approaches.pdf}
+  \caption{Integrative and hybrid neurosymbolic approaches.}
+  \label{fig:neurosymbolic_approaches}
+\end{figure*}
