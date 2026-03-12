@@ -11,7 +11,8 @@
 %-----------------------------------
 In this chapter, we present a number of essential concepts and techniques required for describing our contributions in subsequent chapters.
 
-\section{LLM and Agentic AI}
+\section{LLMs and Agentic Systems}
+% \subsection{Large Language Models and Prompt Engineering} 
 \subsection{Large Language Models and Prompt Engineering} 
 Vaswani et al.~\cite{vaswani2017attention} introduced the \textit{Transformer} architecture, which marked a pivotal milestone in deep learning and paved the way for the era of large language models (LLMs). \fref{fig:transformers} illustrates the architecture of the Transformer, which employs an encoder-decoder framework, where the encoder transforms an input sequence of symbolic representations $(x_1, x_2, \ldots, x_n)$ into a corresponding sequence of continuous representations $(z_1, z_2, \ldots, z_n)$, upon which the decoder autoregressively produces an output symbol sequence $(y_1, y_2, \ldots, y_m)$. The core mechanism of the Transformer is \textit{Self-Attention}, which allows the model to compute attention scores for each word in a sentence or document in parallel, modeling the influence of each word on every other word. 
 
@@ -37,13 +38,33 @@ Based on the architecture of Transformer, PLMs have branched into three main cat
 
 Guided by scaling laws~\cite{kaplan2020scaling}, model performance improves consistently as model parameters, computational budgets, and data size increase. This growth facilitates the emergence of advanced capabilities, such as zero-shot and few-shot learning, which typically absent in smaller models below a certain scale. Brown et al.~\cite{brown2020language} observed that few-shot performance improves more rapidly as model size increases compared to zero-shot performance, highlighting that larger models possess stronger in-context learning capabilities.
 
-To effectively harness the emergent capabilities of LLMs, \textit{Prompt Engineering} has become a critical discipline to guide the model's output distribution toward desired outcomes. Much of its efficacy is rooted in \textit{In-context learning (ICL)}~\cite{schulhoff2024prompt}, which allows the model to learn from examples or instructions embedded in the prompt without updating weights. Many prompting techniques have been proposed to enhance the performance of LLMs~\cite{sahoo2024systematic}: (1) \textit{Few-shot prompting} provides the model with a limited number of input-output examples as context, helping it induce an understanding of the given task, recognize task-relevant patterns and respond in appropriate formats. (2) \textit{Zero-shot Prompting}, which relies solely on task descriptions or instructions without any examples, requiring the model to generalize from its pre-trained knowledge without any examples. Common strategies, such as \textit{Role-playing} (e.g., \textit{You are a senior software engineer.}) and \textit{Emotion Prompting} (e.g., \textit{It is really important to my career.}), are also widely used. (3) \textit{Chain-of-Thought (CoT) prompting}, which encourages the model to generate intermediate reasoning steps, improving performance on complicated tasks that require multi-step reasoning. Related techniques such as \textit{Tree-of-Thoughts (ToT)} and \textit{Graph-of-Thoughts (GoT)} extend this idea by structuring the reasoning process, enabling systemic exploration of multiple reasoning paths. Together, all of these techniques have been shown to mitigate hallucinations and improve the accuracy of complex tasks, and have substantially broadened the applicability of LLMs, enabling them to tackle increasingly complex tasks more reliably.
+To effectively harness the emergent capabilities of LLMs, \textit{Prompt Engineering} has become a critical discipline to guide the model's output distribution toward desired outcomes. Much of its efficacy is rooted in \textit{In-context learning (ICL)}~\cite{schulhoff2024prompt}, which allows the model to learn from examples or instructions embedded in the prompt without updating weights. 
 
-
+Many prompting techniques have been proposed to enhance the performance of LLMs~\cite{sahoo2024systematic}: (1) \textit{Few-shot prompting} provides the model with a limited number of input-output examples as context, helping it induce an understanding of the given task, recognize task-relevant patterns and respond in appropriate formats. (2) \textit{Zero-shot Prompting}, which relies solely on task descriptions or instructions without any examples, requiring the model to generalize from its pre-trained knowledge without any examples. Common strategies, such as \textit{Role-playing} (e.g., \textit{You are a senior software engineer.}) and \textit{Emotion Prompting} (e.g., \textit{It is really important to my career.}), are also widely used. (3) \textit{Chain-of-Thought (CoT) prompting}, which encourages the model to generate intermediate reasoning steps, improving performance on complicated tasks that require multi-step reasoning. Related techniques such as \textit{Tree-of-Thoughts (ToT)} and \textit{Graph-of-Thoughts (GoT)} extend this idea by structuring the reasoning process, enabling systemic exploration of multiple reasoning paths. Together, all of these techniques have been shown to mitigate hallucinations and improve the accuracy of complex tasks, and have substantially broadened the applicability of LLMs, enabling them to tackle increasingly complex tasks more reliably.
 
 
 \subsection{Automated Workflows and Autonomous Agents}
-planning, reasoning, tool use, multi-agent collaboration, etc.
+LLMs' comprehension and reasoning skills makes them compelling candidates for the central ``brain'' or general-purpose controllers within intelligent agentic systems. Based on their architectural design, these systems can be broadly categorized into two types: 
+\begin{itemize}
+    \item \textbf{Workflows} coordinate LLMs and tools through a sequence of predefined, explicit steps. This design offers predictability and consistency, making it suitable for well-defined tasks.
+    \item \textbf{Agents} allows the LLM to determine how to accomplish tasks by organizing the processes and tool usage on their own. This design provides flexibility to revise strategies in response to real-time feedback and adapt to complex and dynamic environments.
+\end{itemize}
+
+\begin{figure*}[ht]
+  \centering
+  \includegraphics[width=0.8\textwidth]{Figures/Chapter2/agent.pdf}
+  \caption{Augmented LLM-based agentic system.}
+  \label{fig:agent}
+\end{figure*}
+
+As depicted in \fref{fig:agent}, the core block of an agentic system is an augmented LLM equipped with capabilities such as retrieval, tools, and memory. Retrieval (e.g., \textit{Retrieval Augmented Generation}~\cite{lewis2020retrieval}) helps the LLM access external knowledge bases to reduce hallucinations. Tool Use (e.g., \textit{Function Calling}~\cite{function_calling_guide} and \textit{Model Context Protocol}~\cite{model_context_protocol}) acts as the ``hand'' of the agentic system, enabling the LLM to perform actions and interact with the real world. Memory (e.g., short-term context and long-term storage~\cite{agent_guide}) allows the LLM to persist, recall and reason over historical information.
+
+This agentic system can perceive changes from the environment and execute actions to influence it in return. Within this loop, the LLM serves as the central intelligent engine that understands the state of the environment, queries necessary information, selects appropriate tools, and determines what information to retain in memory at each step. By leveraging frameworks like \textit{ReAct}~\cite{yao2022react} to integrates reasoning and acting or \textit{Reflexion}~\cite{shinn2023reflexion} to enable self-reflection with dynamic memory, LLMs gain stronger reasoning and planning abilities, enabling more autonomous decision-making.
+
+
+
+
+
 
 \section{Formal Methods in Software Analysis}
 
