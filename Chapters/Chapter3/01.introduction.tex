@@ -24,6 +24,20 @@ checking~\cite{mora2018client,zhu2019framework}. These techniques address
 library compatibility issues in different dimensions and have been
 evaluated with their own isolated datasets.
 
+In recent years, Large Language Models (LLMs) have achieved remarkable success across numerous automated software engineering tasks. At the heart of this progress lie high-quality open-source datasets, which serve as the cornerstone of model capabilities. These datasets provide essential domain-specific training material for learning real-world complex software patterns. Furthermore, the precision of their annotations and the reproducibility of their instances directly impact the performance upper bound of AI tools on various software engineering tasks. For example, \textit{Defects4J}~\cite{just2014defects4j} contains over 800 reproducible bugs drawn from 17 open-source Java projects, enabling evaluation of whether AI can generate patches that pass test suites; \textit{CoRe}~\cite{xie2025core} includes more than 10,000 task instances covering data dependency, control dependency, and information flow across multiple programming languages for evaluating the ability of fundamental static analysis; \textit{SWE-bench}~\cite{jimenez2023swe} provides an end-to-end benchmark comprising a large collection of real GitHub issues, designed to assess the end-to-end capability of AI in resolving software engineering problems.
+
+However, these datasets mainly focus on internal problems of projects, leaving largely uncovered risks introduced by external changes. Although existing LLM-based tools have demonstrated impressive performance in code comprehension, they face substantial challenges in understanding and reasoning about compatibility issues induced by library upgrades, severely limiting their capacity to manage external evolutionary risks. This limitation stems from two interrelated factors. First, library upgrade compatibility issues are inherently complex, involving multiple components and intricate dependency relationships. Current LLM reasoning is often insufficient to model cross-component interactions or infer the impact of changes. Second, such issues are difficult to detect and some of them may only trigger under specific environments and test cases. Additionally, constructing reproducible problem instances requires non-trivial configuration, which further exacerbates the scarcity of data. Consequently, a structured, high-quality, and fully reproducible dataset of real-world library upgrade incompatibilities is essential for enhancing and evaluating LLM-based tools in this domain.
+
+
+An excellent dataset has the potential to serve as a valuable reference for future research in
+this field. However, composing the dataset requires intricate
+manual validation, e.g., confirming whether the cause of a test
+failure is due to runtime exception, assertion violation, or other reasons.
+Therefore, we propose \toolcompsuite, the first incompatibility issue dataset focusing on
+library behavioral incompatibility with concrete reproducible test cases.
+Each test case is isolated and validated, enabling the direct manifestation of the
+incompatibilities.
+
 
 An excellent dataset has the potential to serve as a valuable reference for future research in
 this field. However, composing the dataset requires intricate
@@ -81,6 +95,7 @@ compatibility checking, module-level regression testing selection, and debugging
 %module-level RTS tools utilize it as a safety evaluator to verify whether all relevant test cases
 %have been selected. Additionally, \toolcompsuite is able to assist debugging techniques to do better root
 %cause analysis.
+Furthermore, this is also very high-quality and valuable data for AI, which can help models better understand such type of issue.
 More detailed information can be found in \sref{sec:app-compsuite}.
 
 The dataset and tool are available at: \url{https://github.com/compsuite-team/compsuite}.
