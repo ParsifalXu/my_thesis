@@ -68,16 +68,34 @@ This agentic system can perceive changes from the environment and execute action
 
 \section{Formal Methods in Software Analysis}
 
-\subsection{Symbolic Execution and SMT Solvers}
-Symbolic execution is a formal program analysis technique that explores multiple execution paths by treating program inputs as symbolic constants rather than concrete values. Unlike concrete execution, which evaluates a single control-flow path per input, a single symbolic execution represents a class of program behaviors sharing the same execution path. During this process, the execution state is maintained as a functional mapping from program variables to symbolic expressions. For every conditional branch encountered, the analysis identifies the logical conditions necessary to follow different path, accumulating these conditions into a path constraint ($\pi$).
-
-The feasibility of an execution path is determined by Satisfiability Modulo Theories (SMT) solvers like Z3 and CVC5. An SMT solver decides whether there exists a concrete assignment of values to the symbolic constants that satisfies the path constraint $\pi$. If the constraint is Satisfiable (SAT), the solver provides a model (a concrete test case); if it is Unsatisfiable (UNSAT), the path is unreachable and can be pruned.This mechanism highlights a key trade-off: while symbolic execution is generally less exhaustive than abstract interpretation (which often over-approximates to ensure termination), it achieves higher precision. Any error discovered corresponds to a feasible execution path, effectively eliminating false positives that are common in static analysis. 
-
-To bridge the gap between idealized symbolic analysis and real-world program complexity, Concolic Execution (a portmanteau of concrete and symbolic) was introduced. It maintains two simultaneous states: a concrete state tracking actual values, and a symbolic state tracking logical expressions along the same path. The execution typically starts with a random concrete input. As the program runs, the engine records the path constraints. To explore unexplored branches, the engine selects a constraint, negates it, and queries the SMT solver for new concrete inputs. 
+\subsection{Symbolic Execution and SMT Solver}
+Symbolic execution is a formal program analysis technique powered by constraint solving~\cite{baldoni2018survey}. It explores multiple execution paths of a program by treating program inputs as symbolic representations rather than concrete values. Formally, symbolic execution maintains a pair of \textit{symbolic state} and \textit{path conditions} $<\sigma, \pi>$, where $\sigma: \text{Var} \to \text{Expr}$ is the mapping from variables to symbolic representations, and $\pi$ is a conjunction of constraints that must hold for execution to follow the current path. At the beginning, $\sigma$ is initialized as an empty mapp and $\pi$ is set to $\text{true}$. Every time a conditional branch (e.g., an if-statement \textit{if($e$)}) is encountered, the engine forks: one adds $\sigma(e)$ to $\pi$ (true branch) and the other adds $\sigma(\lnot e)$ to $\pi$ (false branch). An execution path is considered feasible if and only if its accumulated path condition $\pi$ is satisfiable. When a path terminates or reaches a target assertion, a constraint solver is invoked to determine the satisfiability. If $\pi$ is satisfiable, the solver provides a concrete set of input assignments that guarantees the program will follow that exact execution path.
 
 
-% To provide deterministic guarantees in software analysis, Symbolic Execution has emerged as a rigorous technique for exhaustive path exploration. Unlike concrete execution, it assigns symbolic values to inputs and accumulates path constraints, which are subsequently resolved by SMT solvers to verify program properties. In the context of this dissertation, symbolic execution functions as the deterministic anchor within our neurosymbolic framework. Specifically, in the analysis of API constraints, it enables the extraction of precise logical predicates from implementation code, serving as a formal baseline to detect semantic drifts and inconsistencies when reconciled with LLM-generated interpretations of natural language documentation.
+\begin{figure}[htbp]
+    \centering
+    \begin{minipage}{0.8\textwidth} 
+        \begin{minted}[frame=single]{c}
+void foo(int a, int b) {
+    int x = a + b;
+    if (x > 11) {
+        if (a > 3) {
+            assert(false);  // bug
+        }
+    }
+}
+        \end{minted}
+    \end{minipage}
+    \caption{A simple C program}
+    \label{fig:c}
+\end{figure}
 
+Consider the simple C program in \fref{fig:c}. Symbolic execution begins with symbolic inputs $\alpha$ and $\beta$ for $a$ and $b$ respectively, and maps $x$ to $\alpha + \beta$. Upon reaching the first if-statement, it forks into two paths: the true branch records $\pi_1 = (\alpha + \beta > 11)$ and the false branch records $\pi_2 = \lnot(\alpha + \beta > 11)$. Continuing along $\pi_1$, the execution forks again at the second if-statement. The true sub-path accumulates $\pi_{11} = (\alpha + \beta > 11) \land (\alpha > 3)$, which is then submitted to the constraint solver upon reaching the assertion. Since $\pi_{11}$ is satisfiable (e.g., $\alpha = 4$ and $\beta = 8$), symbolic execution reports a feasible bug-triggering path along with a concrete counterexample. Similarly, the remaining paths $\pi_2$ and $\pi_{12}$ are checked and found to be safe. 
+
+While symbolic execution is theoretically robust, its practical application is often hindered by challenges such as \textit{path explosion}, modeling of complex data structures, and environmental interaction problems. To address these limitations, \textit{concolic execution} was introduced as a hybrid approach that utilizes concrete execution to drive symbolic execution. Rather than forking at every branch, concolic execution never forks. It executes the program with concrete inputs while simultaneously tracking symbolic constraints. After a concrete run is completed, the engine identifies a branch condition along the path, negates it, and asks the SMT solver for a new set of concrete inputs that satisfy this modified constraint. Tools such as DART~\cite{godefroid2005dart}, CUTE~\cite{sen2005cute}, and KLEE~\cite{cadar2008klee} have demonstrated the effectiveness of this approach across large real-world codebases.
+
+The efficiency of symbolic execution heavily depends on the underlying constraint solver, which is typically an SMT (Satisfiability Modulo Theories) solver 
+such as Z3~\cite{de2008z3} and CVC5~\cite{barbosa2022cvc5}. SMT solving is the process of determining the satisfiability of first-order formulas. It generalizes the Boolean Satisfiability (SAT) problem, which concerns the satisfiability of propositional logic formulas, by introducing background theories such as linear arithmetic, bit-vectors, and arrays. During symbolic execution, each path constraint is represented as a conjunctive formula, and submitted to the SMT solver as a satisfiability query. If it is satisfiable (SAT), the solver returns a model that assigns concrete values to the symbolic variables; if it is unsatisfiable (UNSAT), it indicates that the execution path is unreachable and can be pruned safely. 
 
 \subsection{Program Facts and Datalog}
 Program facts are a structured representation of information extracted from source code for the purpose of automated reasoning and analysis. They encode observable properties of a program, such as the existence of entities (e.g., functions, classes, variables), their attributes (e.g., names, locations, modifiers), and relations between them (e.g., containment, calls, inheritance), in a form suitable for systematic querying and inference.
@@ -126,15 +144,15 @@ This representation cleanly separates \emph{fact extraction}, which records conc
 
 
 
-\section{Neuro-symbolic AI: The Path to Reliable AI}
-system 1 and system 2, neurosymbolic AI, etc.
-scaling laws and the limitations of scaling, the need for symbolic reasoning, etc.
+% \section{Neuro-symbolic AI: The Path to Reliable AI}
+% system 1 and system 2, neurosymbolic AI, etc.
+% scaling laws and the limitations of scaling, the need for symbolic reasoning, etc.
 
-add a picture to explain two approaches
-2 main neuro-symbolic approaches to improving logical reasoning: 1. integrative approach comprising models where symbolic reasoning is contained within
-the neural network, and (ii) the hybrid approach comprising models where a symbolic solver, separate from the neural network, performs symbolic reasoning.
+% add a picture to explain two approaches
+% 2 main neuro-symbolic approaches to improving logical reasoning: 1. integrative approach comprising models where symbolic reasoning is contained within
+% the neural network, and (ii) the hybrid approach comprising models where a symbolic solver, separate from the neural network, performs symbolic reasoning.
 
-hybrid approach is more promising for developing general logical reasoning because (i) its reasoning chain is more interpretable, and (ii) it retains the capabilities and advantages of existing LLMs.
+% hybrid approach is more promising for developing general logical reasoning because (i) its reasoning chain is more interpretable, and (ii) it retains the capabilities and advantages of existing LLMs.
 
 
 
@@ -149,16 +167,46 @@ hybrid approach is more promising for developing general logical reasoning becau
 
 \section{Neuro-Symbolic AI}
 
-% 人类在创造机器智能的路上从未停歇。最初，符号AI通过显示符号表示知识，并用形式逻辑和规则进行推理，从而模拟人类智能，但因为无法穷尽现实世界的复杂性而陷入困境。随后，联结主义AI通过模拟人脑神经元网络并从特定领域的数据中学习隐藏的模式来实现智能，但因早期的算力不足且缺乏深层结构，在处理长距离依赖和复杂推理方面表现不佳。2010年，深度学习的兴起
+The pursuit of artificial intelligence has been a relentless human endeavor, historically divided into two main categories: \textit{Symbolic AI} and \textit{Sub-symbolic AI}. Symbolic AI represents knowledge through formal, declarative symbols based on rules and logic, and leverages these symbolic representations to reason about and solve complex problems. While this paradigm offers strong interpretability and verifiability, it struggles with scalability and flexibility when confronted with the complexity of the real world, as exhaustively encoding all relevant domain knowledge into hand-crafted rules proves intractable in practice. 
+
+Subsequently, sub-symbolic AI emerged, placing artificial neural networks at its core. Rather than explicit rules, this paradigm relies on algorithms to extract statistical patterns from data, identify latent relationships, and make predictions through learned representations. Exemplified by machine learning, deep neural networks, and generative models, sub-symbolic AI has achieved remarkable success in areas such as pattern recognition and natural language processing. Although large-scale models have been observed to exhibit reasoning-like behaviors brought by emergent ability, they still lack explicit logical structure, making rigorous reasoning and formal verification fundamentally difficult.
 
 
-% 神经网络和深度学习从数据中学习隐式表示，取得了在模式识别和自然语言处理等领域的巨大成功，但缺乏明确的逻辑结构，难以进行严密的推理和形式验证。近年来，神经符号AI试图结合两者的优势，创造出既能处理复杂数据又具备推理能力的系统。
+Neuro-symbolic AI draws inspiration from the System 1 and System 2 theory~\cite{kahneman2011thinking}. System 1 is fast, intuitive, and parallel, akin to the capabilities of deep learning, while System 2 is slow, deliberate, and sequential, resembling symbolic reasoning. Neuro-symbolic AI seeks to integrate these two approaches to create systems that leverage the strengths of both and ultimately produce a superior hybrid AI model possessing reasoning abilities. In the context of software engineering, as illustrated in \fref{fig:neurosymbolic_approaches}, there are two main neurosymbolic approaches~\cite{chen2025comparative} to improve logical reasoning: 
+\begin{enumerate}
+    
+    \item \textbf{Integrative approach.} Symbolic reasoning is embedded within the neural network.
+    \item \textbf{Hybrid approach.} Performing symbolic reasoning with a separate symbolic solver, distinct from the neural network.
+\end{enumerate}
+
+\begin{figure*}[ht]
+  \centering
+  \includegraphics[width=0.8\textwidth]{Figures/Chapter2/neurosymbolic_approaches.pdf}
+  \caption{Integrative and hybrid neurosymbolic approaches.}
+  \label{fig:neurosymbolic_approaches}
+\end{figure*}
+
+The hybrid approach demonstrates greater potential for advancing general logical reasoning, as it preserves the capabilities and advantages of existing
+LLMs while providing a more interpretable reasoning chain. 
 
 
-Symbolic AI focuses on formalized, declarative representations of knowledge through logic and rules, offering high interpretability but struggling with unstructured data. Conversely, Sub-symbolic AI, exemplified by modern deep learning and generative models, learns implicit representations directly from data autonomously. While these methods excel at pattern recognition and scalability, they often lack the explicit logical structures required for rigorous reasoning, transparency, and formal verification~\cite{colelough2025neuro}.
 
-Neuro-symbolic AI draws inspiration from the System 1 and System 2 framework proposed by Kahneman et al.~\cite{kahneman2011thinking}. 
-System 1 is fast, intuitive, and parallel, akin to the capabilities of deep learning, while System 2 is slow, deliberate, and sequential, resembling symbolic reasoning. Neuro-symbolic AI seeks to integrate these two approaches to create systems that leverage the strengths of both and ultimately produce a superior hybrid AI model possessing reasoning abilities. In the context of software engineering, neuro-symbolic AI can be applied to tasks such as program analysis, bug detection, and code localization by leveraging both data-driven learning and rule-based reasoning to achieve more accurate and explainable results.
+
+
+
+
+
+
+
+
+
+% Humanity has never stopped striving to create machine intelligence. Initially, symbolic AI attempted to simulate human intelligence by displaying symbols to represent knowledge and reasoning using formal logic and rules, but it ran into difficulties because it could not fully capture the complexity of the real world. Subsequently, connectionist AI achieved intelligence by simulating the neural networks of the human brain and learning hidden patterns from data in specific domains, but due to insufficient computing power and a lack of deep structures in its early stages, it performed poorly in handling long-distance dependencies and complex reasoning.
+
+
+% Symbolic AI focuses on formalized, declarative representations of knowledge through logic and rules, offering high interpretability but struggling with unstructured data. Conversely, Sub-symbolic AI, exemplified by modern deep learning and generative models, learns implicit representations directly from data autonomously. While these methods excel at pattern recognition and scalability, they often lack the explicit logical structures required for rigorous reasoning, transparency, and formal verification~\cite{colelough2025neuro}.
+
+% Neuro-symbolic AI draws inspiration from the System 1 and System 2 framework proposed by Kahneman et al.~\cite{kahneman2011thinking}. 
+% System 1 is fast, intuitive, and parallel, akin to the capabilities of deep learning, while System 2 is slow, deliberate, and sequential, resembling symbolic reasoning. Neuro-symbolic AI seeks to integrate these two approaches to create systems that leverage the strengths of both and ultimately produce a superior hybrid AI model possessing reasoning abilities. In the context of software engineering, neuro-symbolic AI can be applied to tasks such as program analysis, bug detection, and code localization by leveraging both data-driven learning and rule-based reasoning to achieve more accurate and explainable results.
 
 % introduce LLM (few shot prompting, chain of thought prompting)
 % introduce AI agent (langchain react framework)
@@ -167,9 +215,8 @@ System 1 is fast, intuitive, and parallel, akin to the capabilities of deep lear
 
 
 
-\begin{figure*}[ht]
-  \centering
-  \includegraphics[width=0.8\textwidth]{Figures/Chapter2/neurosymbolic_approaches.pdf}
-  \caption{Integrative and hybrid neurosymbolic approaches.}
-  \label{fig:neurosymbolic_approaches}
-\end{figure*}
+
+
+
+
+

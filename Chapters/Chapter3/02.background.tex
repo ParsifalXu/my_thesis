@@ -102,8 +102,6 @@ the \toolcompsuite dataset have a significant impact on a large number of
 codebases and can affect many users of the libraries, either directly
 or indirectly.
 
-
-
 To ensure that all client projects in the dataset are executable and
 the runs are reproducible, we performed a series of checks on each
 project. First, we checked out the project to the version (SHA) at the time of
@@ -119,10 +117,18 @@ thereby ensuring that the dataset is only consist of projects which can
 be executed and whose executions can be reproduced.
 
 
+\begin{landscape}
+\begin{figure*}
+  \centering
+  \includegraphics[width=0.8\linewidth]{Figures/Chapter3/architecture.pdf}
+  \caption{The architecture of \toolcompsuite.}
+  \label{fig:architecture}
+\end{figure*}
+\end{landscape}
+
+
+
 \subsection{Data Collection}\label{sec:data:collect-compsuite}
-
-
-
 
 We collected the data following the below procedures.
 \fref{fig:architecture} visualizes the overall architecture of \toolcompsuite.
@@ -158,16 +164,6 @@ pair, we selected a single incompatibility-revealing test to be
 included in the final dataset. In cases where a client-library pair
 had multiple incompatibility issues, we chose the one that we deemed
 most representative and easy to comprehend.
-
-\begin{landscape}
-\begin{figure*}
-  \centering
-  \includegraphics[width=0.8\linewidth]{Figures/Chapter3/architecture.pdf}
-  \caption{The architecture of \toolcompsuite.}
-  \label{fig:architecture}
-\end{figure*}
-\end{landscape}
-
 
 
 
