@@ -33,7 +33,7 @@ The workflow begins with performing a preliminary analysis to extract the core t
 
 % \subsubsection{Syntax Correction and Intermediate-rule Diagnosis}
 \subsubsection{Synthesize-Check-Refine Loop}
-As shown in the red box in the \fref{fig:arch}, before execution, \tooldataloc follows a \textit{synthesize-check-refine} loop to mitigate the impact of hallucinations and improve the executability of LLM-generated Datalog programs. It mainly contains two critical, feedback-driven phases (Details in \sref{sec:method:val-dataloc} and \sref{sec:method:int-dataloc}): (1) \textit{Syntax correction}. Each synthesized program will undergo a parser-gated validation to ensure syntactic well-formedness. Our workflow adopts a \emph{best-effort repair, then fallback} strategy: unambiguous cases are handled via conservative rule-based fixes, revalidated with \souffle’s parser, and all other cases return error feedback to the LLM.restructuring. (2) \textit{Intermediate-rule diagnosis}. We instrument the program to track row counts of intermediate relations, thereby identifying rules that produce empty results. Using controlled, mutation-based probing, we differentiate fragile-empty relations caused by over-constraints from stable-empty relations that reflect inherent dataset properties. These feedbacks help the model refine the generated program and ensure its quality before it reaches the inference engine. Validated programs are then executed through \texttt{exec\_dl} tool to generate a list of candidates. Excessive locations are treated as failures, triggering refinement with stricter constraints to reduce noise and improve precision.
+As shown in the red box in the \fref{fig:arch}, before execution, \tooldataloc follows a \textit{synthesize-check-refine} loop to mitigate the impact of hallucinations and improve the executability of LLM-generated Datalog programs. It mainly contains two critical, feedback-driven phases (Details in Section~\sref{sec:method:val-dataloc} and \sref{sec:method:int-dataloc}): (1) \textit{Syntax correction}. Each synthesized program will undergo a parser-gated validation to ensure syntactic well-formedness. Our workflow adopts a \emph{best-effort repair, then fallback} strategy: unambiguous cases are handled via conservative rule-based fixes, revalidated with \souffle’s parser, and all other cases return error feedback to the LLM. (2) \textit{Intermediate-rule diagnosis}. We instrument the program to track row counts of intermediate relations, thereby identifying rules that produce empty results. Using controlled, mutation-based probing, we differentiate fragile-empty relations caused by over-constraints from stable-empty relations that reflect inherent dataset properties. These feedbacks help the model refine the generated program and ensure its quality before it reaches the inference engine. Validated programs are then executed through \texttt{exec\_dl} tool to generate a list of candidates. Excessive locations are treated as failures, triggering refinement with stricter constraints to reduce noise and improve precision.
 
 \begin{landscape}
 \begin{figure}[t]
@@ -127,11 +127,157 @@ We introduce an intermediate-rule diagnostic and mutation-based feedback mechani
 
 An empty relation is not inherently incorrect: depending on the user’s constraints and the underlying dataset, the semantically correct result may legitimately be the empty set. To avoid forcing spurious revisions or encouraging the model to hallucinate evidence, our approach explicitly distinguishes between fragile and stable emptiness through controlled diagnostic probing.
 
-When detecting an intermediate relation that produces zero rows, we pick several applicable mutations from a small, fixed set of lightweight diagnostic mutations to the corresponding rule and re-execute the program, as shown in \fref{fig:mutate}. These mutations are structure-preserving and intentionally conservative (e.g., relaxing exact string equality to substring or pattern matching, or weakening a single brittle filter), and they are used only for diagnosis, not as candidate replacements for the final query. We then observe whether any mutation yields non-empty results and how row counts change relative to the original execution.
+\subsubsection{Mutation Operators}
+\label{sec:mutation-operators}
 
-Based on this behavior, we classify empty intermediates into two categories. A relation is considered fragile-empty if at least one diagnostic mutation produces a non-empty result, suggesting that the original rule may be over-constrained or mis-specified. In this case, we return targeted feedback identifying the affected relation, the specific mutations applied, and the observed changes in row counts (optionally including a small sample of newly surfaced tuples). Conversely, a relation is considered stable-empty if it remains empty under all tested mutations. In such cases, emptiness may reflect a genuine property of the dataset under the stated constraints rather than a synthesis error. To remain conservative, we do not pressure the model to introduce relaxations; instead, we report that the empty result appears robust and encourage the model to either preserve the current semantics or emit auxiliary diagnostic outputs rather than altering the core query.
+We define a fixed catalog of five diagnostic mutation operators, organized
+into two families. Each operator is \emph{structure-preserving}: it
+modifies only the body of a rule while leaving the head (and therefore the
+relation schema) unchanged. Mutations are purely diagnostic---they are
+never used as candidate replacements for the final query.
 
-Results produced by mutated programs are never used as final answers. Mutations serve only as execution-guided diagnostic probes to help the model decide whether and where revision is warranted. This design balances error localization with semantic caution, enabling targeted repair when evidence exists while avoiding misleading feedback in cases where empty results are likely correct. 
+\paragraph{Family~1: String-relaxation mutations.}
+These operators relax exact string equality to approximate matching,
+targeting the most common error class in LLM-generated Datalog programs
+over code-analysis fact bases: over-specified string literals. Because the
+LLM must guess identifier formats (fully qualified names, file paths,
+method signatures) without seeing the data, exact-match constraints
+frequently fail even when the logical intent is correct.
+
+\begin{enumerate}[label=\textbf{M\arabic*}.,leftmargin=*]
+
+\item \textbf{\textsc{Contains-Literal} (substring relaxation).}
+For every string literal \texttt{"s"} appearing in the rule body, the
+mutation replaces it with a fresh variable~$V_i$ and appends a
+\texttt{contains("s", $V_i$)} atom to the body, relaxing exact equality to
+substring containment. For example, the atom
+\texttt{IsMethod(\_, "getValue", \ldots)} becomes
+\texttt{IsMethod(\_, MUTVAR1, \ldots)} and \texttt{contains("getValue", MUTVAR1)}.
+
+\item \textbf{\textsc{Match-Literal} (prefix relaxation).}
+Analogous to \textsc{Contains-Literal}, but uses
+\texttt{match}\texttt{("$s$.*", $V_i$)} instead of
+\texttt{contains}. This tests whether the original literal matches as a
+\emph{prefix} of the actual data, diagnosing a different failure mode:
+the literal may be correct as a prefix but actual values carry trailing
+context (e.g., type signatures).
+\end{enumerate}
+
+\paragraph{Family~2: Single-constraint ablation mutations.}
+Rather than modifying a constraint's matching semantics, these operators
+\emph{remove} exactly one body atom from a rule, producing a separate
+diagnostic variant for each eligible atom. This one-at-a-time strategy
+provides fine-grained localization: by observing which single removal
+causes rows to appear, the system pinpoints the specific constraint
+responsible for emptiness.
+
+\begin{enumerate}[label=\textbf{M\arabic*}.,leftmargin=*,start=3]
+
+\item \textbf{\textsc{Drop-Single-Atom} (general single-constraint ablation).}
+For each body atom~$a_i$ in rules defining the target relation, the
+system generates a variant with~$a_i$ removed and all other atoms
+retained. If a rule has $k$ body atoms ($k \geq 2$), this produces up to
+$k$ variants per rule. For example, given the rule:
+%
+\begin{lstlisting}[language=Prolog,basicstyle=\small\ttfamily]
+R(x, y) :- A(x, y), B(y, z), contains("foo", x).
+\end{lstlisting}
+%
+three variants are generated, each dropping one of \texttt{contains("foo",x)}, \texttt{B(y,z)}, or
+\texttt{A(x,y)}.
+If dropping \texttt{B(y,z)} is the only variant that yields rows, the join
+on \texttt{B} is identified as the likely error site. To control
+computational cost, the total number of single-drop variants per relation
+is capped at a configurable limit (default~3).
+
+\item \textbf{\textsc{Drop-Single-Contains} (targeted string-filter ablation).}
+A specialization of \textsc{Drop-Single-Atom} restricted to
+\texttt{contains(\ldots)} atoms. Removing one \texttt{contains} filter at a time isolates
+whether a specific filter (rather than the combination of all filters) is
+the cause of emptiness.
+
+\item \textbf{\textsc{Drop-Single-Negation} (targeted negation ablation).}
+A specialization restricted to negated atoms (\texttt{!pred(\ldots)}).
+LLMs sometimes introduce incorrect negation constraints---e.g., excluding
+a class from results when the intent was to include it. Removing one
+negated atom at a time tests whether any individual negation is overly
+restrictive.
+\end{enumerate}
+
+\subsubsection{Mutation Selection and Applicability}
+\label{sec:mutation-selection}
+
+Not every mutation operator is applicable to every rule. The system
+determines applicability via lightweight syntactic checks before execution:
+
+\begin{itemize}
+\item \textsc{Contains-Literal} and \textsc{Match-Literal} require
+at least one string literal (a quoted string) in the rule body.
+
+\item \textsc{Drop-Single-Atom} requires at least two body atoms (removing
+the sole atom would produce an unconditional fact with potentially
+ungrounded variables).
+
+\item \textsc{Drop-Single-Contains} requires at least one
+\texttt{contains(\ldots)} atom in a rule with $\geq 2$ body atoms.
+
+\item \textsc{Drop-Single-Negation} requires at least one negated atom
+(\texttt{!pred(\ldots)}) in a rule with $\geq 2$ body atoms.
+
+%\item \textsc{Drop-All-Contains} requires at least one
+%\texttt{contains(\ldots)} atom.
+\end{itemize}
+
+
+\subsubsection{Classifying Empty Relations and Constructing Feedback}
+\label{sec:mutation-classification}
+
+After all applicable mutations have been executed for a zero-row
+relation~$R$, the system classifies the emptiness and constructs targeted
+feedback:
+
+\paragraph{Fragile-empty.}
+If at least one successfully executed mutation produces a non-empty result
+for~$R$ (i.e., $\text{rows}(R_{\text{mutated}}) > 0$), the relation is
+classified as \emph{fragile-empty}. This signals that the original rule is
+likely over-constrained or mis-specified: a small, conservative relaxation
+sufficed to surface rows, suggesting the original constraints were close
+to---but not quite matching---the actual data. The feedback returned to the
+LLM includes:
+
+\begin{itemize}
+\item The name of the affected relation and its zero row count in the
+original execution.
+\item For each mutation that produced rows: the mutation operator identity,
+the specific constraint that was relaxed or removed (for single-constraint
+ablation mutations, this identifies the exact atom), the rewritten rule(s),
+the resulting row count, and (optionally) a small sample of newly surfaced
+tuples (capped at a configurable limit, default~5). The sample helps the
+LLM see the actual data format and adjust accordingly.
+\item For each mutation that remained empty or failed: the operator
+identity and its outcome, providing a complete diagnostic picture.
+\end{itemize}
+
+\paragraph{Stable-empty.}
+If \emph{all} applicable mutations either remain empty or fail, the
+relation is classified as \emph{stable-empty}. In this case, emptiness may
+reflect a genuine property of the dataset under the stated constraints
+rather than a synthesis error. To remain conservative, we do not pressure
+the model to introduce relaxations; instead, we report that the empty
+result appears robust under diagnostic probing and encourage the model to
+either preserve the current semantics or emit auxiliary diagnostic outputs
+(e.g., intermediate row counts for upstream relations) to further
+investigate.
+
+\paragraph{Mutations as probes, not patches.}
+A critical design principle is that results produced by mutated programs
+are \textbf{never} used as final answers. Mutations serve exclusively as
+execution-guided diagnostic probes. The LLM receives the mutation feedback
+as part of the tool response alongside the original (empty) query results,
+and decides autonomously whether and how to revise its program. This
+separation ensures that the system does not silently weaken the user's
+intended query semantics: it provides evidence to support the model's
+reasoning while leaving the revision decision to the model.
 
 
 % \begin{algorithm}[t]
