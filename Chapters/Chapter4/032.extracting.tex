@@ -10,7 +10,7 @@ We modified current advanced dynamic symbolic execution tools~\cite{github:pyexs
 
 
 \begin{enumerate}
-    \item Current Python symbol execution tool can not solve class directly. Therefore, it is necessary to split the class into functions (i.e. member functions). The corresponding member variables also need to be changed and used as symbolic inputs.
+    \item Current Python symbol execution tool can not solve class directly. Therefore, it is necessary to split the class into functions (i.e., member functions). The corresponding member variables also need to be changed and used as symbolic inputs.
     \item Replace complex structures and operations, such as lists and dictionaries, that are difficult to handle and do not affect the path, as well as external function calls that may cause path explosion, with symbolic inputs.
     \item Replace the handling of exceptions and warnings that do not affect the path with \textit{return}.
     \item Add a fixed format of \textit{return} statement to capture concrete values of potential symbols.
