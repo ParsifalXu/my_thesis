@@ -449,18 +449,24 @@
 \usepackage{tikz}
 \usepackage{eso-pic}
 % NTU Style 3 statements
-\newcommand\thesisdeclareOriginality[3]{
+\newcommand\thesisdeclareOriginality[4]{
 	\btypeout{Declaration}
 	\thispagestyle{empty}
 	\begin{spacing}{2}
 		\begin{center}\Large \underline{\bf Statement of Originality}\end{center}
 		{\textnormal{\large #1}}
-		\vspace{2.5cm}
+
+		\vspace{0.5cm}
+		{\textnormal{\large \textbf{\underline{Disclosure on AI Use:}}}}
+
+		{\textnormal{\large #2}}
+
+		\vspace{1.5cm}
 		\begin{center}
-			\makebox[4cm]{#2}  \hfill
-      \tikz[remember picture,overlay] 
+			\makebox[4cm]{#3}  \hfill
+      \tikz[remember picture,overlay]
       \node[opacity=0.9,inner sep=0pt]at (2.13, 0.5) {\includegraphics[width=4cm,height=1.527cm]{Styles/ntu-watermark.png}};
-      \makebox[4cm]{\includegraphics[height=0.9cm]{#3}}\\
+      \makebox[4cm]{\includegraphics[height=0.9cm]{#4}}\\
 		\end{center}
 		\vspace{-1.8cm}
 		\begin{center}
