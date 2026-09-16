@@ -220,3 +220,11 @@ TSWLatexianTemp*
 *-tags.tex
 
 *.DS_Store
+
+# Local defense build files and temporary previews
+/.codex_thesis_defense_build/
+/.codex_thesis_defense_build_v2/
+/.tmp/
+
+# Microsoft Office temporary lock files
+~$*
