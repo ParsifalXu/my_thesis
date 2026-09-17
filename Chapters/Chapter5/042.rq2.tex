@@ -1,6 +1,6 @@
 \subsubsection{Effectiveness for general issues}
 
-To evaluate the practical utility of \tooldataloc in real-world software maintenance, we conducted a comparative analysis on the SWE-bench Lite. Existing approaches usually employ top-$n$ strategy, whereas \tooldataloc operates without a predefined $n$. \tref{tab:comparison_isq} illustrates that \tooldataloc remains highly competitive.
+To evaluate the practical utility of \tooldataloc in real-world software maintenance, a comparative analysis was conducted on SWE-bench Lite. Existing approaches usually employ top-$n$ strategy, whereas \tooldataloc operates without a predefined $n$. \tref{tab:comparison_isq} illustrates that \tooldataloc remains highly competitive.
 
 A critical distinction lies in the recommendation density and target precision. While \tooldataloc provides instance-specific localization with an average of only 2 candidates per issue, SOTA baselines rely on much broader and often fixed-size candidate sets to improve their accuracy. Specifically, CoSIL and LocAgent typically default to a top-$5$ recommendation at the function level, while Agentless routinely recommends 5 locations as candidates regardless of the issue's actual complexity. SweRank adopts an even more aggressive strategy, utilizing top-100 rankings.
 

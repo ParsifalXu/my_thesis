@@ -1,12 +1,12 @@
 \subsection{Constraint Extraction}\label{sec:extraction-mpchecker}
 
-We now specially explain how to extract path constraints from code and convert them into expressions which are solvable by SMT solver, as well as how to use LLM to extract constraints from documentation and transform them into expressions containing fuzzy words.
+This subsection explains how to extract path constraints from code and convert them into expressions which are solvable by SMT solver, as well as how to use LLM to extract constraints from documentation and transform them into expressions containing fuzzy words.
 
 \subsubsection{Code Constraint Expression Extraction}
 
-The goal of \toolchecker is to verify whether the constraints between multiple parameters in documentation align with the logic during actual code execution. This requires our tool to understand and analyze deeper constraint relationships. Therefore, we employ symbolic execution to capture as many path conditions as possible and precisely handle complex paths and constraints.
+The goal of \toolchecker is to verify whether the constraints between multiple parameters in documentation align with the logic during actual code execution. This requires the tool to understand and analyze deeper constraint relationships. Therefore, \toolchecker employs symbolic execution to capture as many path conditions as possible and precisely handle complex paths and constraints.
 
-We modified current advanced dynamic symbolic execution tools~\cite{github:pyexsmt, github:pyexz3, github:pysmt, ball2015deconstructing, bruni2011peer} for path exploration. Unfortunately, supporting dynamic languages like Python is more challenging compared to symbolic execution tools designed for static languages such as Java and C. Despite Python's rapid evolution, symbolic execution tools specifically designed for Python have developed slowly, struggling to keep pace with the growing new syntax and features. This forces us to make reasonable modifications to the source code extracted directly from repositories. However, these modifications must not alter the path constraints of the original code; they should be equivalent code transformations that do not affect path exploration. We mainly made the following modifications:
+The study modified current advanced dynamic symbolic execution tools~\cite{github:pyexsmt, github:pyexz3, github:pysmt, ball2015deconstructing, bruni2011peer} for path exploration. Unfortunately, supporting dynamic languages like Python is more challenging compared to symbolic execution tools designed for static languages such as Java and C. Despite Python's rapid evolution, symbolic execution tools specifically designed for Python have developed slowly, struggling to keep pace with the growing new syntax and features. This necessitates appropriate modifications to the source code extracted directly from repositories. However, these modifications must not alter the path constraints of the original code; they should be equivalent code transformations that do not affect path exploration. The main modifications were as follows:
 
 
 \begin{enumerate}
@@ -20,7 +20,7 @@ We modified current advanced dynamic symbolic execution tools~\cite{github:pyexs
 
 In the limit, \toolchecker strives to explore all feasible paths in a Python function by following these processes: 1) Running the function with specific input to trace a path through the control flow of the function; 2) Symbolic executing the path to determine how its conditions depend on the function's input parameters; 3) Utilizing Z3 to generate new parameter values that guide the function toward paths that haven't been covered yet.
 
-Although \toolchecker supports a certain level of external function call analysis, in complex real-world code, an external function call often corresponds to extra more function calls, leading to path explosion. Furthermore, documentation constraints are usually handled within the target function, so we still prefer not to introduce external function calls and to focus the analysis within the target function. Additionally, similar to the current concolic symbolic execution tools for Python, \toolchecker does not yet provide strong support for theorem of strings. Thus, during the actual execution process, we replace the string with a unique large number, which does not affect the exploration of condition constraints.
+Although \toolchecker supports a certain level of external function call analysis, in complex real-world code, an external function call often corresponds to extra more function calls, leading to path explosion. Furthermore, documentation constraints are usually handled within the target function, so the prefered strategy remains to avoid introducing external function calls and to focus the analysis within the target function. Additionally, similar to the current concolic symbolic execution tools for Python, \toolchecker does not yet provide strong support for theorem of strings. Thus, during the actual execution process, \toolchecker replaces the string with a unique large number, which does not affect the exploration of condition constraints.
 
 
 \begin{figure*}[t]
@@ -60,43 +60,42 @@ def fit(sample_weight, strategy, call__check_sample_weight):
     \vspace{-5pt}
 \end{figure*}
 
-We will use an example depicted in \fref{fig:extractpath} to illustrate the entire extraction phase, containing a simplified original source code and modified code from a popular data science project \texttt{scikit-learn}, and its corresponding path constraints. The \textit{fit} function is a member function within a class, and thus member variables such as ``self.strategy'' also exist within the code. We also modified ``None'' as a string to make it easier to be captured, since it is represented as a number 0 during symbolic execution. Our tool first modifies the code and replaces exception handling and external function calls with symbolic inputs, marked as ``ERROR\_END'' and ``call\_'', respectively. For those paths whose final states are ``ERROR\_END'', the final results of the conjunction of the documentation constraint and these paths will be negated during reasoning phase.
+The example depicted in \fref{fig:extractpath} illustrates the entire extraction phase and contains a simplified original source code and modified code from a popular data science project \texttt{scikit-learn}, and its corresponding path constraints. The \textit{fit} function is a member function within a class, and thus member variables such as ``self.strategy'' also exist within the code. ``None'' was also converted to a string to make it easier to be captured, since it is represented as a number 0 during symbolic execution. The tool first modifies the code and replaces exception handling and external function calls with symbolic inputs, marked as ``ERROR\_END'' and ``call\_'', respectively. For those paths whose final states are ``ERROR\_END'', the final results of the conjunction of the documentation constraint and these paths will be negated during reasoning phase.
 
 
 
 \subsubsection{Documentation Constraint Expression Extraction}\label{sec:llm-mpchecker}
 
-In this step, we extract constraints from Python documentation by applying LLMs.
-Since Python documentation can vary in quality and may contain informal writing~\cite{rani2021comments}, the important task is to understand the parameter information within the documentation. To achieve this, we resort to SOTA LLMs. Given Python documentation as input, the LLM is asked to first extract constraint-related sentences and then output them in a standard logical expression format. This includes two steps, model selection and prompt design.
+In this step, \toolchecker extracts constraints from Python documentation by applying LLMs.
+Since Python documentation can vary in quality and may contain informal writing~\cite{rani2021comments}, the important task is to understand the parameter information within the documentation. To achieve this, \toolchecker uses SOTA LLMs. Given Python documentation as input, the LLM is asked to first extract constraint-related sentences and then output them in a standard logical expression format. This includes two steps, model selection and prompt design.
 
 
-\textbf{Model Selection} We adopt GPT-4, which is pretrained on a diverse corpus and shows
-excellent performance in natural language understanding. Based on our preliminary study, GPT-4's
+\textbf{Model Selection} \toolchecker uses GPT-4, which is pretrained on a diverse corpus and shows
+excellent performance in natural language understanding. Based on the preliminary study, GPT-4's
 performance stands out compared to Gemini-1.5~\cite{gemini} and LLaMA-3~\cite{llama3} due to its
 ability to capture details, and it is also well-acquainted with the context of code
 documentation~\cite{dvivedi2024comparative}.
 
 
 \textbf{Prompt Design} Because the constraint extraction task is relatively complex and can be
-broken down into clear steps, we apply the chain-of-thought approach~\cite{wei2024cot}, which has
-been widely proven effective in improving GPT-based model performance. We first divide the prompt
-task into two steps, document input and constraint extraction. \fref{fig:prompt} shows the
+broken down into clear steps, the prompting strategy uses the chain-of-thought approach~\cite{wei2024cot}, which has
+been widely proven effective in improving GPT-based model performance. The prompting task is divided into two steps, document input and constraint extraction. \fref{fig:prompt} shows the
 structure and some details of the used prompt.
-Below, we detail our prompt mechanism for each step.
+The prompt mechanism for each step is detailed below.
 
 \textbf{Document Input Prompt}
-We observe that some documentation may be too lengthy to provide to GPT-4 in a single input, considering that GPT-4 has a maximum token length limit of 8,192 tokens~\cite{modeltoken}. We also find that LLMs exhibit lower performance when dealing with long and complex text inputs as noted in previous research~\cite{han2024lm, jin2024llm}. Thus, we decide to segment the lengthy documents into smaller sections. To determine a heuristic chunk size, we randomly select ten lengthy Python documentation files, split them into chunks of varying word lengths, and use these as inputs for GPT-4. We then evaluate the constraint extraction task performance of GPT-4 based on these inputs to determine which chunk size yields better results. Based on our findings, we decide to standardize the chunk size to 1,500 words (around 2,048 tokens~\cite{tokencount}).
-We also input the parameter list obtained in \sref{sec:preprocess-mpchecker} into GPT-4 to help model better recognize the information related to parameters. The details of the document input prompt are shown in Prompt 1 in \fref{fig:prompt}.
+Some documentation may be too lengthy to provide to GPT-4 in a single input, considering that GPT-4 has a maximum token length limit of 8,192 tokens~\cite{modeltoken}. This study also finds that LLMs exhibit lower performance when dealing with long and complex text inputs as noted in previous research~\cite{han2024lm, jin2024llm}. Thus, the lengthy documents are segmented into smaller sections. To determine a heuristic chunk size, ten lengthy Python documentation files are randomly selected, split into chunks of varying word lengths, and used as inputs for GPT-4. The constraint extraction task performance of GPT-4 is then evaluated based on these inputs to determine which chunk size yields better results. Based on the findings, the chunk size is standardized to 1,500 words (around 2,048 tokens~\cite{tokencount}).
+The parameter list obtained in \sref{sec:preprocess-mpchecker} is also provided to GPT-4 to help model better recognize the information related to parameters. The details of the document input prompt are shown in Prompt 1 in \fref{fig:prompt}.
 
 \textbf{Constraint Extraction Prompt}
-For the constraint extraction task, our prompt is divided into three parts to guide GPT-4 in recognizing text related to constraints in the original documentation, and then, based on that text, to generate a formatted logical expression of the constraint.
+For the constraint extraction task, the prompt is divided into three parts to guide GPT-4 in recognizing text related to constraints in the original documentation, and then, based on that text, to generate a formatted logical expression of the constraint.
 
 The first part involves defining the logical symbols that can be used in the logical format, including implication, negation NOT, logical AND, logical OR, and also defining parentheses to indicate the precedence of logical expressions.
 
-The second part arises from our preliminary study, in which we observed that some Python documentation uses vague terms such as ``override'', ``specify'', ``have an effect'', ``no effect'', ``significant'', and ``ignore'' when mentioning constraints related to parameters. To preserve as much detail as possible from the documentation, we design prompts to guide GPT-4 so that if text related to parameter constraints contains vague keywords, these keywords should be retained in the final logical expression.
+The second part arises from the preliminary study, which found that some Python documentation uses vague terms such as ``override'', ``specify'', ``have an effect'', ``no effect'', ``significant'', and ``ignore'' when mentioning constraints related to parameters. To preserve as much detail as possible from the documentation, prompts are designed toguide GPT-4 so that if text related to parameter constraints contains vague keywords, these keywords should be retained in the final logical expression.
 
-In the third part, to ensure that the format of the logical expression in GPT-4's output is consistent each time and convenient to process, we apply in-context learning techniques that widely used in previous works~\cite{min2022rethinking, rubin2021learning} to enable GPT-based models to handle tasks specific to a domain.
-We include four examples that contain pairs of original constraint-related sentences selected from Python documentation and their corresponding logical expression constraints.
+In the third part, to ensure that the format of the logical expression in GPT-4's output is consistent each time and convenient to process, the prompting strategy applies in-context learning techniques that widely used in previous works~\cite{min2022rethinking, rubin2021learning} to enable GPT-based models to handle tasks specific to a domain.
+The prompt includes four examples that contain pairs of original constraint-related sentences selected from Python documentation and their corresponding logical expression constraints.
 
 
 \begin{figure*}[h]

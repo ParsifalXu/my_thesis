@@ -1,33 +1,27 @@
 \section{Dataset Usage}\label{sec:usage-compsuite}
 
-In this section, we provide instructions on the usage of our dataset.
+This section provides instructions on the usage of the dataset.
 
 \subsection{Exploring an Incompatibility Issue}\label{sec:isolate-compsuite}
 To ensure the reproducibility of incompatibility issues and to
-facilitate the demonstration of such issues, we have annotated
-checkpoints in the version histories of the client projects and
-provided tags that guide users to explore any incompatibility issues
+facilitate the demonstration of such issues, the dataset includes annotated checkpoints in the version histories of the client projects and tags that guide users to explore any incompatibility issues
 present in the \toolcompsuite dataset.
 
-As illustrated on the right-hand side of \fref{fig:architecture}, our
+As illustrated on the right-hand side of \fref{fig:architecture}, the
 approach to handling incompatible client-library pairs involved
 creating a fork~\cite{gitfork} of the original client project for each
 identified pair, while preserving all code and version history
-information. To mark the base version of the project, we utilized the
-\Code{git tag}~\cite{gittag} command, designating it as $V_{base}$. Subsequently, we developed a
-patch to upgrade the library from its old version to its new version,
+information. To mark the base version of the project, the \Code{git tag}~\cite{gittag} command was used to designate the base version as $V_{base}$. Subsequently, a patch was developed to upgrade the library from its old version to its new version,
 a simple process that can be accomplished with a single line change in
 the \Code{pom.xml} file for Maven projects. This patch was then
-applied to the $V_{base}$ version, resulting in a new version that we
-identified as $V_{incomp}$. Notably, the only difference between
+applied to the $V_{base}$ version, resulting in a new version identified as $V_{incomp}$. Notably, the only difference between
 $V_{base}$ and $V_{incomp}$ lies in the library version used: the old
 (compatible) version is utilized on $V_{base}$ while the new
 (incompatible) version is utilized on $V_{incomp}$. For instance, in
 \fref{fig:architecture}, the client project employs version 2.2.1 of
 the \Code{org.restlet.jse-org.restlet} library on its $V_{base}$ and
 version 3.0-M1 on its $V_{incomp}$. In cases where multiple libraries
-exhibit incompatibility issues in the client project, we not only create different branches for each library with its name, but also generate a
-$V_{incomp}$ version tag for each, with accompanying annotations that
+exhibit incompatibility issues in the client project, a separate branch named after each library is created, along with a $V_{incomp}$ version tag for each, with accompanying annotations that
 denote the corresponding library name and version, as depicted in
 \fref{fig:architecture}.
 
@@ -55,12 +49,11 @@ the impact of the library upgrade on the client behaviors.
 
 \subsection{\runner: An Automated Tool for Reproducing Incompatibility Issues}
 
-We further developed an automated tool, named \runner, which is a part of
-\toolcompsuite. With \runner, users can easily reproduce and investigate any
+An automated tool, named \runner, was also developed as part of \toolcompsuite. With \runner, users can easily reproduce and investigate any
 incompatibility issue in a one-click manner by providing the issue ID
 as input.
 
-We offer an option which enables users to reproduce an
+\runner offers an option which enables users to reproduce an
 incompatibility issue end-to-end with a single command as is shown below.
 The command outputs and saves all intermediate results and logs for future
 reference.
@@ -69,14 +62,14 @@ reference.
 python\PYG{+w}{ }main.py\PYG{+w}{ }\PYGZhy{}\PYGZhy{}incompat\PYG{+w}{ }i\PYGZhy{}56
 \end{Verbatim}
 
-When \runner runs, it clones the client project from our forked
+When \runner runs, it clones the client project from the forked
 code repository and saves it in the output directory (which is configurable).
 Then, it checks out to the base version, compiles the code, and runs the
 incompatibility-revealing test. Next, it upgrades the library to the
 new version, reruns the incompatibility-revealing test, and reports
 any failure information to the user.
 
-We also provide a set of commands that break down the entire cycle of incompatibility
+\runner also provides a set of commands that break down the entire cycle of incompatibility
 exploration into separate steps:
 
 \begin{Verbatim}[fontsize=\small,breaklines,linenos,xleftmargin=8pt,numbersep=5pt,commandchars=\\\{\}]
@@ -87,7 +80,7 @@ python main.py \PYGZhy{}\PYGZhy{}testnew i\PYGZhy{}56
 \end{Verbatim}
 
 
-We provide several other \runner commands for users to inspect
+Several other \runner commands are available for users to inspect
 different aspects of the incompatibility issues from the \toolcompsuite dataset. A
 complete list of these commands can be found on \toolcompsuite's website at
 \url{https://github.com/compsuite-team/compsuite}.

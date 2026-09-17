@@ -1,19 +1,19 @@
 \subsubsection{Ablation Study}\label{sec:ablation-dataloc}
-We design an ablation study to quantify how two mechanisms detailed in \sref{sec:method:val-dataloc} and \sref{sec:method:int-dataloc} improve the quality of LLM-generated Datalog program.
+An ablation study quantifies how two mechanisms detailed in \sref{sec:method:val-dataloc} and \sref{sec:method:int-dataloc} improve the quality of LLM-generated Datalog program.
 
 %where ``quality'' encompasses (i) executability (passing parsing and evaluation), (ii) result usefulness (avoiding silent empty outputs caused by mistakes), and (iii) convergence efficiency (reaching a working query with fewer LLM iterations).
 
 %For brevity, we refer to these two types of mechanism as \emph{validation and repair} (VAL) and \emph{intermediate-rule feedback} (INT), respectively.
 
 \textbf{Configurations}
-We evaluate three configurations that progressively enable these mechanisms:
+The study evaluates three configurations that progressively enable these mechanisms:
 \textbf{Base} directly executes the LLM-generated Datalog program without any validation or additional feedback, except the output or error messages from \souffle{} itself. \textbf{VAL} (validation and repair) enables parser-gated validation with deterministic syntactic repairs and high-confidence semantic checks. \textbf{Full} further enables intermediate-rule mutation and feedback.
 %
 All configurations share the same LLM, initial prompt, iteration budget, and underlying fact bases.
 %Each natural-language query is evaluated independently.
 
 \textbf{Metrics}
-We compare (i) execution success rate and non-empty result rate, (ii) mean LLM iterations to first successful execution and (iii) final answer correctness. This evaluation is conducted on a representative subset of \dataset, consisting of the first 25 queries.
+The study compares (i) execution success rate and non-empty result rate, (ii) mean LLM iterations to first successful execution and (iii) final answer correctness. This evaluation is conducted on a representative subset of \dataset, consisting of the first 25 queries.
 
 % \usepackage{siunitx}
 \begin{table}[t]

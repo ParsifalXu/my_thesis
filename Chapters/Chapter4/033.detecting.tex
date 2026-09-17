@@ -1,6 +1,6 @@
 \subsection{Inconsistency Detection}\label{sec:detect-mpchecker}
 
-In the second phase, we extracted constraints from both documentation and code. While \emph{code-constraints} are deterministic in nature, \emph{doc-constraints} inherently contain uncertainties stemming from two main sources. First, there are \emph{implicit constraints} arising from vague or incomplete descriptions, which we address by defining fuzzy words to extend them into soft constraints. Second, we encounter uncertainties introduced by generative models' limited reasoning capabilities and unavoidable hallucination issues, for which no validator exists to definitively determine the correctness of generated constraints. To address this challenging scenario, we proposed a customized fuzzy constraint logic to mitigate such vagueness. With the help of fuzzy words and fuzzy constraint logic, our converter can effectively handle both explicit and implicit constraints. The converter ultimately produces fuzzy expressions, which are then processed by a reasoner based on the z3 SMT (Satisfiability Modulo Theories) solver to detect inconsistencies.
+In the second phase, constraints were extracted from both documentation and code. While \emph{code-constraints} are deterministic in nature, \emph{doc-constraints} inherently contain uncertainties stemming from two main sources. First, there are \emph{implicit constraints} arising from vague or incomplete descriptions, which are addressed by defining fuzzy words to extend them into soft constraints. Second, there are uncertainties introduced by generative models' limited reasoning capabilities and unavoidable hallucination issues, for which no validator exists to definitively determine the correctness of generated constraints. To address this challenging scenario, this study introduces a customized fuzzy constraint logic to mitigate such vagueness. With the help of fuzzy words and fuzzy constraint logic, the converter can effectively handle both explicit and implicit constraints. The converter ultimately produces fuzzy expressions, which are then processed by a reasoner based on the z3 SMT (Satisfiability Modulo Theories) solver to detect inconsistencies.
 
 
 The reasoner offers two strategies, from relaxed to strict, to identify inconsistencies from the perspectives of satisfiability and equivalence. Given a \emph{doc-constraint} $c$ and a \emph{code-constraint} set $P$ containing a group of path constraints $p$, the detection strategies are defined as follows:
@@ -15,22 +15,21 @@ The reasoner offers two strategies, from relaxed to strict, to identify inconsis
 	\end{equation}
 \end{itemize}
 
-For constraints containing sub-constraints that do not exist in the code logic, we employ a heuristic approach to provide suggestions. Specifically, when a constraint mentioned in the documentation is not present in the corresponding code logic, we issue a warning and label this constraint as a potential weak constraint to prompt further investigation by the user.
+For constraints containing sub-constraints that do not exist in the code logic, \toolchecker employs a heuristic approach to provide suggestions. Specifically, when a constraint mentioned in the documentation is not present in the corresponding code logic, \toolchecker issues a warning and labels this constraint as a potential weak constraint to prompt further investigation by the user.
 
 
 
 \subsubsection{Fuzzy Words}\label{sec:fuzzword-mpchecker}
 
-The example from \sref{sec:eg2-mpchecker} illustrates a very typical implicit constraint with fuzzy words, where part of constraint is clearly defined while others remain uncertain. We introduce a series of fuzzy words to help LLM extract constraints better. These fuzzy words frequently appear in documentation but don't represent specific values, making it challenging for the LLM to extract them directly. We generally categorize these fuzzy words into two types: \textit{existence} and \textit{non-existence}. In fuzzy words, \textit{non-existence} includes ``ignore'', ``no effect'', ``unused'', ``override'', indicating that a parameter either is unused or does not exist within code segments where other conditions are met. Similarly, \textit{existence} includes ``specify'', ``have an effect'', ``exist'', ``significant'', indicating that the parameter is used or exists when other conditions are met.
+The example from \sref{sec:eg2-mpchecker} illustrates a very typical implicit constraint with fuzzy words, where part of constraint is clearly defined while others remain uncertain. This study introduces a series of fuzzy words to help LLM extract constraints better. These fuzzy words frequently appear in documentation but don't represent specific values, making it challenging for the LLM to extract them directly. These fuzzy words fall into two general categories: \textit{existence} and \textit{non-existence}. In fuzzy words, \textit{non-existence} includes ``ignore'', ``no effect'', ``unused'', ``override'', indicating that a parameter either is unused or does not exist within code segments where other conditions are met. Similarly, \textit{existence} includes ``specify'', ``have an effect'', ``exist'', ``significant'', indicating that the parameter is used or exists when other conditions are met.
 
-We implement several specialized predicates to evaluate such implicit constraints. \toolchecker will first trace the target variable's define-use chain (DU-chain)~\cite{kennedy1978use, harrold1994efficient} and then check if the definition and usage of it are existed or not under a specific program path. For instance, ``\texttt{exist(x)}'' will check if the definition and usage of a variable \texttt{x} are existed in the program path with other explicit conditions. If found, it will return \texttt{True}; otherwise, it will return \texttt{False}. Similarly, ``\texttt{ignore(x)}'' will check whether the definition and usage of \texttt{x} are absent under the program path with given explicit conditions. It can be further extended to check weak \emph{doc-constraints}. Like the example in \sref{sec:eg2-mpchecker}, \textit{gamma} will be ignored not only when \texttt{``affinity$=$nearest\_neighbors''} but also ignored when \texttt{``affinity$=$precomputed\_nearest\_neighbors''} as well as \texttt{``affinity$=$precomputed''}.
+Several specialized predicates are implemented to evaluate such implicit constraints. \toolchecker will first trace the target variable's define-use chain (DU-chain)~\cite{kennedy1978use, harrold1994efficient} and then check if the definition and usage of it are existed or not under a specific program path. For instance, ``\texttt{exist(x)}'' will check if the definition and usage of a variable \texttt{x} are existed in the program path with other explicit conditions. If found, it will return \texttt{True}; otherwise, it will return \texttt{False}. Similarly, ``\texttt{ignore(x)}'' will check whether the definition and usage of \texttt{x} are absent under the program path with given explicit conditions. It can be further extended to check weak \emph{doc-constraints}. Like the example in \sref{sec:eg2-mpchecker}, \textit{gamma} will be ignored not only when \texttt{``affinity$=$nearest\_neighbors''} but also ignored when \texttt{``affinity$=$precomputed\_nearest\_neighbors''} as well as \texttt{``affinity$=$precomputed''}.
 
 
 
 \subsubsection{Fuzzy Constraint Satisfaction}\label{sec:fuzzlogic-mpchecker}
 
-While we have employed several strategies in Phase II to maximize LLM's understanding of
-constraints and restrict randomness in outputs, inaccurate extraction is still unavoidable.
+Although Phase II employs several strategies to maximize the LLM's understanding of constraints and restrict randomness in outputs, inaccurate extraction is still unavoidable.
 The main reasons are threefold: (1) typos inevitably occur when developers write documentation; (2)
 the hallucination issues inherent to black-box generative models; and (3) the intrinsic ambiguity in
 natural languages. This implies that correct documentation descriptions can generate incorrect \emph{doc-constraints}, and incorrect documentation descriptions can also have the chance to generate correct \emph{doc-constraints}.
@@ -41,26 +40,26 @@ Nevertheless, due to minor errors introduced by LLMs, such as a single letter be
 in a parameter name, or a comparison operator being reversed, e.g., writing ``<'' instead of ``>'',
 a \emph{doc-constraint} can be mistakenly identified as inconsistent when it is actually correct.
 
-To address this, we proposed a customized fuzzy constraint logic that reconciles such
+To address this, a customized fuzzy constraint logic was proposed that reconciles such
 unpredictability.
 In a traditional fuzzy constraint~\cite{kosko1993fuzzy, ruttkay1994fuzzy}, a membership function
 assigns a degree of satisfaction (ranging from 0 to 1) to each possible variable value.
 It enables partial fulfillment of a condition, with satisfaction measured on a continuous scale.
-In our case, a constraint needs to be measured on a new scale, assessing ``how likely'' the
+In this setting, a constraint needs to be measured on a new scale, assessing ``how likely'' the
 extracted \emph{doc-constraint} conforms to the \emph{code-constraints}.
-Therefore, we introduced a unique similarity computation which serves as the membership function.
+Therefore, a unique similarity computation was introduced which serves as the membership function.
 
-\fref{fig:ebnf} shows an EBNF grammar for our multi-parameter constraints.
+\fref{fig:ebnf} shows an EBNF grammar for the multi-parameter constraints.
 A multi-parameter constraint is a combination and nesting of binary expressions and Boolean
 operators, which can be viewed as a complete binary tree where leaf nodes are binary expressions
 over single parameters and non-leaf nodes are logical operators connecting them.
-Without loss of generality, we only keep negation, conjunction, and disjunction in the constraints;
+Without loss of generality, the constraints retain only negation, conjunction, and disjunction;
 logical relations such as implications can be simplified accordingly.
 The fuzziness of a constraint is defined with respect to a set of \emph{environment expressions},
 facts that are known to hold (with a truth value of 1).
 In other words, the instantiation of a specific tree structure and nodes is a constraint $c$
 evaluated against a set of expressions $\{e_1, e_2, \ldots, e_n\}$.
-Next, we define the membership function of our fuzzy constraint logic through a few similarity
+Next, the membership function of the proposed fuzzy constraint logic is defined through a few similarity
 functions.
 
 
@@ -108,8 +107,8 @@ or $v$) and $|s|$ denotes the length of it.
     cos\theta(\bowtie_1, \bowtie_2) = \frac{\delta_{\bowtie_1} \cdot \delta_{\bowtie_2}}{\|\delta_{\bowtie_1}\| \|\delta_{\bowtie_2}\|}
 \end{equation}
 
-As illustrated in \eref{eq:embedding}, we design an operator embedding across five key dimensions: \underline{\textbf{C}}omparison, \underline{\textbf{E}}quality, \underline{\textbf{G}}reater than, \underline{\textbf{L}}ess than, and \underline{\textbf{N}}egativity.
-This way, we may calculate the similarity between two operators by simply calculating the cosine
+As illustrated in \eref{eq:embedding}, the proposed approach uses an operator embedding across five key dimensions: \underline{\textbf{C}}omparison, \underline{\textbf{E}}quality, \underline{\textbf{G}}reater than, \underline{\textbf{L}}ess than, and \underline{\textbf{N}}egativity.
+This way, the similarity between two operators can be calculated as the cosine
 similarity between two vectors.
 The result is highly intuitive. For example, with $\delta_{<} = (1, 0, 0, 1, 0)$, $\delta_{>} =
 (1, 0, 1, 0, 0)$, and $\delta_{<=} = (1, 1, 0, 1, 0)$, the similarity between ``$<$'' and ``$>$''
@@ -117,7 +116,7 @@ is 0.5, while the similarity between ``$<$'' and ``$<=$'' is 0.82.
 
 The weight of operator similarity is set as $\beta$ such that the weights of operators, values, and
 parameters within a given experssion should sum to one.
-Thus, we have $\alpha = \frac{1 - \beta}{2}$ and the similarity $\sigma$ of two single parameter
+Thus, the derivation gives $\alpha = \frac{1 - \beta}{2}$ and the similarity $\sigma$ of two single parameter
 expressions (i.e., atomic constraint) can be calculated according to \eref{eq:simexpr}.
 
 
@@ -169,7 +168,7 @@ ensures complementary probabilities. For instance, ``0.7$\cdot$False = 0.3$\cdot
 a 70\% probability of inconsistency or a 30\% probability of consistency.
 
 
-\subsubsection{Constraint Similarity Threshold.} LLMs demonstrate a great potential in constraint extraction, yet they still encounter errors such as using incorrect parameter names or values and introducing non-existent constraints. To reduce false positives from these inevitable issues, we set a constraint similarity threshold of 0.85. This is based on the observation that a high constraint similarity (>0.85) indicates a high likelihood of misinterpretation or conflation by the LLM.
+\subsubsection{Constraint Similarity Threshold.} LLMs demonstrate a great potential in constraint extraction, yet they still encounter errors such as using incorrect parameter names or values and introducing non-existent constraints. To reduce false positives from these inevitable issues, \toolchecker sets a constraint similarity threshold of 0.85. This is based on the observation that a high constraint similarity (>0.85) indicates a high likelihood of misinterpretation or conflation by the LLM.
 
 For instance, in \texttt{scikit-learn}, the documentation of \texttt{LinearSVC} states: ``\emph{If n\_samples < n\_features and optimizer supports chosen loss, multi\_class and penalty, then dual will be set to True}''. However, the extracted constraint is ``\texttt{$($samples$<$features$)$$\wedge$$($dual$=$True$)$}'', where two parameters are mistakenly mapped to similar names. Their constraint similarity is 0.86, exceeding the threshold, leading \toolchecker to discard the result. Moreover, in most cases where the expression contains only a single parameter, the threshold exhibits stronger filtering capability.
 

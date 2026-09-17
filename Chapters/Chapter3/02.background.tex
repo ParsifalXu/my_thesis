@@ -1,5 +1,5 @@
 \section{Client-specific Upgrade Incompatibility}
-In this section, we delve deeper into the issue of client-specific upgrade incompatibilities.
+This section provides a more in-depth examination of the issue of client-specific upgrade incompatibilities.
 
 Modern complex software systems are typically composed of components developed by multiple teams or even distinct organizations. These components continuously evolve throughout their lifecycle. Because developers often lack comprehensive understanding of changes happened in external components, ensuring that a new dependency upgrade will not introduce compatibility issues into an existing system remains a significant challenge.
 
@@ -34,7 +34,7 @@ By contrast, Regression testing~\cite{yoo2012regression} operates within the spe
 
 \section{Dataset Creation}\label{creation}
 
-In this section, we outline the methodology and process employed to
+This section outlines the methodology and process employed to
 create the \toolcompsuite dataset.
 
 \begin{landscape}
@@ -58,25 +58,22 @@ create the \toolcompsuite dataset.
 \end{landscape}
 
 \subsection{Subjects Selection}
-To ensure the representativeness and reproducibility of the \toolcompsuite dataset, we
-focus on including high-quality and popular client projects and
+To ensure the representativeness and reproducibility of the \toolcompsuite dataset, the selection process focuses on high-quality and popular client projects and
 libraries. The selection of client projects was sourced from
 GitHub~\cite{github}, a widely recognized online community for hosting
 open-source codebases. To ensure the inclusion of the most
-popular projects, we systematically sorted all the available projects
-in descending order based on their number of stars on GitHub and
-selected the target clients from the top of the list. The selection of
+popular projects, all the available projects were systematically sorted
+in descending order based on their number of stars on GitHub and the target clients were selected from the top of the list. The selection of
 libraries was sourced from Maven Central~\cite{mvnrepo}, which hosts
 33.5M of Java libraries and their associated binaries, making it
 a widely used repository of libraries for Java API and library
-research~\cite{mostafa2017study,wu2016exploratory,qiu2016understanding,kula2014visualizing}. We include a library in the dataset only
-if it has more than 100 usages (i.e., clients) on Maven
-Central. Our selection criteria aimed to ensure the inclusion of
+research~\cite{mostafa2017study,wu2016exploratory,qiu2016understanding,kula2014visualizing}. A library is included in the dataset only if it has more than 100 usages (i.e., clients) on Maven
+Central. The selection criteria aimed to ensure the inclusion of
 popular and widely used client projects and libraries in the dataset,
 thereby maximizing its relevance and usefulness to the research
 community.
 
-Among the highly-rated client projects, our selection criteria focused
+Among the highly-rated client projects, the selection criteria focused
 on those that use Maven~\cite{mvn} as their build systems, given its
 widespread adoption and maturity. Maven provides a standardized
 approach to managing Java projects and their dependencies, where each
@@ -87,32 +84,23 @@ functionality for running unit tests and generating test reports,
 which simplifies the identification and diagnosis of incompatibility
 issues arising from test executions. Since Maven projects typically rely on Maven Central as their
 centralized repository for hosting and downloading libraries, the process of obtaining and managing
-libraries in our dataset is simplified.
+libraries in the dataset is simplified.
 
 \tref{client-library} presents the top 5 client projects and libraries in the \toolcompsuite dataset, ranked by popularity. For
-each client project, we provide information on its lines of code (LoC)
-and the number of stars it has received on GitHub, while for each
-library, we include its number of usages by other projects from Maven Central.
+each client project, the table provides its lines of code (LoC) and number of GitHub stars; for each library, it lists its number of usages by other projects from Maven Central.
 
 In total, \toolcompsuite comprises 123 incompatible client-library pairs. These pairs encompass 88 distinct
 clients and 104 libraries altogether. On average, the affected clients have 2.5K stars on GitHub
 and 358.7K lines of code, while incompatible libraries have 4.8K usages on Maven Central.
-Thus, we believe that the incompatibility issues present in
+These statistics suggest that the incompatibility issues present in
 the \toolcompsuite dataset have a significant impact on a large number of
 codebases and can affect many users of the libraries, either directly
 or indirectly.
 
 To ensure that all client projects in the dataset are executable and
-the runs are reproducible, we performed a series of checks on each
-project. First, we checked out the project to the version (SHA) at the time of
-the dataset creation, which we refer to as the \emph{base version}.
-Next, we ran the standard Maven project compilation command to verify if the
-project compiles successfully. If the project fails to compile, we
-excluded it from the dataset. Subsequently, we ran the standard Maven
-test command to execute all the tests in the project, ensuring that
-all tests pass on the base version. We excluded any project that fails
-to pass tests at this stage. Finally, we only included the client
-projects that successfully compile and pass all tests on the base version,
+the runs are reproducible, each project underwent a series of checks. First, the project was checked out to the version (SHA) at the time of
+the dataset creation, referred to as the \emph{base version}.
+Next, the standard Maven project compilation command was executed to verify whether the project could be compiled successfully. Projects that failed to compile were excluded from the dataset. Subsequently, the standard Maven test command was executed to run all the tests in the project, ensuring that all tests passed on the base version. Any project that failed to pass tests at this stage was excluded. Finally, only client projects that successfully compiled and passed all tests on the base version were included,
 thereby ensuring that the dataset is only consist of projects which can
 be executed and whose executions can be reproduced.
 
@@ -130,40 +118,28 @@ be executed and whose executions can be reproduced.
 
 \subsection{Data Collection}\label{sec:data:collect-compsuite}
 
-We collected the data following the below procedures.
+The data were collected using the following procedures.
 \fref{fig:architecture} visualizes the overall architecture of \toolcompsuite.
-In the upper left portion of \fref{fig:architecture}, we
-illustrate the approach taken by \toolcompsuite to identify incompatibilities
+The upper left portion of \fref{fig:architecture} illustrates the approach taken by \toolcompsuite to identify incompatibilities
 between a client project and its dependent libraries. Specifically,
-for each client project on its base version, we upgraded each of its
-dependent libraries and tested if the upgrade caused any test
-failures. Our intuition behind this approach is that since all the
+for each client project on its base version, each dependent library was upgraded individually, and tests were run to determine whether the upgrade caused any failures. The intuition behind this approach is that since all the
 tests in the client passed on the base version, if upgrading any
 library causes a test failure, that library upgrade must have
-introduced incompatibility issues. We refer to the test that flips
-from passing to failing as an \emph{incompatibility-revealing test}.
+introduced incompatibility issues. A test that flips from passing to failing is termed an \emph{incompatibility-revealing test}.
 
-To automatically upgrade the libraries and run the tests, we utilized
-the Maven Versions Plugin~\cite{mvnplugin}. For a given client project, we
-scanned its dependency list using this plugin to identify all the
+To automatically upgrade the libraries and run the tests, the data collection process used the Maven Versions Plugin~\cite{mvnplugin}. For a given client project, its dependency list was scanned using this plugin to identify all the
 libraries that had newer versions available on Maven Central. If a
-library had a newer version, we marked it as upgradable. Next, for
-each upgradable library, we used the plugin to upgrade it by updating
+library had a newer version, it was marked as upgradable. Next, for
+each upgradable library, the plugin was used to upgrade it by updating
 the \Code{pom.xml} file to the most recent version on Maven
-Central. We then re-executed the test suite of the client. If any
-tests failed during this run, we marked the client-library pair as
-having an incompatibility issue and marked the test as an
-incompatibility-revealing test of this issue. It is crucial to note
-that we only upgraded one library at a time to isolate failures caused
+Central. The test suite of the client was then re-executed. If any
+tests failed during this run, the client-library pair was marked as having an incompatibility issue, and the test was marked as an incompatibility-revealing test of this issue. It is crucial to note
+that only one library was upgraded at a time to isolate failures caused
 by different libraries. To ensure the accuracy and dependability of
-the dataset, we carried out a manual verification process for each
-identified incompatibility issue. In particular, we carefully examined
-the test failure messages and reports to confirm that they were indeed
+the dataset, each identified incompatibility issue was manually verified. In particular, the test failure messages and reports were carefully examined to confirm that they were indeed
 caused by the upgraded library. For each incompatible client-library
-pair, we selected a single incompatibility-revealing test to be
-included in the final dataset. In cases where a client-library pair
-had multiple incompatibility issues, we chose the one that we deemed
-most representative and easy to comprehend.
+pair, a single incompatibility-revealing test was selected for inclusion in the final dataset. In cases where a client-library pair
+had multiple incompatibility issues, the issue judged most representative and easy to comprehend was selected.
 
 
 
@@ -189,8 +165,7 @@ most representative and easy to comprehend.
 \caption{The data schema of \toolcompsuite}\label{fig:json}
 \end{figure}
 
-Finally, we persisted the metadata of all the selected incompatibility
-issues in a collection of \Code{json} files.
+Finally, the metadata of all the selected incompatibility issues were persisted in a collection of \Code{json} files.
 \fref{fig:json} presents the metadata of an incompatibility
 issue in the \toolcompsuite dataset. The data schema includes the ID of the
 issue, client project name, SHA of the client base version, URL of the

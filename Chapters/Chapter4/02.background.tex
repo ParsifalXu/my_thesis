@@ -1,7 +1,7 @@
 \section{Background}\label{sec:bg-mpchecker}
-In this section, we review the essential terminology and background necessary for understanding the subsequent chapters.
+This section reviews the essential terminology and background necessary for understanding the subsequent chapters.
 \subsection{Multi-Parameter Constraints}\label{sec:eg-mpchecker}
-We use two examples to illustrate inconsistencies between API documentation and the corresponding code
+Two examples illustrate inconsistencies between API documentation and the corresponding code
 caused by multi-parameter interdependence.
 Both of them come from open-source Python data science libraries and were successfully
 detected by \toolchecker.
@@ -78,8 +78,7 @@ This indicates that the constraint is inaccurate and demonstrates a form of inco
 
 For this type of implicit constraint, traditional pattern-based approaches are not able to extract
 the \emph{doc-constraint} correctly, thus fail to detect the inconsistencies.
-To solve this issue, we design a customized constraint that incorporates fuzzy words, and adopt
-few-shot learning to teach LLMs how to generate such constraints (details in
+To solve this issue, a customized constraint incorporating fuzzy words is designed, and few-shot learning is adopted to teach LLMs how to generate such constraints (details in
 \sref{sec:llm-mpchecker}).
 In this case, the \emph{doc-constraint} should be \textit{``(affinity = "nearest\_neighbors") $\rightarrow$
 (ignore(gamma))''}, where a special predicate \textit{``ignore(x)''} is used to indicate that a parameter

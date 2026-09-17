@@ -1,6 +1,6 @@
 \section{Application Scenarios}\label{sec:app-compsuite}
 
-We anticipate that both researchers and practitioners can benefit from
+It is anticipated that both researchers and practitioners can benefit from
 \toolcompsuite to facilitate their investigations and research on errors
 and test failures induced by library upgrades. \toolcompsuite supports the evaluation of
 various program analysis techniques, such as software upgrade compatibility checking, debugging,
@@ -20,7 +20,7 @@ the library changes.
 
 
 
-We detail the three usage scenarios as follows.
+The usage scenarios are detailed as follows.
 \begin{itemize}[leftmargin=*,topsep=2pt]
     \item \textbf{Compatibility Checkers and Detectors.}
       The existing techniques for compatibility checking and detection
@@ -34,8 +34,7 @@ We detail the three usage scenarios as follows.
       program states~\cite{zhuclient,mora2018client}. iii) Techniques for
       detecting dependency conflicts~\cite{wang2021will,wang2018dependency,wang2019could},
       which aim to identify library APIs that exhibit inconsistent
-      semantics between libraries due to class path shading. We
-      believe that developers of techniques in the first two
+      semantics between libraries due to class path shading. This study takes the view that developers of techniques in the first two
       categories can use \toolcompsuite as a benchmark to evaluate their tools'
       performance, such as precision and recall. They can run their
       tools on the \toolcompsuite dataset and compare the results with the
@@ -69,5 +68,5 @@ We detail the three usage scenarios as follows.
       analysis by trying to identify the corresponding library change
       that caused the compatibility issue.
 
-    \item \textbf{Benchmark.} With the growing integration of AI in software engineering, we also envision that \toolcompsuite as a robust benchmark can be used to evaluate the performance of advancing AI-driven techniques in diagnosing, locating, and resolving compatibility issues. For example, devlopers of AI tools utilize \toolcompsuite to quantify the detection rate of LLM-based compatibility checkers or the pass rate of generated patches.
+    \item \textbf{Benchmark.} With the growing integration of AI in software engineering, \toolcompsuite is also envisioned as a robust benchmark to evaluate the performance of advancing AI-driven techniques in diagnosing, locating, and resolving compatibility issues. For example, devlopers of AI tools utilize \toolcompsuite to quantify the detection rate of LLM-based compatibility checkers or the pass rate of generated patches.
 \end{itemize}
