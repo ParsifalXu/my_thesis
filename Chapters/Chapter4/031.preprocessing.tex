@@ -9,18 +9,22 @@ To help the LLM better focus on the constraints between parameters and reduce th
 
 
 \begin{figure*}[t]
+  \centering
 	\vspace{2mm}
-    \begin{subfigure}{0.49\linewidth}
-        \begin{tcolorbox}[colback=Emerald!10,colframe=cyan!40!black,title=\textbf{Numpy Style Docstrings}]
+    \begin{subfigure}[t]{0.49\linewidth}
+        \begin{tcolorbox}[equal height group=docstringstyles,valign=top,colback=Emerald!10,colframe=cyan!40!black,title=\textbf{Numpy Style Docstrings}]
 \begin{lstlisting}[escapechar=@]
 class ExampleNumpyStyle():
-  """Exceptions are documented
+"""Exceptions are documented
+
   @\colorbox{blue!20}{Parameters}@
   ----------
   msg : str
     Human readable string describing the exception.
   code : obj:`int`, optional 
     Numeric error code.
+
+    
   @\colorbox{blue!20}{Attributes}@
   ----------
   msg : str
@@ -28,6 +32,7 @@ class ExampleNumpyStyle():
   code : int
     Numeric error code.
   """
+
   def __init__(self, msg, code):
     self.msg = msg
     self.code = code
@@ -35,8 +40,8 @@ class ExampleNumpyStyle():
         \end{tcolorbox}
         \label{fig:numpy}
     \end{subfigure}
-    \begin{subfigure}{0.49\linewidth}
-\begin{tcolorbox}[colback=Salmon!20, colframe=Salmon!90!Black,title=\textbf{Google Style Docstrings}]
+    \begin{subfigure}[t]{0.49\linewidth}
+\begin{tcolorbox}[equal height group=docstringstyles,valign=top,colback=Salmon!20, colframe=Salmon!90!Black,title=\textbf{Google Style Docstrings}]
 \begin{lstlisting}[escapechar=@]
 class ExampleGoogleStyle():
   """Exceptions are documented
@@ -45,7 +50,7 @@ class ExampleGoogleStyle():
         
   @\colorbox{blue!20}{Args:}@
     msg (str): Human readable string describing the exception.
-    code (:obj:`int`, optional): Error code.
+    code (obj:`int`, optional): Error code.
 
   @\colorbox{blue!20}{Attributes:}@    
     msg (str): Human readable string describing the exception.
@@ -62,5 +67,4 @@ class ExampleGoogleStyle():
     \label{fig:docstring}
     \vspace{-10pt}
 \end{figure*}
-
 
