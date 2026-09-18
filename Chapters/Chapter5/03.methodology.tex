@@ -108,7 +108,7 @@ either a legitimate result or an overly restrictive rule, these mutations serve 
 probes. Their outputs are used to localize the source of failure and are never returned as part of
 the final answer.
 
-\noindent\textbf{Mutation catalog.}
+\paragraph{Mutation catalog.}
 For a zero-cardinality relation~$R$, the diagnostic mechanism mutates only rules that define~$R$. The
 catalog is prioritized and capped for cost control; each mutation preserves
 the rule head and changes only the body.
@@ -133,7 +133,7 @@ M1--M2 apply only when quoted string literals occur in the rule body; M3--M5
 apply only when their target atom exists and the remaining body still contains
 at least one atom.
 
-\noindent\textbf{Feedback construction.}
+\paragraph{Feedback construction.}
 After applicable probes run, \tooldataloc classifies each zero-cardinality relation as:
 \emph{fragile-empty} if any successful mutation yields rows; \emph{stable-empty}
 if at least one mutation succeeds and all successful mutations remain empty; and

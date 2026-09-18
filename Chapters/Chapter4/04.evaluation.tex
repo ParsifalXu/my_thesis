@@ -24,6 +24,7 @@ Based on constraint dataset, an inconsistency dataset was constructed comprising
 
 \begin{landscape}
 \begin{table}[]
+\centering
 \caption{Data science libraries used in the experiments}
 \begin{tabular}{lrrrrrrr}
 \hline
@@ -130,7 +131,7 @@ The remaining 9 unresolved inconsistent constraints stem from external function 
 
 A notable situation arose during one issue report: even though the issue had been confirmed, one developer expressed dissatisfaction. He believed the reporters were an automated tool or AI-based bot because of their anonymous status, which diminished his enthusiasm for addressing the issue. With a mass of LLM-based program analysis or inconsistency checkers now available, while they offer insights sometimes, their results often cost more manual verification than traditional tools due to higher uncertainty.
 
-\textbf{Comparative Study}
+\paragraph{Comparative Study.}
 Therefore, a comparative experiment was conducted between the tool and the approach of using only LLMs as a constraint checker on the same dataset. To align with the experiment settings, GPT-4, one of the leading models, was selected for comparison and evaluated under two settings: 1) LLM: providing the raw documentation and code as input, directly prompting GPT to check for consistency, and 2) LLM+C: This is a two-phase processing. Extracting constraints using the LLM first, and then providing both these constraints and their corresponding code to the LLM for consistency check. In addition, the LLM is also required to provide justifications for its answers.
 
 
