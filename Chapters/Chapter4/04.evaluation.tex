@@ -25,7 +25,7 @@ Based on constraint dataset, an inconsistency dataset was constructed comprising
 \begin{landscape}
 \begin{table}[]
 \centering
-\caption{Data science libraries used in the experiments}
+\caption{Data science libraries used in the experiments.}
 \begin{tabular}{lrrrrrrr}
 \hline
 \multicolumn{1}{c}{Project} & \multicolumn{1}{c}{class} & \multicolumn{1}{c}{class w/ doc} & \multicolumn{1}{c}{func} & \multicolumn{1}{c}{func w/ doc} & \multicolumn{1}{c}{KLOC} & \multicolumn{1}{c}{avg. params} & \multicolumn{1}{c}{\#Stars} \\ \hline
@@ -59,7 +59,7 @@ After including chain-of-thought and few-shot learning, \toolchecker's performan
 
 \begin{table}[t]
     \centering
-    \caption{Results of \toolchecker on constraint extraction}
+    \caption{Results of \toolchecker on constraint extraction.}
     \label{tab:rq1}
     \small
     \setlength{\tabcolsep}{5pt}
@@ -119,27 +119,29 @@ The remaining 9 unresolved inconsistent constraints stem from external function 
 
 
 
-\begin{table}[]
-	\vspace{2mm}
-	\captionsetup{aboveskip=6pt, belowskip=-8pt}
-	\begin{threeparttable}
-		
-  \caption{Results of LLM and \toolchecker on detecting multi-parameter CDIs}
-  \begin{tabularx}{0.91\linewidth}{p{0.75\linewidth}lrrrr}
-  \hline
-   Checker  & FN  & TP  & Recall\\ \hline
-  LLM        & 119  & 7  & 5.6\% \\
-  LLM+C      & 74  & 52  & 41.3\% \\
-  \vanillatool   & 39  & 87  & 69.0\%\\
-  \fuzzytool  & 9 & 117 & 92.8\% \\ \hline
-  \end{tabularx}
-  \begin{tablenotes}
-  	\small
-  	\item LLM: raw documentation and corresponding code; LLM+C: extracted \emph{doc-constraints} from documentation and corresponding code; \vanillatool: \toolchecker without fuzzy words and fuzzy constraint logic; \fuzzytool: \toolchecker with fuzzy words and fuzzy constraint logic.
-  \end{tablenotes}
-  \label{tab:res}
-\end{threeparttable}
-\vspace{-12pt}
+\begin{table}[t]
+    \centering
+    \caption{Results of LLM and \toolchecker on detecting multi-parameter Code-Documentation Inconsistencies (CDIs).}
+    \label{tab:res}
+    \small
+    \setlength{\tabcolsep}{8pt}
+    \renewcommand{\arraystretch}{1.15}
+    \begin{threeparttable}
+    \begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}Xrrr@{}}
+        \toprule
+        Checker & FN & TP & Recall \\
+        \midrule
+        LLM & 119 & 7 & 5.6\% \\
+        LLM+C & 74 & 52 & 41.3\% \\
+        \vanillatool & 39 & 87 & 69.0\% \\
+        \fuzzytool & 9 & 117 & 92.8\% \\
+        \bottomrule
+    \end{tabularx}
+    \begin{tablenotes}[flushleft]
+        \footnotesize
+        \item LLM: raw documentation and corresponding code; LLM+C: extracted \emph{doc-constraints} from documentation and corresponding code; \vanillatool: \toolchecker without fuzzy words and fuzzy constraint logic; \fuzzytool: \toolchecker with fuzzy words and fuzzy constraint logic.
+    \end{tablenotes}
+    \end{threeparttable}
 \end{table}
 
 

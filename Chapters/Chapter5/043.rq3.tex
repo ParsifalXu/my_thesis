@@ -9,12 +9,15 @@ Token consumption varies substantially across methods and foundation models. As 
 
 The efficiency of \tooldataloc stems from its hybrid architecture. In the design, the LLM-based agent is strategically confined to high-level tasks: query analysis, Datalog program synthesis, and final candidate verification. By delegating deep inference to a specialized engine, \tooldataloc greatly reduces the overhead of redundant multi-round exploration. In addition, errors carry small cost, requiring only the regeneration of a Datalog program. Beyond this low overhead, the parser-gated validation and intermediate-rule feedback actively assist the LLM in synthesizing high-quality programs.
 
+\begin{landscape}
 \begin{figure}[t]
 	\centering
-	\includegraphics[width=0.89\textwidth]{Figures/Chapter5/cost.png}
-	\caption{Average execution time and token consumption of \dataset}
+	\includegraphics[width=\linewidth]{Figures/Chapter5/cost.png}
+	\caption{Average execution time and token consumption of \dataset.}
 	\label{fig:cost_analysis-dataloc}
 \end{figure}
+	
+\end{landscape}
 
 \smallskip
 \noindent\shadowbox{%

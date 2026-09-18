@@ -5,7 +5,7 @@ This section first formalizes the repository-level code localization problem. It
 \begin{figure}[t]
 	\centering
 	\includegraphics[width=\linewidth]{Figures/Chapter5/architecture.pdf}
-	\caption{Overview of \tooldataloc framework}
+	\caption{Overview of \tooldataloc framework.}
 	\label{fig:arch-dataloc}
 \end{figure}
 \end{landscape}
@@ -46,12 +46,15 @@ As shown in the red box in \fref{fig:arch-dataloc}, before execution, \tooldatal
 \subsubsection{Context Retrieval and Final Verification}
 As depicted in the yellow box in \fref{fig:arch-dataloc}, once a set of potential code locations has been determined, the agent retrieves the relevant code snippets using \texttt{get\_sources} or \texttt{get\_file\_contents} and conducts a verification against the original query. These verified locations are then returned in a standardized format (e.g., \texttt{FILE\_PATH:CLASS.METHOD}). Although the agent may undergo multiple internal reasoning iterations, the user experience is streamlined into a single step: submitting a query and receiving a list of locations. This fully automated closed-loop design ensures both usability and seamless integration into production development environments.
 
+\begin{landscape}
 \begin{figure}[t]
 	\centering
-	\includegraphics[width=\textwidth]{Figures/Chapter5/mutate.pdf}
-	\caption{Intermediate rules mutation and feedback}
+	\includegraphics[width=\linewidth]{Figures/Chapter5/mutate.pdf}
+	\caption{Intermediate rules mutation and feedback.}
 	\label{fig:mutate-dataloc}
-\end{figure}
+\end{figure}	
+\end{landscape}
+
 \subsection{Repairing LLM-Generated Datalog}
 \label{sec:method:val-dataloc}
 LLM-generated Datalog programs (the dialect used by \souffle) often contain syntactic and semantic errors, especially when the model is not fine-tuned for Datalog programming.
