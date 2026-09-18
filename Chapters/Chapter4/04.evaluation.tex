@@ -93,7 +93,12 @@ To measure \toolchecker's effectiveness in detecting multi-parameter API documen
 The \vanillatool does not include fuzzy words or apply fuzzy constraint satisfaction theory, limiting its ability to handle implicit constraints. Despite these limitations, it achieved an impressive 69\% recall by detecting 87 inconsistencies. With fuzzy words and fuzzy constraints logic, \toolchecker's performance significantly improved, successfully identifying 117 inconsistencies with a recall of 92.8\% and  an accuracy $=\frac{TP+TN}{TP+TN+FP+FN}=\frac{117+88}{216}=94.9\%$. This demonstrates that incorporating fuzzy words and fuzzy constraints can expand the range of detectable constraints. However, two false positives were identified because the constraints lie between the parameters and method calls, rather than among the parameters. One example is shown below:
 
 
-\texttt{$($shape $=$ None$)$ $\wedge$ $($axes $\neq$ None$)$ $\rightarrow$ $($shape $=$ numpy.take$($x.shape,axes,axis=0$))$}
+% \texttt{$($shape $=$ None$)$ $\wedge$ $($axes $\neq$ None$)$ $\rightarrow$ $($shape $=$ numpy.take$($x.shape,axes,axis=0$))$}
+\(
+(\mathtt{shape}=\mathtt{None}) \land
+(\mathtt{axes}\neq\mathtt{None}) \rightarrow
+(\mathtt{shape}=\mathtt{numpy.take(x.shape,axes,axis=0)})
+\)
 
 
 where, the value for ``shape'' is the function ``take()'' from numpy library. Modern software increasingly emphasizes code maintainability and reusability, leading to highly complex function calls, often involving nested or chained calls. To avoid the high risk of path explosion in symbolic execution, \toolchecker alternates function calls with symbolic inputs during the preprocessing phase, which leads to misclassification of these two inconsistencies.
