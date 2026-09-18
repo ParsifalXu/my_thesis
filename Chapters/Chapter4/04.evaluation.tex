@@ -45,37 +45,46 @@ statsmodels                 & 2,184                     & 273                   
 \tref{tab:subjects} lists 7 popular libraries that \toolchecker evaluated on, first four for dataset construction and last three for assessing \toolchecker's ability to detect unknown issues. The selected libraries are of high quality and widely used, with tens of thousands of stars on GitHub. These libraries are substantial third-party libraries, averaging 1,642 classes, 14,467 functions, with an average of 373.6 thousand lines of code, and each function containing an average of 1.3 parameters. The tool extracts documentation constraints and path constraints from these libraries and uses a fuzzy constraint reasoner to detect inconsistencies.
 
 \toolchecker was implemented in Python. All the experiments were performed on an Intel(R) Xeon(R) Silver 4214 CPU @ 2.20GHz machine with 252GB of RAM, running Ubuntu 18.04, with Python 3.8.19 and Z3 4.13.0.
-For the constraint extraction evaluation (RQ1), GPT-4 is accessed through OpenAI's API. For result validation, given the absence of established benchmarks in this domain, two volunteer researchers independently reviewed the constraint extraction results from GPT-4, manually assessing each constraint's consistency with the original Python documentation. Any discrepancies were resolved through consensus discussion.
+For the constraint extraction evaluation (RQ1), GPT-4 is accessed through OpenAI's API. For result validation, given the absence of established benchmarks in this domain, two volunteer researchers independently reviewed the constraint extraction results from GPT-4, manually assessing each constraint's consistency with the original Python documentation. Any discrepancies were resolved through consensus discussion. In RQ1, \textit{Equivalent} denotes a correctly extracted constraint that preserves the meaning of the original documentation, whereas \textit{Non-Equivalent} groups incorrect extractions and missing constraints. Thus, these categories assess documentation constraint extraction, rather than equivalence between documentation and code constraints.
 
 
 \subsection{Results}
 \subsubsection{Accuracy of LLM in extracting constraints from API documentation.}
 \tref{tab:rq1} displays the result of RQ1. The experiment shows that the tool correctly identified and extracted 66 out of 72 constraints contained in the Python documentation collected in the benchmark, achieving an accuracy of 91.7\%, which demonstrates that the tool can successfully extract most of the constraints accurately, with few errors or omissions.
-Next, the remaining failed cases are examined to investigate the reasons for the inaccuracy. The analysis showed that out of the 6 incorrect cases, 4 involved missing constraints during the documentation processing. For example, one of the missing constraints is: ``(batch\_size = auto) $\rightarrow$ (batch\_size = min(200, n\_samples))''. Although this case involves a constraint between multiple parameters, the format is tricky because one of the parameters is within a function, which may have misled GPT-4 and caused it to miss this constraint during extraction. In the last 2 cases, the constraint information was identified but converted into incorrect logic expressions due to the complex logic or sentence structure.
+Next, the remaining failed cases are examined to investigate the reasons for the inaccuracy. The analysis showed that out of the 6 extraction failures, 4 involved missing constraints during the documentation processing. For example, one of the missing constraints is: ``(batch\_size = auto) $\rightarrow$ (batch\_size = min(200, n\_samples))''. Although this case involves a constraint between multiple parameters, the format is tricky because one of the parameters is within a function, which may have misled GPT-4 and caused it to miss this constraint during extraction. In the last 2 cases, the constraint information was identified but converted into incorrect logic expressions due to the complex logic or sentence structure.
 
 An ablation study further explores \toolchecker's abilities. The results show that \toolchecker without few-shot learning achieves an accuracy of 62.5\%. Most failures occur in the incorrect extraction of constraints. This indicates that including few-shot learning is important for \toolchecker to generate accurate constraints.
 Next, \toolchecker without applying chain-of-thought techniques results in an accuracy of 79.2\%, with the number of missed constraints accounting for more than half of total non-equivalent cases. This suggests that GPT tends to miss more details in documentation when chain-of-thought is removed.
 After including chain-of-thought and few-shot learning, \toolchecker's performance shows a clear improvement.
 
 \begin{table}[t]
-	\vspace{2mm}
-	\caption{Results of \toolchecker on constraint extraction}
-	\label{tab:rq1}
-	\centering
-  \small
-	\begin{tabularx}{\linewidth}{l *{4}{>{\centering\arraybackslash}X}}
-		\hline
-		& \textbf{Equivalent} 
-		& \multicolumn{2}{c}{\textbf{Non-Equivalent}} 
-		& \textbf{Accuracy} \\ \hline
-		& Correct extraction 
-		& Incorrect extraction 
-		& Missing constraints 
-		& \\ \hline
-		\textbf{\toolchecker w/o few-shot learning} & 45 & 20 & 7 & 62.5\% \\ \hline
-		\textbf{\toolchecker w/o chain-of-thought}  & 57 & 7  & 8 & 79.2\% \\ \hline
-		\textbf{\toolchecker}                       & 66 & 2  & 4 & 91.7\% \\ \hline
-	\end{tabularx}
+    \centering
+    \caption{Results of \toolchecker on constraint extraction}
+    \label{tab:rq1}
+    \small
+    \setlength{\tabcolsep}{5pt}
+    \renewcommand{\arraystretch}{1.15}
+    \begin{threeparttable}
+    \begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}Xcccr@{}}
+        \toprule
+        \multirow{3}{*}{Configuration} & Equivalent
+        & \multicolumn{2}{c}{Non-Equivalent}
+        & \multirow{3}{*}{Accuracy} \\
+        \cmidrule(lr){2-2}\cmidrule(lr){3-4}
+        & \shortstack{Correct\\extraction}
+        & \shortstack{Incorrect\\extraction}
+        & \shortstack{Missing\\constraints} & \\
+        \midrule
+        \toolchecker & 66 & 2 & 4 & 91.7\% \\
+        \toolchecker w/o few-shot learning & 45 & 20 & 7 & 62.5\% \\
+        \toolchecker w/o chain-of-thought & 57 & 7 & 8 & 79.2\% \\
+        \bottomrule
+    \end{tabularx}
+    \begin{tablenotes}[flushleft]
+        \footnotesize
+        \item All configurations are evaluated on 72 constraints. Accuracy is the proportion of correctly extracted constraints.
+    \end{tablenotes}
+    \end{threeparttable}
 \end{table}
 
 \smallskip
