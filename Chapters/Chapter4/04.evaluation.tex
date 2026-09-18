@@ -178,7 +178,7 @@ At the time of writing, 10 out of 11 confirmed inconsistencies have been resolve
 \begin{figure*}[t]
 	\vspace{2mm}
     \begin{subfigure}{\linewidth}
-        \begin{tcolorbox}[colback=Emerald!10,colframe=cyan!40!black,title=\textbf{Constraint description of \texttt{X} and \texttt{Gram} in function \texttt{lars\_path}}]
+        \begin{tcolorbox}[fontupper=\footnotesize,fonttitle=\small,colback=Emerald!10,colframe=cyan!40!black,title=\textbf{Constraint description of \texttt{X} and \texttt{Gram} in function \texttt{lars\_path}}]
             {\sffamily \textbf{> X } : None or ndarray of shape (n\_samples, n\_features)
             \\
             Input data. Note that \colorbox{blue!20}{\textbf{if X is None then the Gram matrix must be specified}}, i.e, cannot None or False.}
@@ -186,8 +186,8 @@ At the time of writing, 10 out of 11 confirmed inconsistencies have been resolve
         \label{fig:eg3-doc}
     \end{subfigure}
     \begin{subfigure}{\linewidth}
-\begin{tcolorbox}[colback=Salmon!20, colframe=Salmon!90!Black,title=\textbf{Corresponding code snippet in function \texttt{lars\_path}}]
-\begin{lstlisting}[escapechar=@]
+\begin{tcolorbox}[fontupper=\footnotesize,fonttitle=\small,colback=Salmon!20, colframe=Salmon!90!Black,title=\textbf{Corresponding code snippet in function \texttt{lars\_path}}]
+\begin{lstlisting}[escapechar=@,basicstyle={\footnotesize\ttfamily}]
 def lars_path(...):
     @\colorbox{blue!20}{if X is None and Gram is not None:}@
         raise ValueError("X cannot be None if Gram is not None. Use lars_path_gram to avoid passing X and y.")
@@ -196,7 +196,7 @@ def lars_path(...):
         \label{fig:eg3-code}
     \end{subfigure}
      \begin{subfigure}{\linewidth}
-    	\begin{tcolorbox}[colback=Emerald!10,colframe=LimeGreen!60!black,title=\textbf{Fixed Constraint description of \texttt{X} and \texttt{Gram} in function \texttt{lars\_path}}]
+    	\begin{tcolorbox}[fontupper=\footnotesize,fonttitle=\small,colback=Emerald!10,colframe=LimeGreen!60!black,title=\textbf{Fixed Constraint description of \texttt{X} and \texttt{Gram} in function \texttt{lars\_path}}]
     		{\sffamily \textbf{> X } : None or ndarray of shape (n\_samples, n\_features)
     			\\
     			Input data. Note that \colorbox{blue!20}{\textbf{if X is None, Gram must also be None.}}, If only the Gram matrix is available, use lars\_path\_gram instead.}
