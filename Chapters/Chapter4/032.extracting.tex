@@ -26,7 +26,7 @@ Although \toolchecker supports a certain level of external function call analysi
 \begin{figure*}[t]
   \centering
 	\vspace{2mm}
-    \begin{subfigure}{0.49\linewidth}
+    \begin{subfigure}{\linewidth}
         \begin{tcolorbox}[colback=Salmon!20, colframe=Salmon!90!Black,title=\textbf{Original source code}]
 \begin{lstlisting}[escapechar=@]
 def fit(self, sample_weight):
@@ -36,13 +36,10 @@ def fit(self, sample_weight):
     sample_weight = _check_sample_weight(sample_weight, X)
 \end{lstlisting}
         \end{tcolorbox}
+        \caption{Original source code}
         \label{fig:sourcecode}
     \end{subfigure}
-    \begin{subfigure}{0.49\linewidth}
-        \includegraphics[width=\linewidth]{Figures/Chapter4/pathgraphpic.pdf}
-        \vspace{-8pt}
-        \label{fig:pathgraph}
-    \end{subfigure}
+    \par\medskip
     \begin{subfigure}{\linewidth}
 \begin{tcolorbox}[colback=OliveGreen!10,colframe=Green!70,title=\textbf{Modified source code}]
 \begin{lstlisting}[escapechar=@,basicstyle={\footnotesize\ttfamily}]
@@ -54,14 +51,22 @@ def fit(sample_weight, strategy, call__check_sample_weight):
   return (f'(sample_weight = {sample_weight}) ^ (call__check_sample_weight = {call__check_sample_weight}) ^ (strategy = {strategy})')
 \end{lstlisting}
 \end{tcolorbox}
+        \caption{Modified source code}
         \label{fig:modifiedcode}
     \end{subfigure}
-    \caption{Extracting constraint from code}
+    \caption{Source code transformation for constraint extraction}
     \label{fig:extractpath}
     \vspace{-5pt}
 \end{figure*}
 
-The example depicted in \fref{fig:extractpath} illustrates the entire extraction phase and contains a simplified original source code and modified code from a popular data science project \texttt{scikit-learn}, and its corresponding path constraints. The \textit{fit} function is a member function within a class, and thus member variables such as ``self.strategy'' also exist within the code. ``None'' was also converted to a string to make it easier to be captured, since it is represented as a number 0 during symbolic execution. The tool first modifies the code and replaces exception handling and external function calls with symbolic inputs, marked as ``ERROR\_END'' and ``call\_'', respectively. For those paths whose final states are ``ERROR\_END'', the final results of the conjunction of the documentation constraint and these paths will be negated during reasoning phase.
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.75\linewidth]{Figures/Chapter4/pathgraphpic.pdf}
+    \caption{Path constraints corresponding to the code in \fref{fig:extractpath}}
+    \label{fig:pathgraph}
+\end{figure}
+
+The example in \fref{fig:extractpath} shows simplified original source code (\subref{fig:sourcecode}) and modified code (\subref{fig:modifiedcode}) from the popular data science project \texttt{scikit-learn}. The corresponding path constraints are shown in \fref{fig:pathgraph}. Together, these figures illustrate the extraction phase. The \textit{fit} function is a member function within a class, and thus member variables such as ``self.strategy'' also exist within the code. ``None'' was also converted to a string to make it easier to be captured, since it is represented as a number 0 during symbolic execution. The tool first modifies the code and replaces exception handling and external function calls with symbolic inputs, marked as ``ERROR\_END'' and ``call\_'', respectively. For those paths whose final states are ``ERROR\_END'', the final results of the conjunction of the documentation constraint and these paths will be negated during reasoning phase.
 
 
 
