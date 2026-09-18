@@ -70,14 +70,14 @@ It is evident that the highlighted part of the documentation only explicitly men
 More importantly, ``ignore'' is not a specific identifier or value but rather a description of
 the program logic---if the parameter \textit{affinity} is set to \textit{nearest\_neighbors}, then
 the parameter \textit{gamma} will not be used.
-Whereas, above constraint does not faithfully reflect the behavior implemented in code.
+However, the above constraint does not faithfully reflect the behavior implemented in code.
 According to the code snippet, ``gamma'' is not only ignored within the \textit{nearest\_neighbors}
 branch, but also ignored within the \textit{precomputed\_nearest\_neighbors} and
 \textit{precomputed} branches.
 This indicates that the constraint is inaccurate and demonstrates a form of inconsistency.
 
 For this type of implicit constraint, traditional pattern-based approaches are not able to extract
-the \emph{doc-constraint} correctly, thus fail to detect the inconsistencies.
+the \emph{doc-constraint} correctly and thus fail to detect the inconsistencies.
 To solve this issue, a customized constraint incorporating fuzzy words is designed, and few-shot learning is adopted to teach LLMs how to generate such constraints (details in
 \sref{sec:llm-mpchecker}).
 In this case, the \emph{doc-constraint} should be \textit{``(affinity = "nearest\_neighbors") $\rightarrow$
@@ -118,7 +118,7 @@ class SpectralClustering(ClusterMixin, BaseEstimator):
 \end{tcolorbox}
         \label{fig:eg2-code}
     \end{subfigure}
-    \caption{Examples of implicit constraint from \texttt{Scikit-learn}.}
+    \caption{Examples of an implicit constraint from \texttt{Scikit-learn}.}
     \label{fig:eg2}
     \vspace{-5pt}
 \end{figure*}
@@ -128,7 +128,7 @@ class SpectralClustering(ClusterMixin, BaseEstimator):
 \subsection{Fuzzy Logic and Fuzzy Constraint Satisfaction}
 Unlike traditional Boolean logic, fuzzy logic~\cite{kosko1993fuzzy} is a multi-valued logic that
 allows for values between 0 and 1 to represent varying degrees of truth, where 0 represents
-absolute false, and 1 represents absolute true.
+complete falsity, and 1 represents absolute truth.
 The human brain can process vague statements or claims that involve uncertainties or subjective
 judgments, such as ``the weather is hot'', ``that man runs so fast'', or ``she is beautiful''.
 Unlike computers, humans possess common sense, allowing them to reason effectively in situations

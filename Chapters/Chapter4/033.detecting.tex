@@ -1,6 +1,6 @@
 \subsection{Inconsistency Detection}\label{sec:detect-mpchecker}
 
-In the second phase, constraints were extracted from both documentation and code. While \emph{code-constraints} are deterministic in nature, \emph{doc-constraints} inherently contain uncertainties stemming from two main sources. First, there are \emph{implicit constraints} arising from vague or incomplete descriptions, which are addressed by defining fuzzy words to extend them into soft constraints. Second, there are uncertainties introduced by generative models' limited reasoning capabilities and unavoidable hallucination issues, for which no validator exists to definitively determine the correctness of generated constraints. To address this challenging scenario, this study introduces a customized fuzzy constraint logic to mitigate such vagueness. With the help of fuzzy words and fuzzy constraint logic, the converter can effectively handle both explicit and implicit constraints. The converter ultimately produces fuzzy expressions, which are then processed by a reasoner based on the z3 SMT (Satisfiability Modulo Theories) solver to detect inconsistencies.
+In the second phase, constraints are extracted from both documentation and code. While \emph{code-constraints} are deterministic in nature, \emph{doc-constraints} inherently contain uncertainties stemming from two main sources. First, there are \emph{implicit constraints} arising from vague or incomplete descriptions, which are addressed by defining fuzzy words to extend them into soft constraints. Second, there are uncertainties introduced by generative models' limited reasoning capabilities and unavoidable hallucination issues, for which no validator exists to definitively determine the correctness of generated constraints. To address this challenging scenario, this study introduces a customized fuzzy constraint logic to mitigate such vagueness. With the help of fuzzy words and fuzzy constraint logic, the converter can effectively handle both explicit and implicit constraints. The converter ultimately produces fuzzy expressions, which are then processed by a reasoner based on the Z3 SMT (Satisfiability Modulo Theories) solver to detect inconsistencies.
 
 
 The reasoner offers two strategies, from relaxed to strict, to identify inconsistencies from the perspectives of satisfiability and equivalence. Given a \emph{doc-constraint} $c$ and a \emph{code-constraint} set $P$ containing a group of path constraints $p$, the detection strategies are defined as follows:
@@ -21,9 +21,9 @@ For constraints containing sub-constraints that do not exist in the code logic, 
 
 \subsubsection{Fuzzy Words}\label{sec:fuzzword-mpchecker}
 
-The example from \sref{sec:eg2-mpchecker} illustrates a very typical implicit constraint with fuzzy words, where part of constraint is clearly defined while others remain uncertain. This study introduces a series of fuzzy words to help LLM extract constraints better. These fuzzy words frequently appear in documentation but don't represent specific values, making it challenging for the LLM to extract them directly. These fuzzy words fall into two general categories: \textit{existence} and \textit{non-existence}. In fuzzy words, \textit{non-existence} includes ``ignore'', ``no effect'', ``unused'', ``override'', indicating that a parameter either is unused or does not exist within code segments where other conditions are met. Similarly, \textit{existence} includes ``specify'', ``have an effect'', ``exist'', ``significant'', indicating that the parameter is used or exists when other conditions are met.
+The example from \sref{sec:eg2-mpchecker} illustrates a very typical implicit constraint with fuzzy words, where part of the constraint is clearly defined while other parts remain uncertain. This study introduces a series of fuzzy words to help LLMs extract constraints better. These fuzzy words frequently appear in documentation but do not represent specific values, making it challenging for the LLM to extract them directly. These fuzzy words fall into two general categories: \textit{existence} and \textit{non-existence}. In fuzzy words, \textit{non-existence} includes ``ignore'', ``no effect'', ``unused'', ``override'', indicating that a parameter either is unused or does not exist within code segments where other conditions are met. Similarly, \textit{existence} includes ``specify'', ``have an effect'', ``exist'', ``significant'', indicating that the parameter is used or exists when other conditions are met.
 
-Several specialized predicates are implemented to evaluate such implicit constraints. \toolchecker will first trace the target variable's define-use chain (DU-chain)~\cite{kennedy1978use, harrold1994efficient} and then check if the definition and usage of it are existed or not under a specific program path. For instance, ``\texttt{exist(x)}'' will check if the definition and usage of a variable \texttt{x} are existed in the program path with other explicit conditions. If found, it will return \texttt{True}; otherwise, it will return \texttt{False}. Similarly, ``\texttt{ignore(x)}'' will check whether the definition and usage of \texttt{x} are absent under the program path with given explicit conditions. It can be further extended to check weak \emph{doc-constraints}. Like the example in \sref{sec:eg2-mpchecker}, \textit{gamma} will be ignored not only when \texttt{``affinity$=$nearest\_neighbors''} but also ignored when \texttt{``affinity$=$precomputed\_nearest\_neighbors''} as well as \texttt{``affinity$=$precomputed''}.
+Several specialized predicates are implemented to evaluate such implicit constraints. \toolchecker first traces the target variable's definition-use chain (DU-chain)~\cite{kennedy1978use, harrold1994efficient} and then checks if the definition and usage of it exist or not under a specific program path. For instance, ``\texttt{exist(x)}'' checks if the definition and usage of a variable \texttt{x} exist in the program path with other explicit conditions. If found, it returns \texttt{True}; otherwise, it returns \texttt{False}. Similarly, ``\texttt{ignore(x)}'' checks whether the definition and usage of \texttt{x} are absent under the program path with given explicit conditions. It can be further extended to check weak \emph{doc-constraints}. As in the example in \sref{sec:eg2-mpchecker}, \textit{gamma} is ignored when \texttt{affinity} is set to \texttt{nearest\_neighbors}, \texttt{precomputed\_nearest\_neighbors}, or \texttt{precomputed}.
 
 
 
@@ -73,26 +73,26 @@ functions.
    \textbf{>=} \;|\; \textbf{=} \;|\; \textbf{!=} \; \nonumber\\
    v \in Value &::= \; string \;|\; number \;|\; bool \nonumber
 \end{align*}%
-\caption{Extended Backus-Naur form for multi-parameter constraint.}\label{fig:ebnf}
+\caption{Extended Backus-Naur form for multi-parameter constraints.}\label{fig:ebnf}
 \vspace{-5pt}
 \end{figure}
 
 \begin{definition}[Expression Similarity]\label{def:es}
-The similarity between two expressions $e_1$ and $e_2$ is defined as,
+The similarity between two expressions $e_1$ and $e_2$ is defined as follows:
 \begin{equation}\label{eq:simexpr}
   \sigma(e_1, e_2) = \alpha * (1 - \frac{LD(p_1, p_2)}{\max(|p_1|, |p_2|)}) + \beta *
   (\frac{\delta_{\bowtie_1} \cdot \delta_{\bowtie_2}}{\|\delta_{\bowtie_1}\|
   \|\delta_{\bowtie_2}\|}) + \alpha * (1 - \frac{LD(v_1, v_2)}{\max(|v_1|, |v_2|)}),
 \end{equation}
 where $\alpha$ and $\beta$ denote the relative weights, $p$, $\bowtie$, and $v$
-are parameter, operator, and value, respectively, $|p|$ and $|v|$ denotes the length of $p$ and $v$, $\|\delta_{\bowtie}\|$ denotes the magnitudes (or Euclidean norms) of the vector $\delta_{\bowtie}$.
+are the parameter, operator, and value, respectively; $|p|$ and $|v|$ denote the lengths of $p$ and $v$, respectively, and $\|\delta_{\bowtie}\|$ denotes the magnitude (or Euclidean norm) of the vector $\delta_{\bowtie}$.
 \end{definition}
 
-The similarity between two expressions are considered separately for the parameters, operators, and
-values appeared in the expressions.
-Both $p$ and $v$ can be treated as texts, therefore, Levenshtien Distance (a.k.a.
+The similarity between two expressions is considered separately for the parameters, operators, and
+values appearing in the expressions.
+Both $p$ and $v$ can be treated as text; therefore, Levenshtein distance (a.k.a.
 edit distance) is used to represent their similarity.
-The normalized Levenshtien Distance (NLD) is given in \eref{eq:ld}, where $s$ denotes strings ($p$
+The normalized Levenshtein distance (NLD) is given in \eref{eq:ld}, where $s$ denotes strings ($p$
 or $v$) and $|s|$ denotes the length of it.
 
 \begin{equation}\label{eq:ld}
@@ -115,9 +115,9 @@ The result is highly intuitive. For example, with $\delta_{<} = (1, 0, 0, 1, 0)$
 is 0.5, while the similarity between ``$<$'' and ``$<=$'' is 0.82.
 
 The weight of operator similarity is set as $\beta$ such that the weights of operators, values, and
-parameters within a given experssion should sum to one.
+parameters within a given expression should sum to one.
 Thus, the derivation gives $\alpha = \frac{1 - \beta}{2}$ and the similarity $\sigma$ of two single parameter
-expressions (i.e., atomic constraint) can be calculated according to \eref{eq:simexpr}.
+expressions (i.e., atomic constraints) can be calculated according to \eref{eq:simexpr}.
 
 
 \begin{definition}[Constraint Similarity]
@@ -157,7 +157,7 @@ $\Omega$ of path constraints $\omega$:
 \end{equation}
 where $\Phi_\Omega$ denotes the set of expressions aggregated from all the path constraints in
 $\Omega$, and $\epsilon[e \mapsto e_{\Phi_\Omega}]$ is a rewrite of $\epsilon$, where each
-expression $e$ has been replaced by its cloest counterpart from $\Phi_\Omega$.
+expression $e$ has been replaced by its closest counterpart from $\Phi_\Omega$.
 \end{definition}
 
 The inconsistency between the modified constraint $\epsilon[e \mapsto e_{\Phi_\Omega}]$ and
@@ -168,9 +168,9 @@ ensures complementary probabilities. For instance, ``0.7$\cdot$False = 0.3$\cdot
 a 70\% probability of inconsistency or a 30\% probability of consistency.
 
 
-\subsubsection{Constraint Similarity Threshold.} LLMs demonstrate a great potential in constraint extraction, yet they still encounter errors such as using incorrect parameter names or values and introducing non-existent constraints. To reduce false positives from these inevitable issues, \toolchecker sets a constraint similarity threshold of 0.85. This is based on the observation that a high constraint similarity (>0.85) indicates a high likelihood of misinterpretation or conflation by the LLM.
+\subsubsection{Constraint Similarity Threshold.} LLMs demonstrate great potential in constraint extraction, yet they still encounter errors such as using incorrect parameter names or values and introducing non-existent constraints. To reduce false positives from these inevitable issues, \toolchecker sets a constraint similarity threshold of 0.85. This is based on the observation that a high constraint similarity (>0.85) indicates a high likelihood of misinterpretation or conflation by the LLM.
 
-For instance, in \texttt{scikit-learn}, the documentation of \texttt{LinearSVC} states: ``\emph{If n\_samples < n\_features and optimizer supports chosen loss, multi\_class and penalty, then dual will be set to True}''. However, the extracted constraint is ``\texttt{$($samples$<$features$)$$\wedge$$($dual$=$True$)$}'', where two parameters are mistakenly mapped to similar names. Their constraint similarity is 0.86, exceeding the threshold, leading \toolchecker to discard the result. Moreover, in most cases where the expression contains only a single parameter, the threshold exhibits stronger filtering capability.
+For instance, in \texttt{scikit-learn}, the documentation of \texttt{LinearSVC} states: ``\emph{If n\_samples < n\_features and optimizer supports chosen loss, multi\_class and penalty, then dual will be set to True}''. However, the extracted constraint is ``\texttt{$($samples$<$features$)$$\wedge$\allowbreak$($dual$=$True$)$}'', where two parameters are mistakenly mapped to similar names. Their constraint similarity is 0.86, exceeding the threshold, leading \toolchecker to discard the result. Moreover, in most cases where the expression contains only a single parameter, the threshold exhibits stronger filtering capability.
 
 However, setting a threshold cannot entirely exclude all false positives, as there is no definitive rule to ascertain whether an error originates from the documentation or the LLM. Another example from \texttt{scikit-learn} illustrates this limitation: the documentation of \texttt{estimator\_} states: \emph{``The child estimator template used to create the collection of fitted sub-estimators''}. Yet, the extracted constraint ``\texttt{$($estimator\_$=$child\_estimator\_template$)\wedge($collection$=$fitted\_sub\_estimators$)$}'' has a constraint similarity of 0.67, which is below the threshold, leading \toolchecker to accept the result.
 

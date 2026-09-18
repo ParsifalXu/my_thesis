@@ -9,20 +9,20 @@ By providing extensive APIs for complex mathematical operations and algorithmic 
 these libraries enable researchers and practitioners to focus on solving domain-specific problems
 rather than reimplementing fundamental algorithms.
 
-A well-designed API documentation not only provides detailed descriptions of interfaces,
+Well-designed API documentation not only provides detailed descriptions of interfaces,
 including the purpose and range of parameters or attributes, returns, and exceptions thrown, but may also specify logical constraints or dependencies among multiple parameters.
 For data science and machine learning libraries, multi-parameter constraints are commonly mentioned
 in their API documentation and users of these libraries are expected to follow them closely when
 using the APIs.
-However, frequent version updates may lead to the documentation out of sync with the corresponding
+However, frequent version updates may cause the documentation to become out of sync with the corresponding
 code, known as the \underline{\textbf{C}}ode-\underline{\textbf{D}}ocumentation
 \underline{\textbf{I}}nconsistency (CDI) issue~\cite{aghajani2019software, rai2022review}.
 Such CDI issues are particularly pronounced in data science libraries.
 On one hand, the underlying mathematical models of DS/ML libraries inherently come with various
 constraints, such as \emph{``a model X can only be chosen when a parameter Y is provided''}, and
 incorrect parameter configurations not satisfying their constraints may lead to unexpected outcomes.
-On the other hand, the number of parameters/attributes of these libraries can be significantly more
-than a typical library API, sometimes over a few dozen.
+On the other hand, the number of parameters/attributes in the APIs of these libraries can be significantly greater
+than that in a typical library API, sometimes over a few dozen.
 Therefore, it is unrealistic to track all parameter constraints manually.
 
 Detecting errors in multi-parameter constraints from Python API documentation is challenging for
@@ -36,7 +36,7 @@ only: e.g., checking whether the information provided on parameter ranges, nulln
 names is correct.
 It is more challenging to extract multi-parameter constraints precisely from free-style descriptions
 written in natural languages.
-(3) For the same reason, a semantic-aware code analysis approach is essential, as logical relations among
+(3) For the same reason, a semantics-aware code analysis approach is essential, as logical relations among
 multiple parameters cannot be easily identified through purely syntactic analysis. The challenge is further compounded by Python's dynamic nature, where variable types, attributes, and behaviors can change at runtime.
 
 

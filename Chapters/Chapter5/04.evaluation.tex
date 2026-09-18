@@ -38,12 +38,12 @@ Code Metrics & Nesting Depth, Inheritance Depth, Assertion Count, Branch count \
 \tooldataloc is compared with four state-of-the-art baselines:
 \begin{itemize}[leftmargin=*]
     \item \textbf{SweRank}~\cite{reddy2025swerank} (\textit{Embedding}): It utilizes a retrieve-and-rerank architecture to identify issue locations. It employs SWERankEmbed (137M/7B parameters) to perform initial retrieval and SWERankLLM (7B/32B parameters) to rerank the results.
-    \item \textbf{Agentless}~\cite{xia2024agentless} (\textit{Pipeline}): This approaches employs a hierarchical filtering strategy within a procedural workflow. It progressively prunes the search space from the file level down to specific classes or functions, utilizing an LLM to rank and select candidates at each stage.
-    \item \textbf{LocAgent}~\cite{chen-etal-2025-locagent} (\textit{Agentic}): It constructs a graph-based representation and sparse indexes of the project and enable an autonomous agent to perform iterative, tool-assisted retrieval.
-    \item \textbf{CoSIL}~\cite{jiang2025cosil} (\textit{Agentic}): This framework focuses on structural dependency traversal through call graphs to identity implicit locations via iterative exploration. It incorporates pruning to maintain context efficiency and restrict the search to high-relevance execution paths.
+    \item \textbf{Agentless}~\cite{xia2024agentless} (\textit{Pipeline}): This approach employs a hierarchical filtering strategy within a procedural workflow. It progressively prunes the search space from the file level down to specific classes or functions, utilizing an LLM to rank and select candidates at each stage.
+    \item \textbf{LocAgent}~\cite{chen-etal-2025-locagent} (\textit{Agentic}): It constructs a graph-based representation and sparse indexes of the project and enables an autonomous agent to perform iterative, tool-assisted retrieval.
+    \item \textbf{CoSIL}~\cite{jiang2025cosil} (\textit{Agentic}): This framework focuses on structural dependency traversal through call graphs to identify implicit locations via iterative exploration. It incorporates pruning to maintain context efficiency and restrict the search to high-relevance execution paths.
 \end{itemize}
 
-All experiments are conducted on an Ubuntu 22.04.5 LTS server with an Intel Xeon Silver 4216 CPU (2.10 GHz) and 62 GB RAM. The framework was implemented in Python 3.12.11 with the \souffle 2.4 Datalog engine. \tooldataloc was evaluated using \texttt{gpt-4o-20240513} via OpenAI API, \texttt{claude-3-5-sonnet-20241022} via AWS Bedrock, and \texttt{Qwen3-Max} via Alibaba Cloud, using a temperature of 0.3 and a maximum of 20 iterations. The SWE-bench Lite comparison in \tref{tab:comparison_isq-dataloc} additionally reports results for GPT-5.1. Baselines ran in their official environments with required dependencies for fair comparison.
+All experiments were conducted on an Ubuntu 22.04.5 LTS server with an Intel Xeon Silver 4216 CPU (2.10 GHz) and 62 GB RAM. The framework was implemented in Python 3.12.11 with the \souffle 2.4 Datalog engine. \tooldataloc was evaluated using \texttt{gpt-4o-20240513} via the OpenAI API, \texttt{claude-3-5-sonnet-20241022} via AWS Bedrock, and \texttt{Qwen3-Max} via Alibaba Cloud, using a temperature of 0.3 and a maximum of 20 iterations. The SWE-bench Lite comparison in \tref{tab:comparison_isq-dataloc} additionally reports results for GPT-5.1. Baselines ran in their official environments with required dependencies for fair comparison.
 
 \subsection{Metrics}
 Localization performance is evaluated at three levels of granularity: \textit{file, module, and function}. Let $Q$ denote the set of query instances, $G_q$ the set of ground-truth locations for query $q \in Q$, and $\mathcal{P}_q$ the set of predicted locations inferred by the agent workflow. $\mathbf{1}(\cdot)$ denotes the \textbf{indicator function}, which equals $1$ if the logical condition holds and $0$ otherwise. The evaluation uses the following six metrics:
@@ -69,7 +69,7 @@ Localization performance is evaluated at three levels of granularity: \textit{fi
         AJS = \frac{1}{|Q|} \sum_{q \in Q} \frac{|G_q \cap \mathcal{P}_q|}{|G_q \cup \mathcal{P}_q|}
     \end{equation}
 
-    \item \textbf{Perfect Location Rate (PLR):} The most stringent metric, measuring the ratio of instances where the predicted set $\mathcal{P}_q$ exactly matches the ground-truth set $G_q$. A PLR of 1.0 indicates perfect localization without any extraneous noise (i.e., $AJS = 1.0$):
+    \item \textbf{Perfect Localization Rate (PLR):} The most stringent metric, measuring the ratio of instances where the predicted set $\mathcal{P}_q$ exactly matches the ground-truth set $G_q$. A PLR of 1.0 indicates perfect localization without any extraneous noise (i.e., $AJS = 1.0$):
     \begin{equation}
         PLR = \frac{1}{|Q|} \sum_{q \in Q} \mathbf{1}(\mathcal{P}_q = G_q)
     \end{equation}

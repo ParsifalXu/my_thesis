@@ -5,7 +5,7 @@ Ensuring compatibility during library upgrades is challenging because third-part
 
 Empirical studies highlight both the prevalence and severity of this problem. A study examining 408 sampled open-source Java projects reported that 202 of them experienced failures following library upgrades, with 41.3\% of these failures manifesting as runtime test failures that could not be caught by the compiler~\cite{gyori2018evaluating}. These incompatibilities are hard to identify statically, and there is no straightforward and easy way to evaluate their ripple effects on the entire system. Consequently, managing third-party software package upgrades is a daunting task, and many developers avoid it as much as possible due to the associated risks and costs. Another empirical study indicates that 81.5\% of surveyed systems retain outdated dependencies~\cite{kula2018developers}. With respect to security patches, 69\% of interviewed developers reported being unaware of vulnerabilities in the libraries they use. Furthermore, due to the additional efforts and responsibilities associated with upgrading, developers are often reluctant to perform upgrades. This hesitation raises serious security concerns and may leave their systems vulnerable to zero-day attacks. In the context of expanding reliance on AI-assisted development tools, these issues may intensify and become progressively harder to manage.
 
-The decision of whether to upgrade thus becomes a practical dilemma. Fundamentally, an \emph{upgrade incompatibility issue} arises from a mismatch between two independently evolved software entities: the client and the library. compatibility checking has been extensively studied from multiple perspectives. Existing approaches can be categorized based on two dimensions: (1) whether they are target client developers or not (i.e., \emph{client-oriented}), and (2) whether they treat different client applications separately when considering the impacts from a library upgrade (i.e., \emph{client-specific}). 
+The decision of whether to upgrade thus becomes a practical dilemma. Fundamentally, an \emph{upgrade incompatibility issue} arises from a mismatch between two independently evolved software entities: the client and the library. Compatibility checking has been extensively studied from multiple perspectives. Existing approaches can be categorized based on two dimensions: (1) whether they target client developers or not (i.e., \emph{client-oriented}), and (2) whether they treat different client applications separately when considering the impacts from a library upgrade (i.e., \emph{client-specific}).
 
 As shown in \fref{fig:cs-example}, the example illustrates a client-specific incompatibility issue. The function \texttt{lib(s1, s2)} is a library function that takes two input parameters (\texttt{s1} and \texttt{s2}) and returns their longest common substring. In the upgraded version (v1), \texttt{lib(s1, s2)} returns \texttt{null} when the two inputs share no common substring, whereas in the original version (v0), it returns an empty string (\texttt{""}) under the same condition. Such a change may cause a behavioral incompatibility in Client A (potentially triggering a \texttt{NullPointerException}), while Client B is not affected. 
 
@@ -20,11 +20,11 @@ As shown in \fref{fig:cs-example}, the example illustrates a client-specific inc
   \label{fig:cs-example}
 \end{figure*}
 
-Client-oriented techniques are designed from the perspective of client developers and aim to provide information and actionable insights regarding detected incompatibilities. For instance, the smart alert mechanism~\cite{wang2020empirical} raises an alarm when a library upgrade may affect existing functionality. Framework and API migration techniques, such as AURA~\cite{wu2010aura}, generate transformation rules that map target API methods in earlier versions to their corresponding replacement methods in newer versions. In constrast, library-oriented techniques, such as DeBBI~\cite{chen2020taming}, focus on assisting library developers in improving testing and code quality, thereby reducing the likelihood of introducing breaking changes that affect downstream clients upon release.
+Client-oriented techniques are designed from the perspective of client developers and aim to provide information and actionable insights regarding detected incompatibilities. For instance, the smart alert mechanism~\cite{wang2020empirical} raises an alarm when a library upgrade may affect existing functionality. Framework and API migration techniques, such as AURA~\cite{wu2010aura}, generate transformation rules that map target API methods in earlier versions to their corresponding replacement methods in newer versions. In contrast, library-oriented techniques, such as DeBBI~\cite{chen2020taming}, focus on assisting library developers in improving testing and code quality, thereby reducing the likelihood of introducing breaking changes that affect downstream clients upon release.
 
 It is worth noting that not all client-oriented techniques are truly client-specific. For instance, package compatibility analysis tools such as Dependabot~\cite{dependabot} and GemChecker~\cite{cleare2018gemchecker} provide upgrade recommendations based on historical records of dependency failures. While these approaches benefit from empirical insights derived from prior upgrade incidents, their definitions of compatibility are too generic. They do not incorporate information about how specific client projects actually interact with the upgraded libraries. 
 
-By contrast, Regression testing~\cite{yoo2012regression} operates within the specific context of a given client application and can used to validate modifications to client-side code. Nevertheless, regression testing frequently fails to identify incompatibilities that arise from library upgrades. This shortcoming stems from the fact that regression testing suites are constructed by client developers, who often lack comprehensive knowledge about library modifications. 
+By contrast, regression testing~\cite{yoo2012regression} operates within the specific context of a given client application and can be used to validate modifications to client-side code. Nevertheless, regression testing frequently fails to identify incompatibilities that arise from library upgrades. This shortcoming stems from the fact that regression testing suites are constructed by client developers, who often lack comprehensive knowledge about library modifications.
 
 
 % 增加关于AI的讨论，如何把AI结合进来等等。application scenarios中增加AI的部分。
@@ -56,17 +56,17 @@ create the \toolcompsuite dataset.
 \end{table*}
 \end{landscape}
 
-\subsection{Subjects Selection}
-To ensure the representativeness and reproducibility of the \toolcompsuite dataset, the selection process focuses on high-quality and popular client projects and
+\subsection{Subject Selection}
+To ensure the representativeness and reproducibility of the \toolcompsuite dataset, the selection process focused on high-quality and popular client projects and
 libraries. The selection of client projects was sourced from
 GitHub~\cite{github}, a widely recognized online community for hosting
 open-source codebases. To ensure the inclusion of the most
 popular projects, all the available projects were systematically sorted
 in descending order based on their number of stars on GitHub and the target clients were selected from the top of the list. The selection of
 libraries was sourced from Maven Central~\cite{mvnrepo}, which hosts
-33.5M of Java libraries and their associated binaries, making it
+33.5M Java libraries and their associated binaries, making it
 a widely used repository of libraries for Java API and library
-research~\cite{mostafa2017study,wu2016exploratory,qiu2016understanding,kula2014visualizing}. A library is included in the dataset only if it has more than 100 usages (i.e., clients) on Maven
+research~\cite{mostafa2017study,wu2016exploratory,qiu2016understanding,kula2014visualizing}. A library was included in the dataset only if it had more than 100 usages (i.e., clients) on Maven
 Central. The selection criteria aimed to ensure the inclusion of
 popular and widely used client projects and libraries in the dataset,
 thereby maximizing its relevance and usefulness to the research
@@ -100,7 +100,7 @@ To ensure that all client projects in the dataset are executable and
 the runs are reproducible, each project underwent a series of checks. First, the project was checked out to the version (SHA) at the time of
 the dataset creation, referred to as the \emph{base version}.
 Next, the standard Maven project compilation command was executed to verify whether the project could be compiled successfully. Projects that failed to compile were excluded from the dataset. Subsequently, the standard Maven test command was executed to run all the tests in the project, ensuring that all tests passed on the base version. Any project that failed to pass tests at this stage was excluded. Finally, only client projects that successfully compiled and passed all tests on the base version were included,
-thereby ensuring that the dataset is only consist of projects which can
+thereby ensuring that the dataset consists only of projects which can
 be executed and whose executions can be reproduced.
 
 

@@ -5,7 +5,7 @@ This section first formalizes the repository-level code localization problem. It
 \begin{figure}[t]
 	\centering
 	\includegraphics[width=\linewidth]{Figures/Chapter5/architecture.pdf}
-	\caption{Overview of \tooldataloc framework.}
+	\caption{Overview of the \tooldataloc framework.}
 	\label{fig:arch-dataloc}
 \end{figure}
 \end{landscape}
@@ -41,7 +41,7 @@ The end-to-end agent is designed to accept natural language queries and return p
 The workflow begins with performing a preliminary analysis to extract the core technical concepts and structural elements. By identifying program entities such as file paths, module names, and structure descriptions, the agent establishes an internal context. This preparatory step provides the necessary predicates and constraints for the subsequent synthesis of Datalog programs.
 
 \subsubsection{Synthesize-Check-Refine Loop}
-As shown in the red box in \fref{fig:arch-dataloc}, before execution, \tooldataloc follows a \textit{synthesize-check-refine} loop to mitigate the impact of hallucinations and improve the executability of LLM-generated Datalog programs. It mainly contains two critical, feedback-driven phases (Details in \sref{sec:method:val-dataloc} and \sref{sec:method:int-dataloc}): (1) \textit{Syntax correction}. Each synthesized program will undergo a parser-gated validation to ensure syntactic well-formedness. The workflow adopts a \emph{best-effort repair, then fallback} strategy: unambiguous cases are handled via conservative rule-based fixes, revalidated with \souffle's parser, and all other cases return error feedback to the LLM. (2) \textit{Intermediate-rule diagnosis}. The diagnostic mechanism instruments the program to track row counts of intermediate relations, thereby identifying rules that produce empty results. Controlled mutation probes then classify such emptiness as fragile, stable, or inconclusive, giving the model targeted evidence for refinement. Validated programs are then executed through \texttt{exec\_dl} tool to generate a list of candidates. Excessive locations are treated as failures, triggering refinement with stricter constraints to reduce noise and improve precision.
+As shown in the red box in \fref{fig:arch-dataloc}, before execution, \tooldataloc follows a \textit{synthesize-check-refine} loop to mitigate the impact of hallucinations and improve the executability of LLM-generated Datalog programs. It mainly contains two critical, feedback-driven phases (details in \sref{sec:method:val-dataloc} and \sref{sec:method:int-dataloc}): (1) \textit{Syntax correction}. Each synthesized program undergoes parser-gated validation to ensure syntactic well-formedness. The workflow adopts a \emph{best-effort repair, then fallback} strategy: unambiguous cases are handled via conservative rule-based fixes, revalidated with \souffle's parser, and all other cases return error feedback to the LLM. (2) \textit{Intermediate-rule diagnosis}. The diagnostic mechanism instruments the program to track row counts of intermediate relations, thereby identifying rules that produce empty results. Controlled mutation probes then classify such emptiness as fragile, stable, or inconclusive, giving the model targeted evidence for refinement. Validated programs are then executed through the \texttt{exec\_dl} tool to generate a list of candidates. Excessive locations are treated as failures, triggering refinement with stricter constraints to reduce noise and improve precision.
 
 \subsubsection{Context Retrieval and Final Verification}
 As depicted in the yellow box in \fref{fig:arch-dataloc}, once a set of potential code locations has been determined, the agent retrieves the relevant code snippets using \texttt{get\_sources} or \texttt{get\_file\_contents} and conducts a verification against the original query. These verified locations are then returned in a standardized format (e.g., \texttt{FILE\_PATH:CLASS.METHOD}). Although the agent may undergo multiple internal reasoning iterations, the user experience is streamlined into a single step: submitting a query and receiving a list of locations. This fully automated closed-loop design ensures both usability and seamless integration into production development environments.
@@ -50,7 +50,7 @@ As depicted in the yellow box in \fref{fig:arch-dataloc}, once a set of potentia
 \begin{figure}[t]
 	\centering
 	\includegraphics[width=\linewidth]{Figures/Chapter5/mutate.pdf}
-	\caption{Intermediate rules mutation and feedback.}
+	\caption{Intermediate-rule mutation and feedback.}
 	\label{fig:mutate-dataloc}
 \end{figure}	
 \end{landscape}
