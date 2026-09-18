@@ -1,6 +1,6 @@
 \section{Evaluation}\label{sec:eval-dataloc}
 
-To evaluate the effectiveness and practicality of the approach at repository-level, the evaluation addresses the following research questions:
+To evaluate the effectiveness and practicality of the approach, the following research questions are formulated:
 \begin{enumerate}
 	\item \textbf{RQ1:} How effective is \tooldataloc in keyword-agnostic logical code localization?
 	\item \textbf{RQ2:} How effective is \tooldataloc for issue-based code localization?
@@ -8,27 +8,16 @@ To evaluate the effectiveness and practicality of the approach at repository-lev
     \item \textbf{RQ4:} How does each component of \tooldataloc contribute to its performance?
 \end{enumerate}
 
+\subsection{Benchmarks and Baselines}\label{sec:eval:setup-dataloc}
 
-\subsection{Experiment Setup}
+\textbf{SWE-bench Lite}~\cite{swebench2024} is a curated subset of SWE-bench for cost-effective evaluation of autonomous issue resolution. Each instance contains a real-world GitHub issue, repository metadata, and patch-derived ground-truth locations. Following Suresh et al.~\cite{suresh2024cornstack}, 274 of the 300 instances whose patches modify existing functions or classes are retained, and those that introduce new functions or imports are excluded, thereby focusing evaluation on localization within existing code structures.
 
-\subsubsection{Benchmarks.} 
-Code localization performance is evaluated on three Python-based benchmarks, covering both complex logical reasoning challenges and industrial issue-resolution tasks.
-
-\textbf{SWE-bench Lite}~\cite{swebench2024}. A carefully curated and widely recognized subset from the full SWE-bench for more efficient and cost-effective evaluation of autonomous issue-solving capabilities. It consists of real-world GitHub issues with repository metadata and ground-truth patch locations. Following Suresh et al.~\cite{suresh2024cornstack}, the evaluation retained 274 of 300 original instances where patches modify existing functions or classes. The evaluation intentionally excluded instances introducing code corresponding to new functions or import statements to focus the evaluation on code localization within existing structures.
-
-\textbf{\dataset} (introduced in this study). To evaluate the capability of localization approaches in keyword-agnostic logical code localization, this study constructed \dataset, a diagnostic benchmark comprising 225 high-quality logic-intensive queries across 9 projects. As illustrated in \tref{tab:code_dimensions}, each query is formulated as a composite logical proposition by integrating code features across multiple dimensions. By combining structural granularity (e.g., classes, methods) with behavioral attributes (e.g., control flow, exception handling) and code metrics (e.g., inheritance depth and branch count), the feature space admits a large number of possible compositions. The query set consists of 25 selected representative combinations, each applied across 9 repositories at the base commit versions sampled from SWE-bench Lite, with minimal adjustments to the query itself to ensure that at least one valid ground-truth location exists in the corresponding codebase. Structural reasoning is a prerequisite for bridging the semantic gap: if an agent cannot even resolve explicit structural constraints, it certainly cannot handle latent semantic mappings where such patterns are implicit. \dataset tests a necessary condition for genuine code understanding.
-
-To establish ground truth, multiple state-of-the-art models (e.g., Claude-4.5-Opus, GPT-5.2) were run in the agent mode of advanced AIDEs (\texttt{Cursor} and \texttt{GitHub Copilot}) to generate candidate locations. All returned results were then aggregated to maximize coverage. Two authors independently validated each candidate against the query constraints, resolving disagreements through discussion grounded in the formal Python syntax specification.
-
-\dataset serves as a critical complement to issue-based benchmarks for localization task. In practice, issues are one of the most important channels for error feedback between users and maintainers. To facilitate debugging, those issue descriptions often provide sufficient information and clear keywords as cues to help maintainers better locate faults, such as accurate file paths, function identifiers, or even specific code snippets. The analysis of SWE-bench Lite instances reveals that for over 50\% of cases, the issue description explicitly mentions identifying information of the ground-truth location (e.g., file names, class names, or function names). Such \textit{keyword shortcut} enables models to succeed via simple lexical matching (e.g. grep) or embedding-based retrieval, without requiring genuine understanding and reasoning over the codebase. This undermines the validity of localization performance evaluations. Moreover, LLM-assisted development shifts the codebase interaction toward intent-based question answering, allowing developers to query repositories using natural language. However, for developers unfamiliar with a given repository, they typically cannot use precise identifiers and instead tend to express their search intent through high-level behavioral pattern descriptions or abstract logical structures.
-
-\textbf{\negset} (introduced in this study). \negset is a variant of \dataset designed to evaluate a system's abstention capability when no valid location meets the query. Verifying a model's ability to return an empty set does not require evaluation at this full scale of the original dataset. Therefore, \negset is constructed by sampling a single version from one repository and intentionally modifying its queries to ensure their ground-truth sets are empty. Current methods often adopt top-$n$ ranking to maximize recall, but ideal robust localization requires the ability to provide ascertained answers and explicitly avoid false positives. Such a ``refusal'' mechanism is a critical metric for ensuring the reliability of autonomous agents in production environments.
-
+\textbf{\dataset} is a diagnostic benchmark for KA-LCL, containing 225 logic-intensive queries across 9 projects. Each query is formulated as a composite logical proposition over code features across multiple dimensions, such as structural granularity (e.g., classes, methods), behavioral attributes (e.g., control flow, exception handling), code metrics (e.g., inheritance depth and branch count), as summarized in \tref{tab:code_dimensions-dataloc}. From the large feature-composition space induced by these dimensions, 25 representative combinations are selected and each is instantiated on 9 repositories, with only minimal query adjustments to ensure at least one valid ground-truth location.
 
 \begin{table}[htbp]
 \centering
 \caption{Taxonomy of Python Code Dimensions and Representative Elements}
-\label{tab:code_dimensions}
+\label{tab:code_dimensions-dataloc}
 \small
 \renewcommand{\arraystretch}{1.2}
 \begin{tabularx}{\textwidth}{lX}
@@ -44,25 +33,20 @@ Code Metrics & Nesting Depth, Inheritance Depth, Assertion Count, Branch count \
 \end{tabularx}
 \end{table}
 
-% To assess the effectiveness of our framework, we require datasets containing ground-truth annotations for code localization that can serve as reliable and standardized benchmarks. SWE-bench~\cite{jimenez2024swebench} constitutes a widely adopted benchmark for evaluating the capabilities of AI systems in performing end-to-end bug fixing across repository-level codebases. Each instance consists of a GitHub issue paired with its corresponding code patches. SWE-bench Lite~\cite{swebench2024} provides a carefully curated subset of 300 tasks from the full benchmark, designed to reduce evaluation costs while preserving the benchmark’s representativeness and overall quality. Following the approach of Suresh et al.~\cite{suresh2024cornstack}, we retained 274 of the 300 instances where patches modify existing functions or classes, excluding instances that introduce new functions or import statements. As code localization constitutes a critical yet implicit intermediate step in bug fixing process, we use the modified code locations from the patches as ground truth to evaluate localization performance.
+\textbf{\negset}, a variant of \dataset, is designed to evaluate abstention capability when no valid location satisfies a query. Since this ability can be tested without using the full benchmark scale, \negset is constructed by sampling a single repository version and deliberately modifying its queries to ensure the corresponding ground-truth sets are empty. Existing methods often rely on top-$n$ ranking to maximize recall, but an ideal localization tool should not only provide well-supported answers but also explicitly abstain when no valid answer can be ascertained, thereby avoiding false positives. Such a \textit{refusal mechanism} serves as a critical metric for the robustness of autonomous agents in production environments.
 
-% Similar to Swe-Bench, LocBench~\cite{chen-etal-2025-locagent}, proposed by Chen et al., is a dataset specifically designed for code localization, comprising 560 issues from Python repositories. Collected after October 2024 to mitigate data leakage and pre-training bias in recent LLMs, it encompasses a broad range of issue categories beyond bug fixing. After removing inaccessible repositories, we retain xxx of the original 560 examples. In summary, for Python, we adopt both SWE-bench Lite and LocBench.
+\tooldataloc is compared with four state-of-the-art baselines:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{SweRank}~\cite{reddy2025swerank} (\textit{Embedding}): It utilizes a retrieve-and-rerank architecture to identify issue locations. It employs SWERankEmbed (137M/7B parameters) to perform initial retrieval and SWERankLLM (7B/32B parameters) to rerank the results.
+    \item \textbf{Agentless}~\cite{xia2024agentless} (\textit{Pipeline}): This approaches employs a hierarchical filtering strategy within a procedural workflow. It progressively prunes the search space from the file level down to specific classes or functions, utilizing an LLM to rank and select candidates at each stage.
+    \item \textbf{LocAgent}~\cite{chen-etal-2025-locagent} (\textit{Agentic}): It constructs a graph-based representation and sparse indexes of the project and enable an autonomous agent to perform iterative, tool-assisted retrieval.
+    \item \textbf{CoSIL}~\cite{jiang2025cosil} (\textit{Agentic}): This framework focuses on structural dependency traversal through call graphs to identity implicit locations via iterative exploration. It incorporates pruning to maintain context efficiency and restrict the search to high-relevance execution paths.
+\end{itemize}
 
-% Our framework supports not only Python but also Java. For Java evaluation, we extract relevant instances from two multilingual datasets: SWE-bench Multilingual~\cite{yang2025swesmith}, which provides 300 tasks across 42 repositories and 9 programming languages including Java, and Multi-SWE-bench~\cite{zan2025multiswebench} from ByteDance, spanning 7 languages with 1,632 high-quality instances. After extracting Java-related entries and deduplicating across both sources, the combined dataset contains XXX instances. We manually annotate code locations as ground truth based on the \texttt{git diff} information, forming a dataset we refer to as SWE-bench Java.
-
-% \todo{average file change, class change, function change, etc.}
-
-\subsubsection{Baselines.} To assess \tooldataloc, the evaluation uses four state-of-the-art baselines representing three distinct technical paradigms: embedding-based, pipeline-based, and agent-based approaches:
-\begin{enumerate}[leftmargin=*]
-    \item \textbf{SweRank}~\cite{reddy2025swerank} (\textit{Embedding-based}): It utilizes a retrieve-and-rerank architecture to identify issue locations. It employs SWERankEmbed (137M/7B parameters) to perform initial retrieval and SWERankLLM (7B/32B parameters) to rerank the results.
-    \item \textbf{Agentless}~\cite{xia2024agentless} (\textit{Pipeline-based}): This approaches employs a hierarchical filtering strategy within a procedural workflow. It progressively prunes the search space from the file level down to specific classes or functions, utilizing an LLM to rank and select candidates at each stage.
-    \item \textbf{LocAgent}~\cite{chen-etal-2025-locagent} (\textit{Agent-based}): It constructs a graph-based representation and sparse indexes of the project and enable an autonomous agent to perform iterative, tool-assisted retrieval.
-    \item \textbf{CoSIL}~\cite{jiang2025cosil} (\textit{Agent-based}): This framework focuses on structural dependency traversal through call graphs to identity implicit locations via iterative exploration. It incorporates pruning to maintain context efficiency and restrict the search to high-relevance execution paths.
-    % \item \textbf{Orca Loca~\cite{yu2025orcalocallmagentframework}:} Integrates priority-based scheduling, action decomposition with relevance scoring, and distance-aware context pruning. By optimizing the synergy between agentic reasoning and precise retrieval, it effectively navigates complex repositories to resolve the suboptimality of current search mechanisms.
-\end{enumerate}
+All experiments are conducted on an Ubuntu 22.04.5 LTS server with an Intel Xeon Silver 4216 CPU (2.10 GHz) and 62 GB RAM. The framework was implemented in Python 3.12.11 with the \souffle 2.4 Datalog engine. \tooldataloc was evaluated using \texttt{gpt-4o-20240513} via OpenAI API, \texttt{claude-3-5-sonnet-20241022} via AWS Bedrock, and \texttt{Qwen3-Max} via Alibaba Cloud, using a temperature of 0.3 and a maximum of 20 iterations. The SWE-bench Lite comparison in \tref{tab:comparison_isq-dataloc} additionally reports results for GPT-5.1. Baselines ran in their official environments with required dependencies for fair comparison.
 
 \subsection{Metrics}
-Localization performance is evaluated at three granularities: \textit{file, module, and function}. Let $Q$ denote the set of query instances, $G_q$ the set of ground-truth locations for query $q \in Q$, and $\mathcal{P}_q$ the set of predicted locations inferred by the agent workflow. $\mathbf{1}(\cdot)$ denotes the \textbf{indicator function}, which equals 1 if the logical condition holds and 0 otherwise. The evaluation uses the following six metrics:
+Localization performance is evaluated at three levels of granularity: \textit{file, module, and function}. Let $Q$ denote the set of query instances, $G_q$ the set of ground-truth locations for query $q \in Q$, and $\mathcal{P}_q$ the set of predicted locations inferred by the agent workflow. $\mathbf{1}(\cdot)$ denotes the \textbf{indicator function}, which equals $1$ if the logical condition holds and $0$ otherwise. The evaluation uses the following six metrics:
 
 \begin{enumerate}[leftmargin=*, label=\textbf{M\arabic*.}]
     \item \textbf{Accuracy@k (ACC@k):} It measures the ability to achieve full coverage, where a success requires all ground-truth locations to be present within the top-$k$ predicted locations. When $k$ equals the length of the prediction set, this metric becomes the \textbf{Success Rate (SR)}:
@@ -85,7 +69,7 @@ Localization performance is evaluated at three granularities: \textit{file, modu
         AJS = \frac{1}{|Q|} \sum_{q \in Q} \frac{|G_q \cap \mathcal{P}_q|}{|G_q \cup \mathcal{P}_q|}
     \end{equation}
 
-    \item \textbf{Perfect Location Rate (PLR):} The most Stringent metric, measuring the ratio of instances where the predicted set $\mathcal{P}_q$ exactly matches the ground-truth set $G_q$. A PLR of 1.0 indicates perfect localization without any extraneous noise (i.e., $AJS = 1.0$):
+    \item \textbf{Perfect Location Rate (PLR):} The most stringent metric, measuring the ratio of instances where the predicted set $\mathcal{P}_q$ exactly matches the ground-truth set $G_q$. A PLR of 1.0 indicates perfect localization without any extraneous noise (i.e., $AJS = 1.0$):
     \begin{equation}
         PLR = \frac{1}{|Q|} \sum_{q \in Q} \mathbf{1}(\mathcal{P}_q = G_q)
     \end{equation}
@@ -96,20 +80,9 @@ Localization performance is evaluated at three granularities: \textit{file, modu
     \end{equation}
 \end{enumerate}
 
-
-
-
-\subsubsection{Implementation and environment.} All experiments were conducted on a server equipped with an Intel Xeon Silver 4216 CPU (2.10 GHz) and 62 GB RAM, running Ubuntu 22.04.5 LTS. The framework was implemented using Python 3.12.11 and the Soufflé 2.4 Datalog engine. To evaluate \tooldataloc, the experiments accessed \texttt{gpt-4o-20240513} via OpenAI’s API, \texttt{claude-3-5-sonnet-20241022} through AWS Bedrock services, and \texttt{Qwen3-Max} via Alibaba Cloud Service. For all models, the temperature was set to 0.3, and the number of max iterations was fixed at 20. For baseline comparisons, runtime environments were instantiated according to their respective official specifications and dependency requirements to ensure a fair evaluation.
-
-
 \subsection{Results}
 
 \input{Chapters/Chapter5/041.rq1}
 \input{Chapters/Chapter5/042.rq2}
 \input{Chapters/Chapter5/043.rq3}
 \input{Chapters/Chapter5/044.rq4}
-
-%%% Local Variables:
-%%% mode: latex
-%%% TeX-master: "../main"
-%%% End:

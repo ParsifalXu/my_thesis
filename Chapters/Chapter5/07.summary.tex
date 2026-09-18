@@ -1,0 +1,6 @@
+\section{Summary}\label{sec:summary-dataloc}
+This chapter identified the \textit{Keyword Shortcut} in issue-based code localization benchmarks, where lexical anchors can enable matching without repository-level structural reasoning. It formalized Keyword-Agnostic Logical Code Localization (KA-LCL) and introduced \dataset, comprising 225 logic-intensive queries across 9 projects, together with \negset for evaluating abstention under empty ground truth.
+
+The proposed \tooldataloc framework represents repositories as program facts, translates natural-language constraints into Datalog programs, and improves query reliability through parser-gated validation and conservative intermediate-rule diagnostics. Diagnostic mutations provide evidence for refinement; their outputs are never returned as final answers.
+
+On \dataset, \tooldataloc achieves function-level precision of 66.98\% and a success rate of 58.67\%, compared with the best baseline values of 5.87\% and 11.73\%, respectively. It returns \textit{no match found} for over 70\% of \negset queries and remains competitive on SWE-bench Lite while returning an average of two candidate locations per issue. These results suggest that combining LLM intent interpretation with formal program reasoning offers a practical route toward more precise, verifiable, and cost-aware code localization.

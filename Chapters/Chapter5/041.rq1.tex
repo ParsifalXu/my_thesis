@@ -1,64 +1,61 @@
-\subsubsection{Effectiveness for logic query}
+\subsubsection{Effectiveness on Logic Queries}
 
-As summarized in \tref{tab:comparison_lq}, \tooldataloc achieves a decisive lead over all baselines across all metrics and granularities. At the file level, \tooldataloc reaches a Precision (PRE) of 73.35\% and a Success Rate (SR) of 68.44\%, which is significantly higher than the baseline methods. Additionally, while all baselines achieve near-zero Perfect Location Rate(PLR), \tooldataloc attains a PLR of 48.44\%. Even at the finest function-level granularity, \tooldataloc still maintains a PLR of 38.27\%, while all baselines drop to 0\%. This highlights the unique advantage of the framework in capturing code structure and reasoning capabilities in assisting precise localization. Furthermore, \tooldataloc consistently achieves exceptional performance across different foundation models, demonstrating strong adaptability. By switching the underlying model from Claude-3.5 to Qwen3-Max, the framework yields further performance gains, suggesting that the framework can scale its localization effectiveness with the advancing capabilities of underlying LLMs.
-
-Even with the most lenient metric, Hit Rate (HR), which only requires at least one correct location, baseline performance drops quickly as the granularity shifts from file-level to module-level and function-level. Other metrics even approach zero. It indicates that, when deprived of explicit keywords to narrow down the search space and forced into deep tracing, they struggle to maintain meaningful localization capability. In contrast, \tooldataloc exhibits remarkable resilience, achieving a high HR of around 90\% across all granularities. This robustness proves that \tooldataloc's success is not a byproduct of a coarse search space but is driven by rigorous, logic-based reasoning.
-
-Baselines typically rely on top-$n$ recommendations to increase the probability of covering relevant locations, but this strategy is inherently a compromise rather than an optimal solution. An effective code localization tool should return results that precisely satisfy the query constraints, since the true number of relevant locations varies across tasks and is not predetermined. This capability is evaluated using two additional metrics: Average Jaccard Similarity (AJS) and Perfect Localization Rate (PLR). AJS penalizes both false positives and false negatives, while PLR represents the most stringent criterion, requiring the predicted set to exactly match the ground truth (i.e., achieving 100\% AJS). For instance, while LocAgent (Claude-3.5) achieves a 54.67\% hit rate at the file level, its AJS is only 8.73\%, indicating that true positives are diluted within an inflated candidate set containing substantial noise. By comparison, the approach consistently maintains high AJS scores, reflecting greater precision in returning constraint-satisfying results without extraneous recommendations. This precision is important for industrial deployment, as it reduces the validation overhead for developers or downstream automated agents, improving the efficiency of maintenance workflows.
-
-The investigation of SWE-bench Lite shows that most issues are highly localized, involving an average of only 1.15 code changes (computed as the total number of ground-truth locations divided by the total number of instances). This sparsity raises a key question: do existing tools truly pinpoint root causes, or do they merely rely on high-probability guessing within a narrow search space? To examine this, the evaluation uses \negset to assess whether tools can recognize when no valid location exists. The constraints were deliberately modified to create a mismatch between the issue description and the codebase, such that the original ground-truth locations are no longer valid. In this setting, the only correct output is a clear ``no match found''. Unfortunately, all SOTA baselines suffer from a compulsion to guess. They persistently return top-$n$ recommendations even when query prerequisites are not met. This over-eager behavior proves harmful in practice, as confident yet wrong targets mislead downstream agents, wasting computational resources, and risk introducing regression bugs. These findings suggest that the strong performance reported by existing baselines is partially inflated by their recommendation-centric design, which lacks true localization rationale. Notably, \tooldataloc demonstrates the necessary discernment to abstain when no valid location exists, returning a clear “no match found” response for over 70\% of the queries.
+As shown in Table~\ref{tab:comparison_lq-dataloc}, \tooldataloc consistently outperforms all baselines across metrics and localization granularities on \dataset. At the file level, \tooldataloc with Qwen3-Max achieves the best Precision (PRE) and Success Rate (SR), reaching 73.35\% and 68.44\%, respectively. It also attains a Perfect Localization Rate (PLR) of 48.44\%, whereas all baselines remain near zero. Even at the finest function-level granularity, \tooldataloc still maintains a PLR of 38.27\%, while all baselines drop to 0\%. These results highlight the advantage of \tooldataloc in capturing code structure and reasoning capabilities in assisting precise localization. \tooldataloc remains strong performance across different foundation models, underscoring its adaptability. Switching the underlying model from Claude-3.5 to Qwen3-Max yields further performance gains, suggesting that the localization capability of the framework can continue to benefit from advances in LLMs.
 
 \begin{landscape}
-\begin{table*}[t]
+\begin{table}[p]
     \centering
-    \scriptsize 
-    \setlength{\tabcolsep}{1.2pt} 
-    \caption{Evaluation results on LogicQuery}
-    \label{tab:comparison_lq}
-    
-    \begin{tabularx}{\linewidth}{@{} l l *{18}{C} @{}} 
+    \footnotesize
+    \setlength{\tabcolsep}{2pt}
+    \caption{Evaluation results on \dataset}
+    \label{tab:comparison_lq-dataloc}
+
+    \begin{tabularx}{\linewidth}{@{} l l *{18}{C} @{}}
         \toprule
-        \multirow{2}{*}{\textbf{Methods}} & \multirow{2}{*}{\textbf{LLM}} & \multicolumn{6}{c}{\textbf{File Level (\%)}} & \multicolumn{6}{c}{\textbf{Module Level (\%)}} & \multicolumn{6}{c}{\textbf{Function Level (\%)}} \\
+        \multirow{2}{*}{\textbf{Method}} & \multirow{2}{*}{\textbf{Model}} & \multicolumn{6}{c}{\textbf{File Level (\%)}} & \multicolumn{6}{c}{\textbf{Module Level (\%)}} & \multicolumn{6}{c}{\textbf{Function Level (\%)}} \\
         \cmidrule(lr){3-8} \cmidrule(lr){9-14} \cmidrule(lr){15-20}
         & & SR & REC & PRE & AJS & PLR & HR & SR & REC & PRE & AJS & PLR & HR & SR & REC & PRE & AJS & PLR & HR \\
-        
+
         \midrule
-        \multirow{2}{*}{SweRank} 
+        \multirow{2}{*}{SweRank}
         & Small & 8.00 & 7.40 & 11.13 & 6.64 & 0 & 31.11 & 4.17 & 3.74 & 5.24 & 3.45 & 0 & 24.07 & 1.02 & 1.87 & 1.28 & 0.74 & 0 & 11.73 \\
         & Large & 4.44 & 5.44 & 10.26 & 4.66 & 0 & 23.56 & 1.85 & 2.64 & 3.61 & 1.91 & 0 & 14.81 & 1.53 & 1.79 & 1.48 & 0.82 & 0 & 11.22 \\
 
         \midrule
-        \multirow{2}{*}{Agentless} 
+        \multirow{2}{*}{Agentless}
         & GPT-4o & 13.33 & 12.16 & 15.66 & 10.07 & 2.22 & 32.44 & 8.33 & 6.29 & 6.93 & 4.23 & 0 & 24.54 & 5.10 & 1.88 & 2.04 & 1.49 & 0 & 14.29 \\
         & Claude-3.5 & 12.00 & 15.14 & 18.99 & 11.46 & 2.67 & 34.22 & 6.02 & 7.62 & 9.05 & 5.71 & 0.46 & 24.54 & 4.08 & 3.53 & 4.87 & 3.29 & 0 & 15.31 \\
 
         \midrule
-        \multirow{2}{*}{LocAgent} 
+        \multirow{2}{*}{LocAgent}
         & GPT-4o & 17.33 & 8.42 & 8.44 & 6.21 & 0.89 & 42.22 & 7.87 & 4.89 & 4.03 & 2.81 & 0 & 29.63 & 5.10 & 1.06 & 1.60 & 1.08 & 0 & 17.35 \\
         & Claude-3.5 & 22.22 & 11.30 & 11.02 & 8.73 & 0.44 & 54.67 & 15.74 & 7.76 & 6.63 & 4.97 & 0 & 47.69 & 11.73 & 5.81 & 4.32 & 3.22 & 0 & 40.82 \\
 
         \midrule
-        \multirow{2}{*}{CoSIL} 
+        \multirow{2}{*}{CoSIL}
         & GPT-4o & 10.22 & 12.82 & 15.62 & 9.39 & 2.22 & 32.89 & 6.94 & 8.76 & 9.47 & 5.06 & 0 & 24.54 & 3.06 & 3.45 & 3.42 & 1.87 & 0 & 10.71 \\
         & Claude-3.5 & 14.22 & 13.60 & 16.16 & 10.39 & 1.33 & 34.67 & 10.19 & 9.04 & 10.17 & 6.50 & 0.93 & 27.78 & 6.12 & 5.42 & 5.87 & 3.57 & 0 & 19.39 \\
 
         \midrule
-        \multirow{2}{*}{\makecell{\tooldataloc}} 
+        \multirow{2}{*}{\makecell{\tooldataloc}}
         & Claude-3.5 & 64.44 & 60.61 & 68.96 & 58.87 & 42.22 & \textbf{89.78} & 59.72 & 55.69 & 65.37 & 54.49 & 35.65 & \textbf{88.89} & 57.14 & 52.09 & 62.11 & 51.19 & 32.65 & \textbf{88.78} \\
         & Qwen3-Max & \textbf{68.44} & \textbf{68.43} & \textbf{73.35} & \textbf{65.28} & \textbf{48.44} & 87.11 & \textbf{62.96} & \textbf{63.87} & \textbf{70.40} & \textbf{61.44} & \textbf{42.59} & 86.11 & \textbf{58.67} & \textbf{61.65} & \textbf{66.98} & \textbf{58.03} & \textbf{38.27} & 84.69 \\
-        
+
         \bottomrule
     \end{tabularx}
-\end{table*}
+\end{table}
 \end{landscape}
+
+
+
+The granularity trend further exposes the limitations of existing localization methods under keyword-agnostic settings. Even under Hit Rate (HR), the most lenient metric that only requires at least one correct location, baselines degrade sharply from file-level to module-level and function-level localization. Other stricter metrics approach zero at fine granularity, indicating that existing methods struggle to perform meaningful localization when deprived of explicit lexical anchors to narrow down the search space and forced into deep tracing. In contrast, \tooldataloc exhibits remarkable resilience, achieving a high HR of around 90\% across all granularities. Such stability proves that \tooldataloc's success is not a byproduct of a coarse search space but is driven by rigorous logic-based reasoning.
+
+A key difference lies in how methods handle the size of the returned set. Baselines typically rely on top-$n$ recommendations to increase the probability of covering relevant locations. However, since the correct number of targets varies across queries and is not known in advance, this approach is inherently a compromise rather than an optimal solution. To evaluate the returned sets, two metrics are introduced: Average Jaccard Similarity (AJS) and Perfect Localization Rate (PLR). AJS penalizes both false positives and false negatives, while PLR represents the most stringent criterion, requiring the predicted set to exactly match the ground truth (i.e., achieving 100\% AJS). For instance, LocAgent with Claude-3.5 reaches a file-level HR of 54.67\%, but its AJS is only 8.73\%, suggesting that true positives are diluted within an inflated candidate set containing substantial noise. By contrast, \tooldataloc achieves substantially higher AJS across granularities, reflecting greater precision in returning constraint-satisfying locations. This precision is important for industrial deployment, as it reduces the validation burden for developers or downstream agents.
+
+Abstention when no valid locations exist is further evaluated using \negset. The investigation of SWE-bench Lite shows that each issue instance involves only 1.15 ground-truth code changes on average. This sparsity raises a key question of whether existing tools truly pinpoint root causes or simply guess likely locations in a narrow search space. In \negset, query constraints are deliberately modified to create a mismatch between the query and the codebase, making the original ground-truth locations invalid. In this setting, the only correct behavior is to return \textit{no match found}. Unfortunately, all baselines suffer from a tendency to guess and persistently return top-$n$ recommendations even when constraints are not satisfied, yielding false positives. This may suggest that the strong performance of baselines is partly due to their recommendation-centric design rather than genuine localization reasoning. A lack of refusal ability can mislead downstream agents, waste computation, and introduce regression risk. In contrast, \tooldataloc returns a clear \textit{no match found} response for over 70\% of \negset queries, demonstrating the necessary discernment to abstain when ground-truth sets are empty.
 
 \smallskip
 \noindent\shadowbox{%
-  \begin{minipage}{0.98\columnwidth}
-    \textbf{Answer to RQ1:}
-		The results clearly show that \tooldataloc effectively handles the keyword-agnostic logical code localization challenge, whereas baselines perform poorly when keyword shorts are unavailable. This means these approaches still rely on shallow lexical matching rather than genuine logical reasoning. Furthermore, their performance on the \negset exposes fundamental weakness in their refusal ability.
+  \begin{minipage}{0.95\linewidth}
+    \textbf{Answer to RQ1:} \tooldataloc outperforms the evaluated baselines on \dataset, attaining function-level precision of 66.98\% and a success rate of 58.67\%. It also returns \textit{no match found} for over 70\% of \negset queries.
   \end{minipage}}
-%%% Local Variables:
-%%% mode: latex
-%%% TeX-master: "../main"
-%%% End:
