@@ -1,5 +1,5 @@
 \subsection{Preprocessing}\label{sec:preprocess-mpchecker}
-This subsection describes the details of separating the documentation and corresponding code from the project and the specifics of preprocessing the documentation content.
+Phase I of \fref{fig:arch} separates documentation from code in the input repository while preserving their correspondence. It also extracts parameter-description pairs to guide documentation constraint extraction in Phase II.
 
 In modern data science libraries, documentation is typically auto-generated using Sphinx, a tool that can automatically create HTML documentation from Python code. Sphinx supports various docstring styles, with Google style and NumPy style being commonly used. \fref{fig:docstring} displays docstring examples of two different styles from the official Sphinx website~\cite{sphnix:google,sphnix:numpy}. Google-style docstrings use a clear and concise format with a minimalistic structure. This style divides the docstring into sections like \textbf{Args}, \textbf{Attributes}, etc., with each section using plain indentation. Similarly, NumPy-style docstrings organize sections more rigidly. Sections are divided by using \textbf{Parameters}, \textbf{Attributes}, etc. with horizontal dash lines ``\textbf{- - -}'' under the section header. The number of dashes is the same as the number of letters in the section header. Regardless of the style used, the docstring is normally placed at the beginning inside its corresponding class or function.
 
@@ -67,4 +67,3 @@ class ExampleGoogleStyle():
     \label{fig:docstring}
     \vspace{-10pt}
 \end{figure*}
-
