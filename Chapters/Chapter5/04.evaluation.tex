@@ -48,7 +48,7 @@ All experiments were conducted on an Ubuntu 22.04.5 LTS server with an Intel Xeo
 \subsection{Metrics}
 Localization performance is evaluated at three levels of granularity: \textit{file, module, and function}. Let $Q$ denote the set of query instances, $G_q$ the set of ground-truth locations for query $q \in Q$, and $\mathcal{P}_q$ the set of predicted locations inferred by the agent workflow. $\mathbf{1}(\cdot)$ denotes the \textbf{indicator function}, which equals $1$ if the logical condition holds and $0$ otherwise. The evaluation uses the following six metrics:
 
-\begin{enumerate}[leftmargin=*, label=\textbf{M\arabic*.}]
+\begin{enumerate}[leftmargin=*, label=\textbf{(\arabic*)}]
     \item \textbf{Accuracy@k (ACC@k):} It measures the ability to achieve full coverage, where a success requires all ground-truth locations to be present within the top-$k$ predicted locations. When $k$ equals the length of the prediction set, this metric becomes the \textbf{Success Rate (SR)}:
     \begin{equation}
         Acc@k = \frac{1}{|Q|} \sum_{q \in Q} \mathbf{1}(G_q \subseteq \mathcal{P}_{q,k})
