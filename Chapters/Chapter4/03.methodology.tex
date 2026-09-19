@@ -5,7 +5,7 @@
 	\vspace{2mm}
     \centering
     \includegraphics[width=\linewidth]{Figures/Chapter4/arch.pdf}
-    \caption{The architecture of \toolchecker: Phase I separates documentation and code, Phase II extracts their constraints, and Phase III compares the constraints and reports potential inconsistencies.}
+    \caption{The architecture of \toolchecker.}
     \label{fig:arch}
     \vspace{-5pt}
 \end{figure*}
@@ -22,7 +22,7 @@ In addition, when it comes to constraint extraction, compared to single-paramete
     \item \textbf{Phase III: Inconsistency Detection} converts the extracted constraints into expressions for comparison and applies SMT-based fuzzy constraint reasoning (\sref{sec:detect-mpchecker}). The Fuzzy Constraint Converter handles the representations described in \sref{sec:fuzzword-mpchecker} and \sref{sec:fuzzlogic-mpchecker}. The reasoner uses these representations to identify potential inconsistencies, as described in \sref{sec:reasoning-mpchecker}.
 \end{enumerate}
 
-The following subsections describe these components in the same order. The worked example in \sref{sec:worked-mpchecker} then follows the \texttt{AutoReg} documentation and code from \fref{fig:eg1} through all three phases.
+The following subsections describe these components in the same order, using the \texttt{AutoReg} documentation and code in \fref{fig:eg1} to illustrate the intermediate constraints and their comparison.
 
 
 
@@ -30,4 +30,3 @@ The following subsections describe these components in the same order. The worke
 \input{Chapters/Chapter4/031.preprocessing.tex}
 \input{Chapters/Chapter4/032.extracting.tex}
 \input{Chapters/Chapter4/033.detecting.tex}
-\input{Chapters/Chapter4/034.worked_example.tex}
