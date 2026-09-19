@@ -119,12 +119,12 @@ the rule head and changes only the body.
 \item \textsc{M1. Contains-Literal}: replace each body string
 literal \texttt{"s"} with a fresh variable~$V_i$ and append
 \texttt{contains("s", $V_i$)}, relaxing exact equality to substring matching.
-\item \textsc{M2. Match-Literal}: replace each body string literal
-with~$V_i$ and append \texttt{match("s.*", $V_i$)}, testing whether the
-literal is a prefix of the actual fact value.
-\item \textsc{M3. Drop-Single-Atom}: remove one selected body atom at
+\item \textsc{M2. Drop-Single-Atom}: remove one selected body atom at
 a time while retaining the rest. This general ablation is applied only when a
 rule has at least two body atoms and is bounded by a small variant cap.
+\item \textsc{M3. Match-Literal}: replace each body string literal
+with~$V_i$ and append \texttt{match("s.*", $V_i$)}, testing whether the
+literal is a prefix of the actual fact value.
 \item \textsc{M4. Drop-Contains}: remove one
 \texttt{contains(\ldots)} atom at a time, isolating overly strict string
 filters.
@@ -132,7 +132,7 @@ filters.
 (\texttt{!pred(\ldots)}) at a time, probing whether an exclusion constraint is
 too strong.
 \end{itemize}
-M1--M2 apply only when quoted string literals occur in the rule body; M3--M5
+M1 and M3 apply only when quoted string literals occur in the rule body; M2, M4, and M5
 apply only when their target atom exists and the remaining body still contains
 at least one atom.
 

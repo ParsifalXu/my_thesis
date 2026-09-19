@@ -39,6 +39,10 @@ The ablation study compares (i) execution success rate and non-empty result rate
     & Time & 427 & 104 & 136 & 38 & 40 & 37 \\
     \midrule
 
+% TODO: Recompute correctness metrics from the per-query predictions using consistent
+% averaging and query inclusion rules. REC is below SR in the first five columns,
+% and some AJS values exceed PRE, REC, or HR, violating the expected bounds
+% under the stated per-query metric definitions. Verify metric-to-column mapping.
     \multirow{6}{*}{\makecell[l]{Correctness\\(function) $\uparrow$}}
     & SR & 20.00 & 40.00 & 56.00 & 44.00 & 44.00 & 61.90 \\
     & PRE & 18.20 & 38.93 & 55.20 & 38.10 & 38.90 & 62.70 \\
@@ -68,9 +72,9 @@ The ablation study compares (i) execution success rate and non-empty result rate
 \end{table}
 
 \tref{tab:ablation-dataloc} summarizes the ablation results under two different LLMs, comparing the baseline system with progressively enabled mechanisms.
-The results show that validation and repair (VAL) substantially improves the quality of LLM-generated Datalog for both models, with a markedly stronger effect on Qwen3-Max than on Claude-3.5. This difference is expected given the models' baseline capabilities: without VAL, Qwen3-Max exhibits a significantly lower execution success rate due to its weaker ability to consistently produce syntactically correct \souffle{} Datalog, whereas Claude already achieves a relatively high baseline level of syntactic validity.
+The results show that validation and repair (VAL) improves the quality of LLM-generated Datalog for both models, with a stronger effect on Qwen3-Max than on Claude-3.5. This difference is expected given the models' baseline capabilities: without VAL, Qwen3-Max exhibits a lower execution success rate due to its weaker ability to consistently produce syntactically correct \souffle{} Datalog, whereas Claude already achieves a relatively high baseline level of syntactic validity.
 
-For Qwen3-Max, enabling VAL leads to a dramatic improvement across nearly all metrics. The non-empty result rate rises from 49\% to 75\%, indicating that a large fraction of previously failing or unproductive queries were recoverable once parser-gated validation and conservative repairs were applied. At the same time, the average end-to-end execution time drops sharply from 427s to 104s, reflecting a reduction in wasted iterations caused by unrecoverable parser errors and repeated failed executions. Correctness also improves: function-level metrics show substantial gains, with precision increasing from 18\% to 39\%, demonstrating that VAL does not merely enable execution but also materially improves the semantic adequacy of the resulting queries.
+For Qwen3-Max, enabling VAL leads to a substantial improvement across nearly all metrics. The non-empty result rate rises from 49\% to 75\%, indicating that a large fraction of previously failing or unproductive queries were recoverable once parser-gated validation and conservative repairs were applied. At the same time, the average end-to-end execution time drops sharply from 427s to 104s, reflecting a reduction in wasted iterations caused by unrecoverable parser errors and repeated failed executions. Correctness also improves: function-level metrics show substantial gains, with precision increasing from 18\% to 39\%, demonstrating that VAL does not merely enable execution but also materially improves the semantic adequacy of the resulting queries.
 In contrast, the effect of VAL on Claude is more moderate: execution success rate increases by +5 percentage points, and the non-empty result rate increases by +8 percentage points.
 
 Enabling intermediate-rule feedback (INT) in the Full configuration produces a different pattern. The primary role of INT is to guide the LLM toward identifying zero-row intermediate rules and the local constraints that may be over-restrictive. As a result, INT may slightly increase iteration count or execution time in some cases due to additional diagnostic executions, but this overhead consistently leads to higher non-empty rates and improved final answer correctness.

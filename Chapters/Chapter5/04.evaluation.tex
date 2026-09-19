@@ -54,9 +54,9 @@ Localization performance is evaluated at three levels of granularity: \textit{fi
         Acc@k = \frac{1}{|Q|} \sum_{q \in Q} \mathbf{1}(G_q \subseteq \mathcal{P}_{q,k})
     \end{equation}
 
-    \item \textbf{Recall (REC):} It represents the proportion of ground-truth locations successfully captured by the predicted set $\mathcal{P}_q$:
+    \item \textbf{Recall (REC):} It represents the proportion of ground-truth locations successfully captured for each query, averaged across queries:
     \begin{equation}
-        Rec@k = \frac{1}{|Q|} \sum_{q \in Q} \frac{|G_q \cap \mathcal{P}_{q,k}|}{|G_q|}
+        REC = \frac{1}{|Q|} \sum_{q \in Q} \frac{|G_q \cap \mathcal{P}_q|}{|G_q|}
     \end{equation}
 
     \item \textbf{Precision (PRE):} This metric penalizes overprediction by calculating the fraction of predicted locations that are correct:

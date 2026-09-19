@@ -1,4 +1,4 @@
-% Adapted from paper-aone-improve icse27-dataloc b7f3453.
+% Adapted from paper-aone-improve icse27-dataloc 8b2b31e.
 % Operator numbering and successful-probe conditions aligned with the source mutation catalog.
 % !TeX program = pdflatex
 \documentclass[tikz,border=6pt]{standalone}
@@ -66,8 +66,8 @@
   column 2/.style={anchor=east},
 ] (Mtbl) at ([xshift=1mm,yshift=-1mm]M.south west) {
   \textbf{Mutation} & \textbf{$\Delta$(\#rows) } \\
-  $M_1$: $x \mapsto$ $y\land x \sqsubseteq y$ & \textcolor{blue}{0 $\rightarrow$ 9} \\
-  $M_3$: drop 1 body atom &  0 $\rightarrow$ 0\\
+  $M_1$: $s \rightsquigarrow V_i [s\sqsubseteq_{\mathrm{sub}}V_i]$ & \textcolor{blue}{0 $\rightarrow$ 9} \\
+  $M_2$: drop 1 body atom &  0 $\rightarrow$ 0\\
   $\ldots$: \ldots &  \ldots \\
 };
 
@@ -118,7 +118,7 @@
     nodes={font=\footnotesize, anchor=west, align=left}
   ] (Ftxt) {
     $\diamond$ empty: \texttt{P\_inter\_2} (0 rows) \\
-    $\diamond$ mutations: $M_1$, $M_3$, \ldots; $\Delta$: 0$\rightarrow$9,\;0$\rightarrow$0, \ldots \\
+    $\diamond$ mutations: $M_1$, $M_2$, \ldots; $\Delta$: 0$\rightarrow$9,\;0$\rightarrow$0, \ldots \\
     $\diamond$ revise highlighted rules \emph{if} output should be non-empty \\
   }
   (P.south);
