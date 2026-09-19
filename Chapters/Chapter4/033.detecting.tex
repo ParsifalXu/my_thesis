@@ -1,6 +1,6 @@
 \subsection{Inconsistency Detection}\label{sec:detect-mpchecker}
 
-In the second phase, constraints are extracted from both documentation and code. While \emph{code-constraints} are deterministic in nature, \emph{doc-constraints} inherently contain uncertainties stemming from two main sources. First, there are \emph{implicit constraints} arising from vague or incomplete descriptions, which are addressed by defining fuzzy words to extend them into soft constraints. Second, there are uncertainties introduced by generative models' limited reasoning capabilities and unavoidable hallucination issues, for which no validator exists to definitively determine the correctness of generated constraints. To address this challenging scenario, this study introduces a customized fuzzy constraint logic to mitigate such vagueness. With the help of fuzzy words and fuzzy constraint logic, the converter can effectively handle both explicit and implicit constraints. The converter ultimately produces fuzzy expressions, which are then processed by a reasoner based on the Z3 SMT (Satisfiability Modulo Theories) solver to detect inconsistencies.
+In the second phase, constraints are extracted from both documentation and code. While \emph{code-constraints} are deterministic in nature, \emph{doc-constraints} inherently contain uncertainties stemming from two main sources. First, there are \emph{implicit constraints} arising from vague or incomplete descriptions, which are addressed by defining fuzzy words to extend them into soft constraints. Second, there are uncertainties introduced by generative models' limited reasoning capabilities and unavoidable hallucination issues, for which no validator exists to definitively determine the correctness of generated constraints. To address this challenging scenario, this study introduces a customized fuzzy constraint logic to mitigate such vagueness. With the help of fuzzy words and fuzzy constraint logic, the converter can effectively handle both explicit and implicit constraints. The converter ultimately produces fuzzy expressions, which are then processed by a reasoner based on the Z3 SMT (Satisfiability Modulo Theories) solver to detect inconsistencies. These operations correspond to the \textit{Fuzzy Constraint Converter} and \textit{SMT-based Fuzzy Constraint Reasoner} in Phase III of \fref{fig:arch}.
 
 
 The reasoner offers two strategies, from relaxed to strict, to identify inconsistencies from the perspectives of satisfiability and equivalence. Given a \emph{doc-constraint} $c$ and a \emph{code-constraint} set $P$ containing a group of path constraints $p$, the detection strategies are defined as follows:
@@ -17,7 +17,15 @@ The reasoner offers two strategies, from relaxed to strict, to identify inconsis
 
 For constraints containing sub-constraints that do not exist in the code logic, \toolchecker employs a heuristic approach to provide suggestions. Specifically, when a constraint mentioned in the documentation is not present in the corresponding code logic, \toolchecker issues a warning and labels this constraint as a potential weak constraint to prompt further investigation by the user.
 
-
+The documentation for \texttt{sample\_weight} in \fref{fig:extractpath} states: ``Cannot be used when \texttt{strategy} is set to \texttt{"uniform"}.'' Replacing ``used'' with ``None'' changes only one word but reverses the requirement. The extracted \emph{doc-constraint} is:
+\[
+    (\texttt{strategy}=\texttt{"uniform"})\rightarrow(\texttt{sample\_weight}\neq\texttt{None}).
+\]
+Symbolic execution extracts the following path constraint for the path that raises \texttt{ValueError}, marked as \texttt{ERROR\_END} in \fref{fig:pathgraph}:
+\[
+    p_{\mathrm{err}} = (\texttt{strategy}=\texttt{"uniform"})\land(\texttt{sample\_weight}\neq\texttt{None}).
+\]
+In Phase III of \fref{fig:arch}, the reasoner checks whether $c\land p_{\mathrm{err}}$ is satisfiable, where $c$ conjoins the condition and requirement of the \emph{doc-constraint}, and $p_{\mathrm{err}}$ is the path constraint. This uses the conjunction underlying the unsatisfiability checking in \eref{eq:uq1}, together with the handling of error paths described above. This conjunction is satisfiable, so the parameter combination can reach the exception. The \texttt{ERROR\_END} handling described above therefore negates the Boolean checking result to \texttt{False}. The \texttt{False} result indicates that the \emph{doc-constraint} fails the consistency check for this error path under the unsatisfiability-checking strategy. Accordingly, \toolchecker reports \texttt{BAD CONSTRAINT WITH ERROR}, identifying the conflicting constraint and path.
 
 \subsubsection{Fuzzy Words}\label{sec:fuzzword-mpchecker}
 

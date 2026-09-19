@@ -18,7 +18,7 @@ In addition, when it comes to constraint extraction, compared to single-paramete
 \begin{enumerate}[leftmargin=*]
     \item \textbf{Phase I: Preprocessing} separates documentation from code and associates parameter descriptions with the relevant functions (\sref{sec:preprocess-mpchecker}).
     \item \textbf{Phase II: Constraint Extraction} has two branches: the LLM-based Constraint Extractor produces documentation constraints, and the Symbolic Executor produces code path constraints (\sref{sec:extraction-mpchecker}). Code transformation prepares functions for symbolic execution, as indicated by the ``Modify'' arrow in the figure.
-    \item \textbf{Phase III: Inconsistency Detection} converts the extracted constraints into expressions for comparison and applies SMT-based fuzzy constraint reasoning (\sref{sec:detect-mpchecker}). The specialized predicates and constraint conversion are described in \sref{sec:fuzzword-mpchecker} and \sref{sec:fuzzlogic-mpchecker}, followed by the comparison strategies in \sref{sec:reasoning-mpchecker}.
+    \item \textbf{Phase III: Inconsistency Detection} converts the extracted constraints into expressions for comparison and applies SMT-based fuzzy constraint reasoning (\sref{sec:detect-mpchecker}). The specialized predicates and constraint conversion supporting these comparisons are described in \sref{sec:fuzzword-mpchecker} and \sref{sec:fuzzlogic-mpchecker}.
 \end{enumerate}
 
 \input{Chapters/Chapter4/031.preprocessing.tex}
