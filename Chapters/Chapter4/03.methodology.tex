@@ -5,7 +5,7 @@
 	\vspace{2mm}
     \centering
     \includegraphics[width=\linewidth]{Figures/Chapter4/arch.pdf}
-    \caption{The architectural overview of \toolchecker.}
+    \caption{The architecture of \toolchecker: Phase I separates documentation and code, Phase II extracts their constraints, and Phase III compares the constraints and reports potential inconsistencies.}
     \label{fig:arch}
     \vspace{-5pt}
 \end{figure*}
@@ -15,13 +15,14 @@ constraints and provides a detailed description of the approach. An API document
 
 In addition, when it comes to constraint extraction, compared to single-parameter constraints, the multi-parameter constraint extraction problem can be classified into two types, as discussed in \sref{sec:eg-mpchecker}, 1) explicit constraint and 2) implicit constraint.
 
-\toolchecker aims to accurately extract multi-parameter constraints from API documentation and detect both types of inconsistency. As depicted in \fref{fig:arch}, \toolchecker follows a three-phase workflow comprising \textbf{1) Data Preprocessing; 2) Constraint Extraction; 3) Inconsistency Detection}. During the preprocessing phase, \toolchecker separates the code and documentation within the project.
-\toolchecker then automatically rewrites each function to be compatible with the symbolic
-execution tool. This includes replacing advanced Python syntax that the tool cannot handle with
-simpler constructs and symbolizing external function calls, such as replacing ternary conditional
-expressions with if-else statements. These modifications do not alter the path constraints of the
-original program.
-In the constraint extraction and expression generation phase, on the one hand, \toolchecker uses large language models to extract constraints in a specific format from the documentation. On the other hand, the symbolic execution tool dynamically analyzes the code and solves the constraint paths. Those constraints are then converted into expressions that can be processed by the SMT solver. In the fuzzy constraint checking phase (Phase III), a constraint checker with an SMT solver and a fuzzy constraint reasoner performs comprehensive reasoning to detect inconsistencies. It is worth noting that an extended fuzzy constraint satisfaction approach is proposed and employed to mitigate the hallucination issues often introduced by large language models, and reduce the risk of false positives and missed detections.
+\toolchecker processes a repository through the three phases in \fref{fig:arch}. Each phase produces the input required by the next:
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Phase I: Preprocessing} separates documentation from code and associates parameter descriptions with the relevant functions (\sref{sec:preprocess-mpchecker}). Its outputs feed the two extraction branches in Phase II.
+    \item \textbf{Phase II: Constraint Extraction} has two branches: the LLM-based Constraint Extractor produces documentation constraints, and the Symbolic Executor produces code path constraints (\sref{sec:extraction-mpchecker}). Code transformation prepares functions for symbolic execution, as indicated by the ``Modify'' arrow in the figure.
+    \item \textbf{Phase III: Inconsistency Detection} converts the extracted constraints into expressions for comparison and applies SMT-based fuzzy constraint reasoning (\sref{sec:detect-mpchecker}). The Fuzzy Constraint Converter handles the representations described in \sref{sec:fuzzword-mpchecker} and \sref{sec:fuzzlogic-mpchecker}. The reasoner uses these representations to identify potential inconsistencies, as described in \sref{sec:reasoning-mpchecker}.
+\end{enumerate}
+
+The following subsections describe these components in the same order. The worked example in \sref{sec:worked-mpchecker} then follows the \texttt{AutoReg} documentation and code from \fref{fig:eg1} through all three phases.
 
 
 
@@ -29,5 +30,4 @@ In the constraint extraction and expression generation phase, on the one hand, \
 \input{Chapters/Chapter4/031.preprocessing.tex}
 \input{Chapters/Chapter4/032.extracting.tex}
 \input{Chapters/Chapter4/033.detecting.tex}
-
-
+\input{Chapters/Chapter4/034.worked_example.tex}
