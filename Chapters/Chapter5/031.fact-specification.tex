@@ -1,0 +1,41 @@
+\subsubsection{Relational Schema and Extraction Semantics}\label{sec:facts-schema-dataloc}
+Following the relational representation introduced in \sref{sec:background-program-facts-datalog}, the Python fact interface used in this study comprises 17 relations. Table~\ref{tab:dataloc-fact-schema} lists these relations with their original argument names and order. Each relation contains a finite set of tuples extracted from the analyzed repository snapshot, with argument types specified below. Line numbers, column positions, span bounds, counts, and parameter indices have type \texttt{number}; all other arguments have type \texttt{symbol}, including Boolean flags represented as \texttt{True} and \texttt{False}.
+
+\begin{table}[htbp]
+\centering
+\caption{Python program-fact relations and their arguments.}
+\label{tab:dataloc-fact-schema}
+\begingroup
+\setstretch{1}
+\fontsize{9.5}{11}\selectfont
+\renewcommand{\arraystretch}{1.05}
+\setlength{\tabcolsep}{6pt}
+\begin{tabularx}{\linewidth}{@{}l>{\raggedright\arraybackslash}X@{}}
+\toprule
+Relation & Arguments in declaration order \\
+\midrule
+\texttt{source\_file} & \mbox{\texttt{file\_path}}, \mbox{\texttt{content\_hash}}, \mbox{\texttt{total\_lines}} \\
+\texttt{source\_line} & \mbox{\texttt{file\_path}}, \mbox{\texttt{line\_number}}, \mbox{\texttt{content}} \\
+\texttt{ast\_node} & \mbox{\texttt{file\_path}}, \mbox{\texttt{line}}, \mbox{\texttt{column}}, \mbox{\texttt{node\_type}}, \mbox{\texttt{parent\_line}}, \mbox{\texttt{parent\_column}} \\
+\texttt{class\_definition} & \mbox{\texttt{file\_path}}, \mbox{\texttt{class\_name}}, \mbox{\texttt{start\_line}}, \mbox{\texttt{end\_line}}, \mbox{\texttt{base\_class}} \\
+\texttt{class\_nesting} & \mbox{\texttt{file\_path}}, \mbox{\texttt{nested\_class}}, \mbox{\texttt{parent\_class}}, \mbox{\texttt{line}} \\
+\texttt{class\_method} & \mbox{\texttt{file\_path}}, \mbox{\texttt{class\_name}}, \mbox{\texttt{method\_name}}, \mbox{\texttt{line}}, \mbox{\texttt{is\_static}}, \mbox{\texttt{is\_class\_method}} \\
+\texttt{class\_attribute} & \mbox{\texttt{file\_path}}, \mbox{\texttt{class\_name}}, \mbox{\texttt{attribute\_name}}, \mbox{\texttt{line}}, \mbox{\texttt{attribute\_type}} \\
+\texttt{function\_definition} & \mbox{\texttt{file\_path}}, \mbox{\texttt{function\_name}}, \mbox{\texttt{start\_line}}, \mbox{\texttt{end\_line}}, \mbox{\texttt{param\_count}}, \mbox{\texttt{is\_async}}, \mbox{\texttt{containing\_class}} \\
+\texttt{function\_parameter} & \mbox{\texttt{file\_path}}, \mbox{\texttt{function\_name}}, \mbox{\texttt{function\_line}}, \mbox{\texttt{param\_name}}, \mbox{\texttt{param\_type}}, \mbox{\texttt{default\_value}}, \mbox{\texttt{param\_index}} \\
+\texttt{function\_decorator} & \mbox{\texttt{file\_path}}, \mbox{\texttt{function\_name}}, \mbox{\texttt{function\_line}}, \mbox{\texttt{decorator\_name}} \\
+\texttt{function\_call} & \mbox{\texttt{file\_path}}, \mbox{\texttt{calling\_function}}, \mbox{\texttt{line}}, \mbox{\texttt{called\_function}}, \mbox{\texttt{arg\_count}}, \mbox{\texttt{call\_type}} \\
+\texttt{type\_annotation} & \mbox{\texttt{file\_path}}, \mbox{\texttt{entity\_name}}, \mbox{\texttt{line}}, \mbox{\texttt{type\_expression}}, \mbox{\texttt{annotation\_type}} \\
+\texttt{variable\_definition} & \mbox{\texttt{file\_path}}, \mbox{\texttt{variable\_name}}, \mbox{\texttt{line}}, \mbox{\texttt{variable\_type}}, \mbox{\texttt{initial\_value}}, \mbox{\texttt{scope\_name}} \\
+\texttt{import\_statement} & \mbox{\texttt{file\_path}}, \mbox{\texttt{line}}, \mbox{\texttt{imported\_name}}, \mbox{\texttt{local\_alias}}, \mbox{\texttt{import\_type}} \\
+\texttt{control\_structure} & \mbox{\texttt{file\_path}}, \mbox{\texttt{structure\_type}}, \mbox{\texttt{start\_line}}, \mbox{\texttt{end\_line}}, \mbox{\texttt{condition}} \\
+\texttt{exception\_handling} & \mbox{\texttt{file\_path}}, \mbox{\texttt{line}}, \mbox{\texttt{exception\_types}}, \mbox{\texttt{handler\_description}} \\
+\texttt{docstring} & \mbox{\texttt{file\_path}}, \mbox{\texttt{entity\_name}}, \mbox{\texttt{line}}, \mbox{\texttt{content}}, \mbox{\texttt{docstring\_type}} \\
+\bottomrule
+\end{tabularx}
+\endgroup
+\end{table}
+
+Paths are relative to the repository root, and source spans include both boundary lines in the analyzed snapshot. Method names are class-qualified, as in \texttt{TimeSeries.\_\_init\_\_}. A \texttt{control\_structure} fact records the construct kind, full syntax-tree span, and normalized condition; an \texttt{if} span therefore includes its alternative branches. The \texttt{exception\_handling} relation describes exception-handling constructs, not explicit \texttt{raise} statements.
+
+The facts provide a syntactic representation rather than complete control-flow or data-flow graphs. Calls are recorded without resolving dynamic targets, and condition summaries may omit parts of compound expressions. Constraints not preserved by this representation, such as whether two raises occur in different branches, require source verification, as illustrated in \sref{sec:end-to-end-dataloc}.

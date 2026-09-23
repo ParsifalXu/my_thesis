@@ -21,16 +21,18 @@ Given a natural language query $q$ (e.g., a bug report or feature request) and a
     \item \textbf{Challenge 3: Complex Logical Pattern Constraints.} Questions may contain logical pattern requirements that candidate code must satisfy. Certain localization tasks are defined by structural patterns rather than keywords. For example, \textit{identifying the conditional statement that raises three distinct error types in different branches} requires satisfying specific logical constraints defined by the language's syntax and semantics. Such patterns are difficult to locate by retrieving class or function information alone; they require repository-level structural understanding and reasoning.
 \end{itemize}
 
-To address these challenges, this study proposes \tooldataloc, a synergy between LLMs and Datalog. The underlying intuition is that LLMs excel at resolving \textit{Challenge 1} by translating vague natural language intents into structured requirements, while Datalog provides the relational and reasoning power to solve \textit{Challenge 2} and \textit{Challenge 3} by performing exhaustive, sound traversal over the codebase.
-In the proposed framework, the codebase $\mathcal{C}$ is represented as a set of pre-extracted program facts $\mathcal{F}$, where $\mathcal{F}$ captures both the source entities and the structural relations (e.g., call graphs, inheritance). Each location $l_i \in \mathcal{L}$ corresponds to a specific level of granularity, such as a file, module, or function, that is essential for resolving the query $q$. \fref{fig:arch-dataloc} illustrates the overview of the framework of \tooldataloc. The framework operates in two stages. First, an offline program fact extraction stage analyzes the codebase to build a structured knowledge base. Second, an automated agent execution stage leverages these extracted facts to perform code localization by synthesizing high-quality Datalog queries.
+To address these challenges, this study proposes \tooldataloc, a synergy between LLMs and Datalog. The underlying intuition is that LLMs excel at resolving \textit{Challenge 1} by translating vague natural language intents into structured requirements, while Datalog provides the relational and reasoning power to solve \textit{Challenge 2} and \textit{Challenge 3} by evaluating relational constraints over the extracted facts.
+In the proposed framework, the codebase $\mathcal{C}$ is represented as a set of pre-extracted program facts $\mathcal{F}$, where $\mathcal{F}$ captures both the source entities and the structural relations, such as function-call information, class membership, and declared inheritance relationships. Each location $l_i \in \mathcal{L}$ corresponds to a specific level of granularity, such as a file, module, or function, that is essential for resolving the query $q$. \fref{fig:arch-dataloc} illustrates the overview of the framework of \tooldataloc. The framework operates in two stages. First, an offline program fact extraction stage analyzes the codebase to build a structured knowledge base. Second, an automated agent execution stage leverages these extracted facts to perform code localization by synthesizing high-quality Datalog queries.
 
 \subsection{Program Facts Extraction}
 This subsection describes the details of extracting program facts from a given repository.
-Program facts are extracted through a modular pipeline that separates source discovery, structural parsing, and fact emission, shown as the offline \textit{Program Fact Extraction} stage in \fref{fig:arch-dataloc}. First, the extraction pipeline enumerates source files under the repository root using configurable include/exclude patterns that respect version-control ignores, build artifacts, and generated code. A language-specific frontend then analyzes the files using the most suitable intermediate representation. For Python, the frontend parses source code into an abstract syntax tree and emits facts during traversal. The frontend produces Datalog facts annotated with precise source locations and stable identifiers, enabling traceability and incremental updates.
+Program facts are extracted through a modular pipeline that separates source discovery, structural parsing, and fact emission, shown as the offline \textit{Program Fact Extraction} stage in \fref{fig:arch-dataloc}. First, the extraction pipeline enumerates source files under the repository root using the configured file-selection rules. A language-specific frontend then analyzes the files using the most suitable intermediate representation. For Python, the frontend parses source code into an abstract syntax tree and emits facts during traversal. The frontend produces Datalog facts annotated with precise source locations and stable identifiers, enabling traceability and incremental updates.
 
 These frontends emit facts describing program entities (files, modules, functions, classes, variables) and relations (containment, inheritance, import/use, call, and reference edges), together with optional control flow and data flow information when available. This representation directly addresses \textit{Challenge 2} by making cross-file interactions explicit and queryable~\cite{wu2021diffbase}. Instead of relying on local directory traversal, localization can now operate over global dependency graphs, enabling the identification of code relevant to a feature even when it is scattered across multiple modules and layers.
 
 The extracted facts also enable expressive logical pattern matching, which helps solve \textit{Challenge 3}. Structural requirements, such as specific exception patterns or multi-step call sequences, can be formulated as Datalog queries over extracted facts. This allows localization tasks defined by program structure rather than surface keywords to be handled systematically, without requiring the LLM to reason over raw source code.
+
+\input{Chapters/Chapter5/031.fact-specification.tex}
 
 \subsection{Agentic Workflow}
 This section elaborates on the agent-based workflow for automated repository-level code localization, which builds upon the program facts constructed offline.
@@ -46,14 +48,7 @@ As shown in the red panel in \fref{fig:arch-dataloc}, before execution, \tooldat
 \subsubsection{Context Retrieval and Final Verification}
 As depicted in the yellow panel in \fref{fig:arch-dataloc}, once a set of potential code locations has been determined, the agent retrieves the relevant code snippets using \texttt{get\_sources} or \texttt{get\_file\_contents} and conducts a verification against the original query. These verified locations are then returned in a standardized format (e.g., \texttt{FILE\_PATH:CLASS.METHOD}). Although the agent may undergo multiple internal reasoning iterations, the user experience is streamlined into a single step: submitting a query and receiving a list of locations. This fully automated closed-loop design ensures both usability and seamless integration into production development environments.
 
-\begin{landscape}
-\begin{figure}[t]
-	\centering
-	\includegraphics[width=\linewidth]{Figures/Chapter5/mutate.pdf}
-	\caption{Intermediate-rule mutation and feedback.}
-	\label{fig:mutate-dataloc}
-\end{figure}	
-\end{landscape}
+
 
 \subsection{Repairing LLM-Generated Datalog}
 \label{sec:method:val-dataloc}
@@ -146,3 +141,14 @@ constraint, rewritten rule, resulting cardinality, and optionally a small sample
 tuples.
 This gives the LLM evidence for revision without silently weakening the user's intended query
 semantics.
+
+\begin{landscape}
+\begin{figure}[t]
+	\centering
+	\includegraphics[width=\linewidth]{Figures/Chapter5/mutate.pdf}
+	\caption{Intermediate-rule mutation and feedback.}
+	\label{fig:mutate-dataloc}
+\end{figure}	
+\end{landscape}
+
+\input{Chapters/Chapter5/032.end-to-end-example.tex}
