@@ -69,6 +69,7 @@ def fit(sample_weight, strategy, call__check_sample_weight):
 The example in \fref{fig:extractpath} shows simplified original source code (\subref{fig:sourcecode}) and modified code (\subref{fig:modifiedcode}) from the popular data science project \texttt{scikit-learn}. The corresponding path constraints are shown in \fref{fig:pathgraph}. Together, these figures illustrate the extraction phase. The \textit{fit} function is a member function within a class, and thus member variables such as ``self.strategy'' also exist within the code. ``None'' is also converted to a string to make it easier to be captured, since it is represented as a number 0 during symbolic execution. The tool first modifies the code and replaces exception handling and external function calls with symbolic inputs, marked as ``ERROR\_END'' and ``call\_'', respectively. For those paths whose final states are ``ERROR\_END'', the final results of the conjunction of the documentation constraint and these paths will be negated during the reasoning phase.
 
 
+Each code constraint $p\in P$ is a conjunction of symbolic branch conditions along an explored path, with conditions negated when the corresponding branches evaluate to false. The concrete endpoint values in \fref{fig:pathgraph} describe individual executions rather than equalities that hold for all inputs satisfying the path condition.
 
 \subsubsection{Documentation Constraint Expression Extraction}\label{sec:llm-mpchecker}
 
@@ -103,6 +104,7 @@ The second part arises from the preliminary study, which found that some Python 
 In the third part, to ensure that the format of the logical expression in GPT-4's output is consistent each time and convenient to process, the prompting strategy applies in-context learning techniques that are widely used in previous works~\cite{min2022rethinking, rubin2021learning} to enable GPT-based models to handle tasks specific to a domain.
 The prompt includes four examples that contain pairs of original constraint-related sentences selected from Python documentation and their corresponding logical expression constraints.
 
+Documentation constraints are expressed in a quantifier-free constraint language comprising atomic comparisons and path-dependent predicates combined by Boolean connectives. \fref{fig:ebnf} specifies the core syntax for comparisons between parameters and literal values, such as \texttt{strategy = "uniform"}. Parameter names refer to the parameters or attributes of the documented function or class. Specialized predicates, including \texttt{ignore(x)} and \texttt{exist(x)}, extend this core and are evaluated according to whether the parameter is used along an execution path, as described in \sref{sec:fuzzword-mpchecker}.
 
 \begin{landscape}
 \begin{figure*}[h]

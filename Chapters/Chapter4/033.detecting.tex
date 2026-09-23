@@ -165,7 +165,7 @@ $\Omega$ of path constraints $\omega$:
 \end{equation}
 where $\Phi_\Omega$ denotes the set of expressions aggregated from all the path constraints in
 $\Omega$, and $\epsilon[e \mapsto e_{\Phi_\Omega}]$ is a rewrite of $\epsilon$, where each
-expression $e$ has been replaced by its closest counterpart from $\Phi_\Omega$.
+expression $e$ has been replaced by its closest counterpart from $\Phi_\Omega$, according to the expression similarity $\sigma$.
 \end{definition}
 
 The inconsistency between the modified constraint $\epsilon[e \mapsto e_{\Phi_\Omega}]$ and
@@ -181,8 +181,3 @@ a 70\% probability of inconsistency or a 30\% probability of consistency.
 For instance, in \texttt{scikit-learn}, the documentation of \texttt{LinearSVC} states: ``\emph{If n\_samples < n\_features and optimizer supports chosen loss, multi\_class and penalty, then dual will be set to True}''. However, the extracted constraint is ``\texttt{$($samples$<$features$)$$\wedge$\allowbreak$($dual$=$True$)$}'', where two parameters are mistakenly mapped to similar names. Their constraint similarity is 0.86, exceeding the threshold, leading \toolchecker to discard the result. Moreover, in most cases where the expression contains only a single parameter, the threshold exhibits stronger filtering capability.
 
 However, setting a threshold cannot entirely exclude all false positives, as there is no definitive rule to ascertain whether an error originates from the documentation or the LLM. Another example from \texttt{scikit-learn} illustrates this limitation: the documentation of \texttt{estimator\_} states: \emph{``The child estimator template used to create the collection of fitted sub-estimators''}. Yet, the extracted constraint ``\texttt{$($estimator\_$=$child\_estimator\_template$)\wedge($collection$=$fitted\_sub\_estimators$)$}'' has a constraint similarity of 0.67, which is below the threshold, leading \toolchecker to accept the result.
-
-
-
-
-
