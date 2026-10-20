@@ -1,88 +1,216 @@
-\section{Evaluation}\label{sec:eval-dataloc}
+\section{Evaluation}\label{sec:eval-mpchecker}
+This section describes the evaluation of \toolchecker. It first presents the research questions, then details the experiment setup and evaluation subjects. Finally, it analyzes the experimental results and answers each research question. The evaluation was guided by the following research questions:
 
-To evaluate the effectiveness and practicality of the approach, the following research questions are formulated:
 \begin{enumerate}
-	\item \textbf{RQ1:} How effective is \tooldataloc in keyword-agnostic logical code localization?
-	\item \textbf{RQ2:} How effective is \tooldataloc for issue-based code localization?
-	\item \textbf{RQ3:} How efficient is \tooldataloc compared to baselines?
-    \item \textbf{RQ4:} How does each component of \tooldataloc contribute to its performance?
+  \item \textbf{RQ1:} How accurate is \toolchecker in extracting constraints from API documentation?
+  \item \textbf{RQ2:} How effective is \toolchecker in detecting errors related to multi-parameter constraints in API documentation?
+  \item \textbf{RQ3:} How effectively can \toolchecker detect unknown inconsistency issues?
 \end{enumerate}
 
-\subsection{Benchmarks and Baselines}\label{sec:eval:setup-dataloc}
+\subsection{Experiment Setup}
+\subsubsection{Dataset.}
+There is currently no well-established dataset specifically focusing on multi-parameter API
+documentation errors. To better evaluate the effectiveness of the tool, two datasets were constructed: a constraint dataset and an inconsistency dataset.
 
-\textbf{SWE-bench Lite}~\cite{swebench2024} is a curated subset of SWE-bench for cost-effective evaluation of autonomous issue resolution. Each instance contains a real-world GitHub issue, repository metadata, and patch-derived ground-truth locations. Following Suresh et al.~\cite{suresh2024cornstack}, 274 of the 300 instances whose patches modify existing functions or classes are retained, and those that introduce new functions or imports are excluded, thereby focusing evaluation on localization within existing code structures.
+\paragraph{Constraint Dataset.}
+The constraint dataset contains 72 constraints from 4 popular open-source data science libraries with well-maintained documentation, including \texttt{scikit-learn}, \texttt{scipy}, \texttt{numpy}, and \texttt{pandas}. The constraints were gathered by analyzing commits from each GitHub repository, focusing on developers' modifications to documentation related to multi-parameter constraints. To streamline this process, an automated script was developed to collect all documentation-related commits and identify changes within parameter (including attribute) descriptions, adhering to two distinct docstring styles (see details in \fref{fig:docstring}). By mapping parameter names to their descriptions, it then cross-checks if any parameter names appear within others' descriptions to keep potential constraint-related documentation. Approximately 90\% to 95\% of irrelevant commits were excluded, leaving a smaller subset of commits that may contain constraints. Additionally, random sampling of the excluded commits was performed to assess and minimize the impact of this heuristic. Despite the approach's proven effectiveness, the remaining subset still contains a substantial number of submissions. Each of the four repositories has over 30,000 commits, requiring manual verification of approximately 1,500 commits per repository to further identify multi-parameter constraints. For each constraint, its source information (repository name, SHA, file path, etc.) was logged and the code file was retained, enabling swift extraction of documentation and code for reproducibility.
+In some cases, the condition enforcing the constraint is located not in the current function but in a function it calls, leading to a mismatch between documentation and code. To address this, such mismatches were recorded and the constraint description was relocated to the function where the check actually occurs.
 
-\textbf{\dataset} is a diagnostic benchmark for KA-LCL, containing 225 logic-intensive queries across 9 projects. Each query is formulated as a composite logical proposition over code features across multiple dimensions, such as structural granularity (e.g., classes, methods), behavioral attributes (e.g., control flow, exception handling), code metrics (e.g., inheritance depth and branch count), as summarized in \tref{tab:code_dimensions-dataloc}. From the large feature-composition space induced by these dimensions, 25 representative combinations are selected and each is instantiated on 9 repositories, with only minimal query adjustments to ensure at least one valid ground-truth location.
 
-\begin{table}[htbp]
+
+
+\paragraph{Inconsistency Dataset.}
+Based on the constraint dataset, an initial inconsistency dataset was constructed comprising 126 multi-parameter constraints that lead to code-documentation inconsistencies. An analysis of around 20 resolved GitHub issues related to multi-parameter constraints identified eight common patterns that may cause CDI: (1) Parameter name change; (2) Value Change; (3) Logic Change; (4) Remove Parameter; (5) Add Constraints; (6) Remove Constraints; (7) Missing Documentation; (8) Modify Description. To better evaluate the capabilities of the tool, these eight patterns were subsequently applied to expand the dataset through mutation based on the \emph{Constraint Dataset}. For each constraint, two types of modifications were applied, resulting in an expanded dataset containing 216 constraints. The mutated constraints and the original constraints were fed into an SMT solver to verify whether the mutations violated the original constraints. Each constraint was also manually inspected to verify its classification as consistent or inconsistent. It is important to note that modifying a correct constraint does not necessarily turn it into an incorrect one. The final expanded dataset contained 126 inconsistent constraints and 90 consistent constraints. The dataset represents potential outcomes of documentation changes that may occur during development.
+
+\begin{landscape}
+\begin{table}[]
 \centering
-\caption{Taxonomy of Python Code Dimensions and Representative Elements.}
-\label{tab:code_dimensions-dataloc}
-\small
-\renewcommand{\arraystretch}{1.2}
-\begin{tabularx}{\textwidth}{lX}
-\toprule
-\textbf{Query Dimensions} & \textbf{Examples / Typical Elements} \\ \midrule
-Code Structure & Functions, Methods, Classes, Modules, Decorators \\
-Control Flow & Conditional (\texttt{if-elif-else}), Iteration (\texttt{for}, \texttt{while}), Context Management (\texttt{with}) \\
-Condition Logic & Comparison (\texttt{==}, \texttt{>}), Identity (\texttt{is}), Membership (\texttt{in}), Type Checks (\texttt{isinstance}), Logical Operators (\texttt{and}, \texttt{or}, \texttt{not}), Early Exit (\texttt{return}, \texttt{break}, \texttt{continue}) \\
-Data Structure & Built-in Collections (\texttt{list}, \texttt{dict}, \texttt{set}), Primitive Types (\texttt{int}, \texttt{str}) \\
-Function Signatures & Default Values, Variadic Parameters (\texttt{*args}, \texttt{**kwargs}), Type Annotations \\
-Exception Handling & Exception Propagation (\texttt{try-except-finally}), Exceptions (\texttt{TypeError}) \\
-Code Metrics & Nesting Depth, Inheritance Depth, Assertion Count, Branch count \\ \bottomrule
-\end{tabularx}
+\caption{Data science libraries used in the experiments.}
+\begin{tabular}{lrrrrrrr}
+\hline
+\multicolumn{1}{c}{Project} & \multicolumn{1}{c}{class} & \multicolumn{1}{c}{class w/ doc} & \multicolumn{1}{c}{func} & \multicolumn{1}{c}{func w/ doc} & \multicolumn{1}{c}{KLOC} & \multicolumn{1}{c}{avg. params} & \multicolumn{1}{c}{\#Stars} \\ \hline
+scikit-learn                & 878                       & 306                              & 9,332                    & 1,535                            & 400.1                    & 1.42                            & 61.8K                      \\
+pandas                      & 2,211                     & 102                              & 28,880                   & 1,432                            & 620.6                    & 1.14                            & 45.2K                      \\
+scipy                       & 2,570                     & 142                              & 22,059                   & 1,705                            & 517.9                    & 1.30                            & 13.6K                      \\
+numpy                       & 2,000                     & 51                               & 12,618                   & 902                             & 276.3                    & 0.83                            & 29.4K                      \\ \hline
+keras                       & 1,370                     & 254                              & 9,877                    & 724                             & 218.5                    & 1.42                            & 62.9K                     \\
+dask                        & 284                       & 26                               & 6,914                    & 368                             & 157.5                    & 1.33                            & 13.1K                      \\
+statsmodels                 & 2,184                     & 273                              & 11,590                   & 1,894                           & 424.6                    & 1.32                            & 10.6K                      \\ \hline
+\end{tabular}
+\label{tab:subjects}
 \end{table}
+\end{landscape}
 
-\textbf{\negset}, a variant of \dataset, is designed to evaluate abstention capability when no valid location satisfies a query. Since this ability can be tested without using the full benchmark scale, \negset is constructed by sampling a single repository version and deliberately modifying its queries to ensure the corresponding ground-truth sets are empty. Existing methods often rely on top-$n$ ranking to maximize recall, but an ideal localization tool should not only provide well-supported answers but also explicitly abstain when no valid answer can be ascertained, thereby avoiding false positives. Such a \textit{refusal mechanism} serves as a critical metric for the robustness of autonomous agents in production environments.
+\subsubsection{Subjects}
+\tref{tab:subjects} lists 7 popular libraries on which \toolchecker was evaluated, the first four for dataset construction and the last three for assessing \toolchecker's ability to detect unknown issues. The selected libraries are of high quality and widely used, with tens of thousands of stars on GitHub. These libraries are substantial third-party libraries, averaging 1,642 classes, 14,467 functions, with an average of 373.6 thousand lines of code, and each function containing an average of 1.3 parameters. The tool extracts documentation constraints and path constraints from these libraries and uses a fuzzy constraint reasoner to detect inconsistencies.
 
-\tooldataloc is compared with four state-of-the-art baselines:
-\begin{itemize}[leftmargin=*]
-    \item \textbf{SweRank}~\cite{reddy2025swerank} (\textit{Embedding}): It utilizes a retrieve-and-rerank architecture to identify issue locations. It employs SWERankEmbed (137M/7B parameters) to perform initial retrieval and SWERankLLM (7B/32B parameters) to rerank the results.
-    \item \textbf{Agentless}~\cite{xia2024agentless} (\textit{Pipeline}): This approach employs a hierarchical filtering strategy within a procedural workflow. It progressively prunes the search space from the file level down to specific classes or functions, utilizing an LLM to rank and select candidates at each stage.
-    \item \textbf{LocAgent}~\cite{chen-etal-2025-locagent} (\textit{Agentic}): It constructs a graph-based representation and sparse indexes of the project and enables an autonomous agent to perform iterative, tool-assisted retrieval.
-    \item \textbf{CoSIL}~\cite{jiang2025cosil} (\textit{Agentic}): This framework focuses on structural dependency traversal through call graphs to identify implicit locations via iterative exploration. It incorporates pruning to maintain context efficiency and restrict the search to high-relevance execution paths.
-\end{itemize}
+\toolchecker was implemented in Python. All the experiments were performed on an Intel(R) Xeon(R) Silver 4214 CPU @ 2.20GHz machine with 252GB of RAM, running Ubuntu 18.04, with Python 3.8.19 and Z3 4.13.0.
+For the constraint extraction evaluation (RQ1), GPT-4 was accessed through OpenAI's API. For result validation, given the absence of established benchmarks in this domain, two volunteer researchers independently reviewed the constraint extraction results from GPT-4, manually assessing each constraint's consistency with the original Python documentation. Any discrepancies were resolved through consensus discussion. In RQ1, \textit{Equivalent} denotes a correctly extracted constraint that preserves the meaning of the original documentation, whereas \textit{Non-Equivalent} groups incorrect extractions and missing constraints. Thus, these categories assess documentation constraint extraction, rather than equivalence between documentation and code constraints.
 
-All experiments were conducted on an Ubuntu 22.04.5 LTS server with an Intel Xeon Silver 4216 CPU (2.10 GHz) and 62 GB RAM. The framework was implemented in Python 3.12.11 with the \souffle 2.4 Datalog engine. \tooldataloc was evaluated using \texttt{gpt-4o-20240513} via the OpenAI API, \texttt{claude-3-5-sonnet-20241022} via AWS Bedrock, and \texttt{Qwen3-Max} via Alibaba Cloud, using a temperature of 0.3 and a maximum of 20 iterations. The SWE-bench Lite comparison in \tref{tab:comparison_isq-dataloc} additionally reports results for GPT-5.1. Baselines ran in their official environments with required dependencies for fair comparison.
-
-\subsection{Metrics}
-Localization performance is evaluated at three levels of granularity: \textit{file, module, and function}. Let $Q$ denote the set of query instances, $G_q$ the set of ground-truth locations for query $q \in Q$, and $\mathcal{P}_q$ the set of predicted locations inferred by the agent workflow. $\mathbf{1}(\cdot)$ denotes the \textbf{indicator function}, which equals $1$ if the logical condition holds and $0$ otherwise. The evaluation uses the following six metrics:
-
-\begin{enumerate}[leftmargin=*, label=\textbf{(\arabic*)}]
-    \item \textbf{Accuracy@k (ACC@k):} It measures the ability to achieve full coverage, where a success requires all ground-truth locations to be present within the top-$k$ predicted locations. When $k$ equals the length of the prediction set, this metric becomes the \textbf{Success Rate (SR)}:
-    \begin{equation}
-        Acc@k = \frac{1}{|Q|} \sum_{q \in Q} \mathbf{1}(G_q \subseteq \mathcal{P}_{q,k})
-    \end{equation}
-
-    \item \textbf{Recall (REC):} It represents the proportion of ground-truth locations successfully captured for each query, averaged across queries:
-    \begin{equation}
-        REC = \frac{1}{|Q|} \sum_{q \in Q} \frac{|G_q \cap \mathcal{P}_q|}{|G_q|}
-    \end{equation}
-
-    \item \textbf{Precision (PRE):} This metric penalizes overprediction by calculating the fraction of predicted locations that are correct:
-    \begin{equation}
-        Pre = \frac{1}{|Q|} \sum_{q \in Q} \frac{|G_q \cap \mathcal{P}_q|}{|\mathcal{P}_q|}
-    \end{equation}
-
-    \item \textbf{Average Jaccard Similarity (AJS):} It quantifies the overlap between the predicted and ground-truth sets, which penalizes both missing targets and redundant predictions:
-    \begin{equation}
-        AJS = \frac{1}{|Q|} \sum_{q \in Q} \frac{|G_q \cap \mathcal{P}_q|}{|G_q \cup \mathcal{P}_q|}
-    \end{equation}
-
-    \item \textbf{Perfect Localization Rate (PLR):} The most stringent metric, measuring the ratio of instances where the predicted set $\mathcal{P}_q$ exactly matches the ground-truth set $G_q$. A PLR of 1.0 indicates perfect localization without any extraneous noise (i.e., $AJS = 1.0$):
-    \begin{equation}
-        PLR = \frac{1}{|Q|} \sum_{q \in Q} \mathbf{1}(\mathcal{P}_q = G_q)
-    \end{equation}
-
-    \item \textbf{Hit Rate (HR):} The most lenient metric, measuring the ratio of instances where the predicted set $\mathcal{P}_q$ provides at least one correct location:
-    \begin{equation}
-        HR = \frac{1}{|Q|} \sum_{q \in Q} \mathbf{1}(\mathcal{P}_{q} \cap G_q \neq \emptyset)
-    \end{equation}
-\end{enumerate}
 
 \subsection{Results}
+\subsubsection{Accuracy of LLM in extracting constraints from API documentation.}
+\tref{tab:rq1} displays the result of RQ1. The experiment shows that the tool correctly identified and extracted 66 out of 72 constraints contained in the Python documentation collected in the benchmark, achieving an accuracy of 91.7\%, which demonstrates that the tool can successfully extract most of the constraints accurately, with few errors or omissions.
+Next, the remaining failed cases are examined to investigate the reasons for the inaccuracy. The analysis showed that out of the 6 extraction failures, 4 involved missing constraints during the documentation processing. For example, one of the missing constraints is: ``(batch\_size = auto) $\rightarrow$ (batch\_size = min(200, n\_samples))''. Although this case involves a constraint between multiple parameters, the format is tricky because one of the parameters is within a function, which may have misled GPT-4 and caused it to miss this constraint during extraction. In the last 2 cases, the constraint information was identified but converted into incorrect logic expressions due to the complex logic or sentence structure.
 
-\input{Chapters/Chapter5/041.rq1}
-\input{Chapters/Chapter5/042.rq2}
-\input{Chapters/Chapter5/043.rq3}
-\input{Chapters/Chapter5/044.rq4}
+An ablation study further explores \toolchecker's abilities. The results show that \toolchecker without few-shot learning achieves an accuracy of 62.5\%. Most failures occur in the incorrect extraction of constraints. This indicates that including few-shot learning is important for \toolchecker to generate accurate constraints.
+Next, \toolchecker without applying chain-of-thought techniques results in an accuracy of 79.2\%, with the number of missed constraints accounting for more than half of total non-equivalent cases. This suggests that GPT tends to miss more details in documentation when chain-of-thought is removed.
+After chain-of-thought and few-shot learning are incorporated, \toolchecker's performance shows a clear improvement.
+
+\begin{table}[t]
+    \centering
+    \caption{Results of \toolchecker on constraint extraction.}
+    \label{tab:rq1}
+    \small
+    \setlength{\tabcolsep}{5pt}
+    \renewcommand{\arraystretch}{1.15}
+    \begin{threeparttable}
+    \begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}Xcccr@{}}
+        \toprule
+        \multirow{3}{*}{Configuration} & Equivalent
+        & \multicolumn{2}{c}{Non-Equivalent}
+        & \multirow{3}{*}{Accuracy} \\
+        \cmidrule(lr){2-2}\cmidrule(lr){3-4}
+        & \shortstack{Correct\\extraction}
+        & \shortstack{Incorrect\\extraction}
+        & \shortstack{Missing\\constraints} & \\
+        \midrule
+        \toolchecker & 66 & 2 & 4 & 91.7\% \\
+        \toolchecker w/o few-shot learning & 45 & 20 & 7 & 62.5\% \\
+        \toolchecker w/o chain-of-thought & 57 & 7 & 8 & 79.2\% \\
+        \bottomrule
+    \end{tabularx}
+    \begin{tablenotes}[flushleft]
+        \footnotesize
+        \item All configurations are evaluated on 72 constraints. Accuracy is the proportion of correctly extracted constraints.
+    \end{tablenotes}
+    \end{threeparttable}
+\end{table}
+
+\smallskip
+\noindent\shadowbox{%
+  \begin{minipage}{0.98\columnwidth}
+    \textbf{Answer to RQ1:} \toolchecker correctly extracted 66 constraints out of 72 in total, achieving an accuracy of 91.7\%. This demonstrates that \toolchecker is effective in extracting constraints from Python documentation.
+  \end{minipage}}
+
+
+
+% ===== RQ2 =====
+\subsubsection{\toolchecker's effectiveness in detecting multi-parameter API documentation errors}
+To measure \toolchecker's effectiveness in detecting multi-parameter API documentation errors, \toolchecker was evaluated on the inconsistency dataset. \tref{tab:res} shows the results of \toolchecker in detecting multi-parameter CDI on the inconsistency dataset.
+
+The \vanillatool does not include fuzzy words or apply fuzzy constraint satisfaction theory, limiting its ability to handle implicit constraints. Despite these limitations, it achieved an impressive 69\% recall by detecting 87 inconsistencies. With fuzzy words and fuzzy constraint logic, \toolchecker's performance significantly improved, successfully identifying 117 inconsistencies with a recall of 92.8\% and  an accuracy $=\frac{TP+TN}{TP+TN+FP+FN}=\frac{117+88}{216}=94.9\%$. This demonstrates that incorporating fuzzy words and fuzzy constraints can expand the range of detectable constraints. However, two false positives were identified because the constraints lie between the parameters and method calls, rather than among the parameters. One example is shown below:
+
+
+% \texttt{$($shape $=$ None$)$ $\wedge$ $($axes $\neq$ None$)$ $\rightarrow$ $($shape $=$ numpy.take$($x.shape,axes,axis=0$))$}
+\(
+(\mathtt{shape}=\mathtt{None}) \land
+(\mathtt{axes}\neq\mathtt{None}) \rightarrow
+(\mathtt{shape}=\mathtt{numpy.take(x.shape,axes,axis=0)})
+\)
+
+
+where the value of ``shape'' is the return value of the function ``take()'' from the NumPy library. Modern software increasingly emphasizes code maintainability and reusability, leading to highly complex function calls, often involving nested or chained calls. To avoid the high risk of path explosion in symbolic execution, \toolchecker replaces function calls with symbolic inputs during the preprocessing phase, which leads to misclassification of these two inconsistencies.
+
+
+
+The remaining 9 unresolved inconsistent constraints stem from external function dependencies. While incorporating external function code could resolve these constraints, this approach risks infinite recursive dependencies and path explosion. This study takes the view that constraints should be handled within the documented function itself.
+
+
+
+
+\begin{table}[t]
+    \centering
+    \caption{Results of LLM and \toolchecker on detecting multi-parameter Code-Documentation Inconsistencies (CDIs).}
+    \label{tab:res}
+    \small
+    \setlength{\tabcolsep}{8pt}
+    \renewcommand{\arraystretch}{1.15}
+    \begin{threeparttable}
+    \begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}Xrrr@{}}
+        \toprule
+        Checker & FN & TP & Recall \\
+        \midrule
+        LLM & 119 & 7 & 5.6\% \\
+        LLM+C & 74 & 52 & 41.3\% \\
+        \vanillatool & 39 & 87 & 69.0\% \\
+        \fuzzytool & 9 & 117 & 92.8\% \\
+        \bottomrule
+    \end{tabularx}
+    \begin{tablenotes}[flushleft]
+        \footnotesize
+        \item LLM: raw documentation and corresponding code; LLM+C: extracted \emph{doc-constraints} from documentation and corresponding code; \vanillatool: \toolchecker without fuzzy words and fuzzy constraint logic; \fuzzytool: \toolchecker with fuzzy words and fuzzy constraint logic.
+    \end{tablenotes}
+    \end{threeparttable}
+\end{table}
+
+
+A notable situation arose during one issue report: even though the issue had been confirmed, one developer expressed dissatisfaction. He believed the reporters were an automated tool or AI-based bot because of their anonymous status, which diminished his enthusiasm for addressing the issue. With a mass of LLM-based program analysis or inconsistency checkers now available, while they offer insights sometimes, their results often require more manual verification effort than those of traditional tools due to higher uncertainty.
+
+\paragraph{Comparative Study.}
+Therefore, a comparative experiment was conducted between the tool and the approach of using only LLMs as a constraint checker on the same dataset. To align with the experiment settings, GPT-4, one of the leading models, was selected for comparison and evaluated under two settings: 1) LLM: providing the raw documentation and code as input, directly prompting GPT to check for consistency, and 2) LLM+C: first extracting constraints using the LLM and then providing both these constraints and their corresponding code to the LLM for a consistency check. In addition, the LLM was also required to provide justifications for its answers.
+
+
+As shown in \tref{tab:res}, when raw documentation and the corresponding code were provided as inputs to the LLM, the LLM demonstrated significant limitations in detecting multi-parameter CDIs, finding only 7 inconsistencies with a recall of 5.6\%. When extracted constraints and code were given as inputs, LLM+C demonstrated heightened awareness of the task and had a higher probability of locating the constraint-related code segments. However, it still struggled to determine inconsistency. Out of 126 inconsistent constraints, 52 were identified correctly, yielding a recall of 41.3\%. After a thorough review of the LLM's responses, the analysis showed that LLM+C gave correct results in many cases but provided unreasonable or even wrong explanations. These results demonstrate that the LLM still has limitations in detecting complicated multi-parameter CDIs, highlighting that the method’s design is the key factor in enhancing detection performance rather than any reliance on potential pretraining data leakage.
+
+
+
+\smallskip
+\noindent\shadowbox{%
+  \begin{minipage}{0.98\columnwidth}
+    \textbf{Answer to RQ2:}
+        The large language model (LLM) exhibits limited capability in handling multi-parameter CDIs. Compared to LLM+C with a recall of 41.3\%, \fuzzytool successfully detected 117 out of 126 inconsistent constraints, achieving a recall of 92.8\%. Notably, \fuzzytool achieved a recall 23.8 percentage points higher than \vanillatool, substantiating the effectiveness of incorporating fuzzy words and fuzzy constraint logic.
+  \end{minipage}}
+
+
+
+% ===== RQ4 =====
+\subsubsection{Practical effect of \toolchecker}
+The tool's effectiveness in detecting unknown multi-parameter inconsistencies was validated by manual review and developer feedback. Fourteen inconsistencies identified by \toolchecker were reported to the library maintenance team and received positive engagement and warm responses. Two of them even sparked further discussions about potential issues. This not only affirmed the reports' quality but also reflected the enthusiasm of the open-source community.
+
+For example, an issue confirmed by the \texttt{scikit-learn} team originates from the independent function ``lars\_path'', as shown in \fref{fig:eg3}. Apparently, an inconsistency exists between the documentation and code regarding whether ``Gram'' is None when ``X'' is None. Therefore, the issue report~\cite{issue30099} detailed the inconsistent documentation sections alongside the corresponding code snippet. The developer made a bit of archeology, admitted the documentation needed to be updated, and asked whether the reporters would submit a PR to correct this error. Finally, the documentation description was fixed to ``If X is None, Gram must also be None''.
+
+For most issue reports, feedback was received promptly, and 11 inconsistencies were confirmed and improvements were made to documentation or code. Of the remaining three cases, two were reported at the initial phase of the experiments, when the understanding of the project architecture was still insufficient. The checks for these two constraints were implemented in other deeper files and could not be accurately verified at that time. The third inconsistency stemmed from ambiguity in the natural language, which resulted in a different interpretation that diverged from the developers' original intent. Furthermore, these reported issues have contributed to four DS/ML repositories (\texttt{scikit-learn}, \texttt{keras}, \texttt{statsmodels}, \texttt{dask}), which emphasizes the generalization of the tool.
+
+At the time of writing, 10 out of 11 confirmed inconsistencies have been resolved: 7 through documentation fixes and 3 through updates to both documentation and code. This aligns with intuition: code errors are more likely to cause runtime failures and are thus easier to detect, whereas documentation errors and their potential efficiency impacts are often subtler and harder to identify.
+
+
+\begin{figure*}[t]
+    \vspace{2mm}
+    \begin{subfigure}{\linewidth}
+        \begin{tcolorbox}[fontupper=\footnotesize,fonttitle=\small,colback=Emerald!10,colframe=cyan!40!black,title=\textbf{Constraint description of \texttt{X} and \texttt{Gram} in function \texttt{lars\_path}}]
+            {\sffamily \textbf{> X } : None or ndarray of shape (n\_samples, n\_features)
+            \\
+            Input data. Note that \colorbox{blue!20}{\textbf{if X is None then the Gram matrix must be specified}}, i.e., cannot be None or False.}
+        \end{tcolorbox}
+        \label{fig:eg3-doc}
+    \end{subfigure}
+    \begin{subfigure}{\linewidth}
+\begin{tcolorbox}[fontupper=\footnotesize,fonttitle=\small,colback=Salmon!20, colframe=Salmon!90!Black,title=\textbf{Corresponding code snippet in function \texttt{lars\_path}}]
+\begin{lstlisting}[escapechar=@,basicstyle={\footnotesize\ttfamily}]
+def lars_path(...):
+    @\colorbox{blue!20}{if X is None and Gram is not None:}@
+        raise ValueError("X cannot be None if Gram is not None. Use lars_path_gram to avoid passing X and y.")
+\end{lstlisting}
+\end{tcolorbox}
+        \label{fig:eg3-code}
+    \end{subfigure}
+     \begin{subfigure}{\linewidth}
+        \begin{tcolorbox}[fontupper=\footnotesize,fonttitle=\small,colback=Emerald!10,colframe=LimeGreen!60!black,title=\textbf{Fixed Constraint description of \texttt{X} and \texttt{Gram} in function \texttt{lars\_path}}]
+            {\sffamily \textbf{> X } : None or ndarray of shape (n\_samples, n\_features)
+                \\
+            Input data. Note that \colorbox{blue!20}{\textbf{if X is None, Gram must also be None.}} If only the Gram matrix is available, use lars\_path\_gram instead.}
+        \end{tcolorbox}
+        \label{fig:eg3-fixed-doc}
+    \end{subfigure}
+    \caption{Example of the fixed documentation from \texttt{Scikit-learn}.}
+    \label{fig:eg3}
+    \vspace{-10pt}
+\end{figure*}
+
+
+\smallskip
+\noindent\shadowbox{%
+  \begin{minipage}{0.98\columnwidth}
+    \textbf{Answer to RQ3:}  Fourteen multi-parameter inconsistencies detected by \toolchecker were reported to library developers, who had confirmed 11 inconsistencies by the time of submission (confirmation rate = 78.6\%)~\cite{issue28469,issue28470,issue28473,issue29440,issue29463,issue29464,issue9304,issue29509,issue11336,issue20141, issue30099}. These results demonstrate that \toolchecker can effectively detect unknown API documentation errors. Some of them are even in unseen libraries, which highlights its strong generalization capability.
+  \end{minipage}}

@@ -294,17 +294,7 @@
 		\item Prof. Yi Li supervised the project, provided guidance, and revised the manuscript.
 	\end{itemize}
 
-	\cref{ch:chapter4} is published as {\color{blue}Xiufeng Xu, Fuman Xie, Chenguang Zhu, Guangdong Bai, Sarfraz Khurshid, and Yi Li. Identifying Multi-parameter Constraint Errors in Python Data Science Library API Documentation. In Proceedings of the ACM on Software Engineering (ISSTA). 2025. DOI: 10.1145/3728945.}
-	
-	The contributions of the co-authors are as follows:
-	\begin{itemize}[topsep=1pt,itemsep=1pt,partopsep=1pt, parsep=1pt]
-		\item Prof. Yi Li and Dr. Chenguang Zhu proposed the topic and revised the manuscript.
-		\item I co-designed the methodology, implemented and evaluated the approach, and drafted the manuscript.
-		\item Fuman Xie contributed to the implementation of the tool, assisted in conducting the evaluation, and refined the manuscript.
-		\item Prof. Sarfraz Khurshid and Prof. Guangdong Bai provided insightful comments on the methodology design.
-	\end{itemize}
-
-	\cref{ch:chapter5} contains material from a manuscript currently under review.
+	\cref{ch:chapter4} contains material from a manuscript currently under review.
 	
 	The contributions of the co-authors are as follows:
 	\begin{itemize}[topsep=1pt,itemsep=1pt,partopsep=1pt, parsep=1pt]
@@ -312,6 +302,16 @@
 		\item I co-designed the methodology, implemented the tool, conducted the experiments, analyzed the data, and drafted the manuscript.
 		\item Dr. Xiuheng Wu contributed to the implementation of the tool and assisted in conducting the experiments.
 		\item Dr. Zejun Zhang provided insightful comments and helped to write the related work section.
+	\end{itemize}
+
+	\cref{ch:chapter5} is published as {\color{blue}Xiufeng Xu, Fuman Xie, Chenguang Zhu, Guangdong Bai, Sarfraz Khurshid, and Yi Li. Identifying Multi-parameter Constraint Errors in Python Data Science Library API Documentation. In Proceedings of the ACM on Software Engineering (ISSTA). 2025. DOI: 10.1145/3728945.}
+	
+	The contributions of the co-authors are as follows:
+	\begin{itemize}[topsep=1pt,itemsep=1pt,partopsep=1pt, parsep=1pt]
+		\item Prof. Yi Li and Dr. Chenguang Zhu proposed the topic and revised the manuscript.
+		\item I co-designed the methodology, implemented and evaluated the approach, and drafted the manuscript.
+		\item Fuman Xie contributed to the implementation of the tool, assisted in conducting the evaluation, and refined the manuscript.
+		\item Prof. Sarfraz Khurshid and Prof. Guangdong Bai provided insightful comments on the methodology design.
 	\end{itemize}
 
 }{08/04/2026}{Styles/xxf_signature.png}
@@ -403,15 +403,15 @@ March 2026
 
 % 1. The Problem 2. The Issues 3. The Approach 4. The Results 5. The Experiments 6. The Applications
 
-Modern software systems are deeply embedded in interconnected dependency networks and must evolve continuously to remain viable. While Large Language Models (LLMs) have emerged as powerful tools for automating software evolution tasks, their probabilistic nature introduces fundamental reliability concerns: inevitable hallucinations and a lack of genuine logical reasoning make fully AI-driven evolution insufficient for industrial-grade demands. This thesis addresses this challenge by advocating a neurosymbolic approach that anchors the generative intelligence of LLMs within formal logical frameworks, systematically enhancing reliability across the three core phases of software evolution: environment perception, logic implementation, and artifact delivery.
+Modern software systems must continually evolve within interconnected dependency networks. Large Language Models (LLMs) offer new opportunities for automating this process, but hallucinations and errors in interpreting program structure and constraints can undermine reliability. This thesis investigates reliability challenges in three phases of software evolution: environment perception, logic implementation, and artifact delivery. It develops reproducible evaluation resources and neurosymbolic methods to support these phases.
 
-For environment perception, this thesis presents \toolcompsuite, a reproducible dataset comprising 123 real-world Java client-library pairs that manifest incompatibility issues upon library upgrades. Sourced from 88 clients and 104 libraries, and accompanied by an automated command-line interface for single-command reproduction, \toolcompsuite provides a high-fidelity empirical foundation for AI systems to perceive and reason about the risks propagated through dependency chains during software evolution.
+For environment perception, dependency changes can introduce failures whose effects depend on how clients use a library. This thesis presents \toolcompsuite, a dataset of 123 real-world Java client-library pairs exhibiting library upgrade incompatibilities. Existing tests from the client projects and an automated command-line interface enable single-command reproduction. \toolcompsuite provides an empirical foundation for studying dependency risks and evaluating compatibility analysis techniques, including future AI-assisted approaches.
 
-For artifact delivery, this thesis presents \toolchecker, an automated technique for detecting multi-parameter code-documentation inconsistencies. \toolchecker employs symbolic execution to extract inter-parameter constraints from code and leverages LLMs to parse corresponding constraints from documentation. A customized fuzzy constraint satisfaction framework reconciles the inherent uncertainty of LLM outputs and enables logical inconsistency detection. Evaluated on four widely used Python data science libraries, \toolchecker discovered 14 real-world inconsistencies, of which 11 have been confirmed by the developers.
+For logic implementation, reliable modification depends on locating the code relevant to the intended changes. This thesis identifies the \textit{Keyword Shortcut} in issue-based localization and formalizes Keyword-Agnostic Logical Code Localization. It introduces diagnostic benchmarks to assess localization beyond explicit identifier clues and abstention when no valid location exists. The proposed \tooldataloc framework combines LLM-based intent interpretation with logical reasoning over program facts and checks retrieved candidates against source code. Experiments demonstrate higher localization precision than the evaluated baselines on keyword-agnostic queries, together with the ability to abstain when no valid match exists.
 
-For logic implementation, this thesis identifies the \textit{Keyword Shortcut} in issue-based code localization and formalizes Keyword-Agnostic Logical Code Localization (KA-LCL). The diagnostic benchmark \dataset comprises 225 logic-intensive queries across 9 projects, while \negset evaluates abstention when no valid location exists. The proposed \tooldataloc framework extracts program facts from repositories and synthesizes Datalog programs using an LLM, delegating structural reasoning to a deterministic engine. Parser-gated validation and conservative mutation-based intermediate-rule diagnostics support iterative query refinement. On \dataset, \tooldataloc achieves function-level precision of 66.98\% and a success rate of 58.67\%, compared with best baseline values of 5.87\% and 11.73\%, respectively. It returns \textit{no match found} for over 70\% of \negset queries and remains competitive on SWE-bench Lite while returning an average of two candidate locations per issue.
+For artifact delivery, code and documentation must remain consistent as software evolves. This thesis presents \toolchecker, which uses symbolic execution to extract inter-parameter constraints from code and LLMs to extract corresponding constraints from documentation. A customized fuzzy constraint satisfaction framework accommodates uncertainty in extracted constraints and detects inconsistencies between the two representations. Evaluation on Python data science libraries identified 11 inconsistencies confirmed by developers.
 
-Collectively, this thesis demonstrates that reliable software evolution in the age of AI requires a synthesis of neural flexibility and symbolic rigor. By embedding neurosymbolic reasoning into each phase of the evolution lifecycle, this work provides both theoretical insights and practical tools toward building autonomous systems that are intelligent, verifiable, and trustworthy.
+Together, these contributions connect reproducible evidence about dependency changes with explicit reasoning about code and documentation. They provide an empirical foundation and practical neurosymbolic methods to support more reliable software evolution.
 
 
 

@@ -46,20 +46,20 @@ There are two core limitations that make reliable fully AI-driven software evolu
 
 Addressing these challenges necessitates a dual-track strategy. First, the model's intrinsic capabilities need to be strengthened by providing high-fidelity data, specifically focusing on edge cases in software evolution that are prone to failure and difficult to detect. Second, deterministic mechanisms must be introduced to constrain, guide, and verify the decision-making process of AI. The former is vital for deepening the model's grasp of complex evolutionary contexts, while the latter ensures the reliability and security of AI-driven actions. This balance is best realized through Neurosymbolic AI. By integrating neural methods (e.g., neural networks and deep learning) with symbolic methods (e.g., formal logic, knowledge representation), it combines the superior semantic understanding and efficient learning power of neural methods with the logical rigor and verifiable interpretability of symbolic methods, ensuring that AI-driven software evolution is both intelligent and trustworthy.
 
-This thesis is dedicated to exploring the reliability and security of AI-driven software evolution, aiming to pave a potential path toward a fully autonomous and trustworthy future. The subsequent chapters explore methodologies to optimize AI performance at each phase of software evolution and provide neurosymbolic frameworks to restrain unpredictable outputs.
+This thesis organizes its contributions around selected reliability challenges in three phases of software evolution: environment perception (\cref{ch:chapter3}), logic implementation (\cref{ch:chapter4}), and artifact delivery (\cref{ch:chapter5}). Each study addresses a specific task within its phase, providing complementary empirical resources and analysis techniques for reliable software evolution.
 
 \section{Contributions}\label{sec:contribution}
-AI plays distinct roles and faces unique challenges at each stage of the software evolution lifecycle. In the requirements identification stage, the most common obstacle is the inability to reliably manage external evolution risks. Due to a scarcity of high-quality real-world data, especially for complicated and hard-to-detect scenarios like client-specific compatibility issues triggered by third-party library upgrades, AI lacks the capacity to assess and mitigate the impact and risks introduced by such changes. In the logic implementation stage, code localization is the most critical prerequisite for any reliable code modification. However, current AI systems remain over-reliant on shallow lexical matching rather than deep structural reasoning, failing to accurately identify the specific code segments. This leads to excessive resource overhead and a higher probability of downstream task failure. In the artifact delivery stage, a pervasive problem is that documentation typically lags behind code changes, leading to semantic drift. As documentation serves as a vital interface between the project and its consumers, outdated or inaccurate descriptions directly amplify the risk of external misuse. AI's ability to detect code-documentation inconsistencies remains limited, particularly in complex scenarios involving multi-parameter constraints, making it unable to ensure that documentation faithfully reflects the codebase.
+AI plays distinct roles and faces unique challenges at each stage of the software evolution lifecycle. In the environment perception stage, the most common obstacle is the inability to reliably manage external evolution risks. Due to a scarcity of high-quality real-world data, especially for complicated and hard-to-detect scenarios like client-specific compatibility issues triggered by third-party library upgrades, AI lacks the capacity to assess and mitigate the impact and risks introduced by such changes. In the logic implementation stage, code localization is the most critical prerequisite for any reliable code modification. However, current AI systems remain over-reliant on shallow lexical matching rather than deep structural reasoning, failing to accurately identify the specific code segments. This leads to excessive resource overhead and a higher probability of downstream task failure. In the artifact delivery stage, a pervasive problem is that documentation typically lags behind code changes, leading to semantic drift. As documentation serves as a vital interface between the project and its consumers, outdated or inaccurate descriptions directly amplify the risk of external misuse. AI's ability to detect code-documentation inconsistencies remains limited, particularly in complex scenarios involving multi-parameter constraints, making it unable to ensure that documentation faithfully reflects the codebase.
 
-To address these multifaceted challenges, this dissertation advocates for a systematic set of neurosymbolic solutions. For requirements identification, this thesis prioritizes empirical grounding by constructing high-quality datasets that capture real-world breaking change patterns, thereby providing a verifiable benchmark for AI to perceive and reason about external evolutionary risks. For logic implementation, this thesis first formalizes the keyword shortcut bias in current research and proposes a neurosymbolic agent framework. By offloading structural reasoning to a logic engine, the framework transcends the limitations of textual context to achieve precise, repository-level code localization. For artifact delivery, this thesis reports the development of a multi-parameter inconsistency detection framework that combines formal methods with LLMs, ensuring that the semantic integrity between code and documentation is maintained even under complex constraints.
+To address these multifaceted challenges, this dissertation advocates for a systematic set of neurosymbolic solutions. For environment perception, this thesis prioritizes empirical grounding by constructing high-quality datasets that capture real-world breaking change patterns, thereby providing a verifiable benchmark for AI to perceive and reason about external evolutionary risks. For logic implementation, this thesis first formalizes the keyword shortcut bias in current research and proposes a neurosymbolic agent framework. By offloading structural reasoning to a logic engine, the framework transcends the limitations of textual context to achieve precise, repository-level code localization. For artifact delivery, this thesis reports the development of a multi-parameter inconsistency detection framework that combines formal methods with LLMs, ensuring that the semantic integrity between code and documentation is maintained even under complex constraints.
 
 Central to these solutions is the paradigm of neurosymbolic AI, which serves as the methodological foundation of this research. By synthesizing the formal rigor of symbolic logic, such as symbolic execution and Datalog, with the adaptive learning power of Large Language Models, this thesis provides a deterministic anchor for AI-driven evolution, ensuring that complex software modifications are not only contextually aware but also logically verifiable. \fref{fig:thesis_structure} illustrates the structure of this thesis, which is organized into six chapters. The core contributions of this dissertation are summarized as follows:
 
 \begin{itemize}
   \item \textbf{Reproducible real-world incompatibility dataset.} The study presented in \cref{ch:chapter3} constructs a dataset, \toolcompsuite, including 123 reproducible, real-world client-library pairs that manifest incompatibility issues when upgrading the library. These data points originate from 88 clients and 104 libraries. An automated command-line interface was created for the dataset. With this interface, users are able to programmatically replicate an incompatibility issue from the dataset with a single command. The interface also offers separate commands for each step involved in the reproduction of incompatibility issues.
-  \item \textbf{Multi-parameter code–documentation inconsistency detection.} The study presented in \cref{ch:chapter4} introduces an automated multi-parameter code-documentation inconsistency detection technique, implemented as an end-to-end command-line tool called \toolchecker. Existing techniques in the same area are only designed to handle single parameter inconsistencies, without considering inter-parameter constraints. A customized fuzzy constraint satisfaction framework was introduced to mitigate the uncertainties introduced by LLM outputs. A theoretical derivation of the membership function based on constraint similarity is provided. The study constructed a documentation constraint dataset comprising 72 real-world constraints sourced from widely used data science libraries, and derived a mutation-based inconsistency dataset with 216 constraints. The dataset and tool implementation are made available online: \url{https://github.com/ParsifalXu/MPChecker}. \toolchecker was evaluated on four real-world popular data science libraries. 14 inconsistency issues discovered by \toolchecker were reported to the developers, who have confirmed 11 inconsistencies at the time of writing.
-  \item \textbf{Keyword Shortcut analysis and diagnostic benchmarks.} The study presented in \cref{ch:chapter5} identifies the \textit{Keyword Shortcut} in issue-based code localization. In the filtered SWE-bench Lite set, 146 of 274 instances explicitly mention identifiers associated with ground-truth locations. The study introduces \dataset for Keyword-Agnostic Logical Code Localization (KA-LCL), comprising 225 logic-intensive queries instantiated from 25 representative combinations across 9 projects, together with \negset for evaluating abstention when no valid location satisfies a query.
-  \item \textbf{Neurosymbolic agent framework for repository-level code localization.} The study presented in \cref{ch:chapter5} proposes \tooldataloc, which represents repositories as program facts and translates natural-language constraints into Datalog programs. A synthesize-check-refine loop combines parser-gated validation and repair with conservative mutation-based intermediate-rule diagnostics; diagnostic probe outputs are never returned as final answers. The framework is implemented as an automated end-to-end command-line tool, and the tool and benchmarks are available at \url{https://zenodo.org/records/22844061}. On \dataset, \tooldataloc achieves function-level precision of 66.98\% and a success rate of 58.67\%, compared with best baseline values of 5.87\% and 11.73\%, respectively. It returns \textit{no match found} for over 70\% of \negset queries and remains competitive on SWE-bench Lite while returning an average of two candidate locations per issue.
+  \item \textbf{Keyword Shortcut analysis and diagnostic benchmarks.} The study presented in \cref{ch:chapter4} identifies the \textit{Keyword Shortcut} in issue-based code localization. In the filtered SWE-bench Lite set, 146 of 274 instances explicitly mention identifiers associated with ground-truth locations. The study introduces \dataset for Keyword-Agnostic Logical Code Localization (KA-LCL), comprising 225 logic-intensive queries instantiated from 25 representative combinations across 9 projects, together with \negset for evaluating abstention when no valid location satisfies a query.
+  \item \textbf{Neurosymbolic agent framework for repository-level code localization.} The study presented in \cref{ch:chapter4} proposes \tooldataloc, which represents repositories as program facts and translates natural-language constraints into Datalog programs. A synthesize-check-refine loop combines parser-gated validation and repair with conservative mutation-based intermediate-rule diagnostics; diagnostic probe outputs are never returned as final answers. The framework is implemented as an automated end-to-end command-line tool, and the tool and benchmarks are available at \url{https://zenodo.org/records/22844061}. On \dataset, \tooldataloc achieves function-level precision of 66.98\% and a success rate of 58.67\%, compared with best baseline values of 5.87\% and 11.73\%, respectively. It returns \textit{no match found} for over 70\% of \negset queries and remains competitive on SWE-bench Lite while returning an average of two candidate locations per issue.
+  \item \textbf{Multi-parameter code–documentation inconsistency detection.} The study presented in \cref{ch:chapter5} introduces an automated multi-parameter code-documentation inconsistency detection technique, implemented as an end-to-end command-line tool called \toolchecker. Existing techniques in the same area are only designed to handle single parameter inconsistencies, without considering inter-parameter constraints. A customized fuzzy constraint satisfaction framework was introduced to mitigate the uncertainties introduced by LLM outputs. A theoretical derivation of the membership function based on constraint similarity is provided. The study constructed a documentation constraint dataset comprising 72 real-world constraints sourced from widely used data science libraries, and derived a mutation-based inconsistency dataset with 216 constraints. The dataset and tool implementation are made available online: \url{https://github.com/ParsifalXu/MPChecker}. \toolchecker was evaluated on four real-world popular data science libraries. 14 inconsistency issues discovered by \toolchecker were reported to the developers, who have confirmed 11 inconsistencies at the time of writing.
 \end{itemize}
 
 \begin{figure}[htbp]
@@ -69,7 +69,7 @@ Central to these solutions is the paradigm of neurosymbolic AI, which serves as 
     chapter_node/.style = {
         align=center,
         font=\sffamily\small,
-        % text width=0.28\textwidth,
+        text width=0.30\textwidth,
         inner sep=2pt,
     },
     arrow/.style = {
@@ -90,23 +90,29 @@ Central to these solutions is the paradigm of neurosymbolic AI, which serves as 
 
     \node[chapter_node, below=1.5cm of c2] (c4) {
         \textcolor{blue}{\hyperref[ch:chapter4]{\underline{\textbf{\cref{ch:chapter4}}}}} \\
-        \textbf{\textsc{MPChecker}:} Multi-parameter \\ 
-        Code-Doc Inconsistency Detection\\ 
-        \textcolor{blue}{$\bullet$ new approach}
+        \textit{Logic implementation} \\
+        \textbf{\textsc{DataLoc}} \\
+        Repository-level \\
+        Code Localization \\
+        \textcolor{blue}{$\bullet$ findings \& framework}
     };
 
-    \node[chapter_node, left= of c4] (c3) {
+    \node[chapter_node, left=of c4] (c3) {
         \textcolor{blue}{\hyperref[ch:chapter3]{\underline{\textbf{\cref{ch:chapter3}}}}} \\
-        \textbf{\textsc{CompSuite}:} A Dataset of Lib-\\ 
-        rary Upgrade Incompatibilities\\
+        \textit{Environment perception} \\
+        \textbf{\textsc{CompSuite}} \\
+        Library Upgrade \\
+        Incompatibility Dataset \\
         \textcolor{blue}{$\bullet$ new dataset}
     };
 
-    \node[chapter_node, right= of c4] (c5) {
+    \node[chapter_node, right=of c4] (c5) {
         \textcolor{blue}{\hyperref[ch:chapter5]{\underline{\textbf{\cref{ch:chapter5}}}}} \\
-        \textbf{\textsc{DataLoc}:} Neurosymbolic \\ 
-        Repo-level Code Localization\\ 
-        \textcolor{blue}{$\bullet$ findings \& new framework}
+        \textit{Artifact delivery} \\
+        \textbf{\textsc{MPChecker}} \\
+        Multi-parameter Code-Doc \\
+        Inconsistency Detection \\
+        \textcolor{blue}{$\bullet$ new approach}
     };
 
     \node[chapter_node, below=1.5cm of c4] (c6) {
@@ -131,7 +137,7 @@ Central to these solutions is the paradigm of neurosymbolic AI, which serves as 
     \draw (c5.south) .. controls ++(0,-1.2) and ++(0,1.2) .. (merge);
 
 \end{tikzpicture}
-\caption{The Structure of the Thesis.}\label{fig:thesis_structure}
+\caption{The structure of the thesis, with three parallel contributions addressing selected reliability challenges in software evolution.}\label{fig:thesis_structure}
 \end{figure}
 
 
@@ -141,7 +147,7 @@ The rest of the thesis is organized as follows:
 \begin{itemize}
   \item \hyperref[ch:chapter2]{\underline{\textbf{\cref{ch:chapter2}}}} provides essential background and key concepts necessary for understanding the thesis.
   \item \hyperref[ch:chapter3]{\underline{\textbf{\cref{ch:chapter3}}}} presents \toolcompsuite, a dataset of real-world library upgrade incompatibilities, detailing its construction, characteristics, and potential applications.
-  \item \hyperref[ch:chapter4]{\underline{\textbf{\cref{ch:chapter4}}}} introduces \toolchecker, a multi-parameter code-documentation inconsistency detection tool, describing its design, implementation, and evaluation on real-world libraries.
-  \item \hyperref[ch:chapter5]{\underline{\textbf{\cref{ch:chapter5}}}} formalizes the keyword shortcut bias in code localization, introduces diagnostic benchmarks, \dataset and \negset, and presents \tooldataloc, a neurosymbolic agent framework for repository-level code localization, along with its evaluation results.
+  \item \hyperref[ch:chapter4]{\underline{\textbf{\cref{ch:chapter4}}}} formalizes the keyword shortcut bias in code localization, introduces diagnostic benchmarks, \dataset and \negset, and presents \tooldataloc, a neurosymbolic agent framework for repository-level code localization, along with its evaluation results.
+  \item \hyperref[ch:chapter5]{\underline{\textbf{\cref{ch:chapter5}}}} introduces \toolchecker, a multi-parameter code-documentation inconsistency detection tool, describing its design, implementation, and evaluation on real-world libraries.
   \item \hyperref[ch:chapter6]{\underline{\textbf{\cref{ch:chapter6}}}} summarizes the contributions, discusses how advances in LLMs may simplify the proposed systems while preserving the benefits of explicit analysis and verification, and outlines directions for future research.
 \end{itemize}

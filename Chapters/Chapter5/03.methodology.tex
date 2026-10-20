@@ -1,154 +1,26 @@
-\section{Methodology}\label{sec:method-dataloc}
-This section first formalizes the repository-level code localization problem. It then analyzes the intrinsic challenges that motivate the hybrid approach, \tooldataloc, which combines the strengths of large language models with the rigorous logical reasoning of Datalog.
+\section{Methodology}\label{sec:method-mpchecker}
 
-\begin{landscape}
-\begin{figure}[t]
-	\centering
-	\includegraphics[width=\linewidth]{Figures/Chapter5/architecture.pdf}
-	\caption{Overview of the \tooldataloc framework.}
-	\label{fig:arch-dataloc}
-\end{figure}
-\end{landscape}
+\begin{figure*}[h]
+	\vspace{2mm}
+    \centering
+    \includegraphics[width=\linewidth]{Figures/Chapter5/arch.pdf}
+    \caption{The architecture of \toolchecker.}
+    \label{fig:arch}
+    \vspace{-5pt}
+\end{figure*}
 
+This section defines the issue of code-documentation inconsistency caused by multi-parameter
+constraints and provides a detailed description of the approach. An API documentation error is an inconsistency between the library source code and its API documentation. Multi-parameter constraints refer to conditional dependency relationships that exist among multiple parameters within functions or classes. If a constraint is never violated across all execution paths in the code, it is considered a benign constraint; otherwise, it indicates a potential documentation error. According to the literature~\cite{uddin2015api,zhou2017analyzing, zhu2022identifying}, API documentation inconsistency can be categorized into two types: incorrectness and incompleteness. Incorrectness refers to cases where the documentation describes behavior that is not implemented in the code, while incompleteness arises when certain code behaviors are not reflected in the documentation. Typically, incorrectness issues are considered more critical than incompleteness.
 
-Given a natural language query $q$ (e.g., a bug report or feature request) and a target codebase $\mathcal{C}$, the goal of \textbf{repository-level code localization} is to identify a list of relevant code locations $\mathcal{L}=\{l_1, l_2, \dots, l_k\}$. Effective localization bridges the gap between informal natural language and the rigid execution logic of software. Three primary challenges are identified:
+In addition, when it comes to constraint extraction, compared to single-parameter constraints, the multi-parameter constraint extraction problem can be classified into two types, as discussed in \sref{sec:eg-mpchecker}, 1) explicit constraint and 2) implicit constraint.
 
-\begin{itemize}[leftmargin=*]
-    \item \textbf{Challenge 1: Semantic and Lexical Disconnect.} There exists a non-trivial gap between the informal vocabulary of $q$ and the formal identifiers in $\mathcal{C}$. This disconnect is categorized into three progressive layers: (1) \textit{Keyword Absence}, where a query lacks any direct textual anchors present in the code; (2) \textit{Latent Semantic Mapping}, where high-level task descriptions (e.g., \texttt{login failure}) lack direct textual overlap with low-level implementation entities (e.g., \texttt{AuthManager} or \texttt{ValidateToken}); (3) \textit{Lexical Divergence}, where developers use synonyms or abbreviations (e.g., \texttt{fqn} for \texttt{fullyQualifiedName}) that elude exact match search.
+\toolchecker processes a repository through the three phases in \fref{fig:arch}:
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Phase I: Preprocessing} separates documentation from code and associates parameter descriptions with the relevant functions (\sref{sec:preprocess-mpchecker}).
+    \item \textbf{Phase II: Constraint Extraction} has two branches: the LLM-based Constraint Extractor produces documentation constraints, and the Symbolic Executor produces code path constraints (\sref{sec:extraction-mpchecker}). Code transformation prepares functions for symbolic execution, as indicated by the ``Modify'' arrow in the figure.
+    \item \textbf{Phase III: Inconsistency Detection} converts the extracted constraints into expressions for comparison and applies SMT-based fuzzy constraint reasoning (\sref{sec:detect-mpchecker}). The specialized predicates and constraint conversion supporting these comparisons are described in \sref{sec:fuzzword-mpchecker} and \sref{sec:fuzzlogic-mpchecker}.
+\end{enumerate}
 
-    \item \textbf{Challenge 2: Non-local Structural Dependencies.} Relevant code is often not directly mentioned in queries but connected through dependencies or calls. A single feature may be implemented across multiple files. For example, identifying \textit{password validation} logic may require traversing complex call chains and data flows scattered across authentication modules and database layers. Existing pipeline-based tools rely on local directory traversal and fail to capture these deep, cross-file relational dependencies.
-
-    \item \textbf{Challenge 3: Complex Logical Pattern Constraints.} Questions may contain logical pattern requirements that candidate code must satisfy. Certain localization tasks are defined by structural patterns rather than keywords. For example, \textit{identifying the conditional statement that raises three distinct error types in different branches} requires satisfying specific logical constraints defined by the language's syntax and semantics. Such patterns are difficult to locate by retrieving class or function information alone; they require repository-level structural understanding and reasoning.
-\end{itemize}
-
-To address these challenges, this study proposes \tooldataloc, a synergy between LLMs and Datalog. The underlying intuition is that LLMs excel at resolving \textit{Challenge 1} by translating vague natural language intents into structured requirements, while Datalog provides the relational and reasoning power to solve \textit{Challenge 2} and \textit{Challenge 3} by evaluating relational constraints over the extracted facts.
-In the proposed framework, the codebase $\mathcal{C}$ is represented as a set of pre-extracted program facts $\mathcal{F}$, where $\mathcal{F}$ captures both the source entities and the structural relations, such as function-call information, class membership, and declared inheritance relationships. Each location $l_i \in \mathcal{L}$ corresponds to a specific level of granularity, such as a file, module, or function, that is essential for resolving the query $q$. \fref{fig:arch-dataloc} illustrates the overview of the framework of \tooldataloc. The framework operates in two stages. First, an offline program fact extraction stage analyzes the codebase to build a structured knowledge base. Second, an automated agent execution stage leverages these extracted facts to perform code localization by synthesizing high-quality Datalog queries.
-
-\subsection{Program Facts Extraction}\label{sec:fact-extraction-dataloc}
-This subsection describes the details of extracting program facts from a given repository.
-Program facts are extracted through a modular pipeline that separates source discovery, structural parsing, and fact emission, shown as the offline \textit{Program Fact Extraction} stage in \fref{fig:arch-dataloc}. First, the extraction pipeline enumerates source files under the repository root using the configured file-selection rules. A language-specific frontend then analyzes the files using the most suitable intermediate representation. For Python, the frontend parses source code into an abstract syntax tree and emits facts during traversal. The frontend produces Datalog facts annotated with precise source locations and stable identifiers, enabling traceability and incremental updates.
-
-These frontends emit facts describing program entities (files, modules, functions, classes, variables) and relations (containment, inheritance, import/use, call, and reference edges), together with optional control flow and data flow information when available. This representation directly addresses \textit{Challenge 2} by making cross-file interactions explicit and queryable~\cite{wu2021diffbase}. Instead of relying on local directory traversal, localization can now operate over global dependency graphs, enabling the identification of code relevant to a feature even when it is scattered across multiple modules and layers.
-
-The extracted facts also enable expressive logical pattern matching, which helps solve \textit{Challenge 3}. Structural requirements, such as specific exception patterns or multi-step call sequences, can be formulated as Datalog queries over extracted facts. This allows localization tasks defined by program structure rather than surface keywords to be handled systematically, without requiring the LLM to reason over raw source code.
-
-\input{Chapters/Chapter5/031.fact-specification.tex}
-
-\subsection{Agentic Workflow}
-This section elaborates on the agent-based workflow for automated repository-level code localization, which builds upon the program facts constructed offline.
-
-The end-to-end agent is designed to accept natural language queries and return precise code locations. Unlike approaches that provide a fixed top-$n$ list of candidates, the system outputs a dynamic set of potential locations to maximize precision. To mitigate hallucinations and enhance abstention ability, the framework decouples reasoning from generation. A deterministic engine handles inference while the LLM acts as a coordinator for query analysis and result calibration. The agent is equipped with three basic tools: \texttt{exec\_dl} for executing Datalog programs, and \texttt{get\_file\_contents} along with \texttt{get\_sources} for retrieving source code and specific line ranges.
-
-\subsubsection{Query Analysis and Information Resolution}
-The workflow begins with a preliminary analysis of the query to extract the core technical concepts and structural elements, performed by the \textit{DataLoc Agent} in \fref{fig:arch-dataloc}. By identifying program entities such as file paths, module names, and structure descriptions, the agent establishes an internal context. This preparatory step provides the necessary predicates and constraints for the subsequent synthesis of Datalog programs.
-
-\subsubsection{Synthesize-Check-Refine Loop}
-As shown in the red panel in \fref{fig:arch-dataloc}, before execution, \tooldataloc follows a \textit{synthesize-check-refine} loop to mitigate the impact of hallucinations and improve the executability of LLM-generated Datalog programs. It mainly contains two critical, feedback-driven phases (details in \sref{sec:method:val-dataloc} and \sref{sec:method:int-dataloc}): (1) \textit{Syntax correction}. Each synthesized program undergoes parser-gated validation to ensure syntactic well-formedness. The workflow adopts a \emph{best-effort repair, then fallback} strategy: unambiguous cases are handled via conservative rule-based fixes, revalidated with \souffle's parser, and all other cases return error feedback to the LLM. (2) \textit{Intermediate-rule diagnosis}. The diagnostic mechanism instruments the program to track row counts of intermediate relations, thereby identifying rules that produce empty results. Controlled mutation probes then classify such emptiness as fragile, stable, or inconclusive, giving the model targeted evidence for refinement. Validated programs are then executed through the \texttt{exec\_dl} tool to generate a list of candidates. Excessive locations are treated as failures, triggering refinement with stricter constraints to reduce noise and improve precision.
-
-\subsubsection{Context Retrieval and Final Verification}
-As depicted in the yellow panel in \fref{fig:arch-dataloc}, once a set of potential code locations has been determined, the agent retrieves the relevant code snippets using \texttt{get\_sources} or \texttt{get\_file\_contents} and conducts a verification against the original query. These verified locations are then returned in a standardized format (e.g., \texttt{FILE\_PATH:CLASS.METHOD}). Although the agent may undergo multiple internal reasoning iterations, the user experience is streamlined into a single step: submitting a query and receiving a list of locations. This fully automated closed-loop design ensures both usability and seamless integration into production development environments.
-
-
-
-\subsection{Repairing LLM-Generated Datalog}
-\label{sec:method:val-dataloc}
-LLM-generated Datalog programs (the dialect used by \souffle) often contain syntactic and semantic errors, especially when the model is not fine-tuned for Datalog programming.
-
-As shown in the red panel in \fref{fig:arch-dataloc}, before executing an LLM-generated Datalog program, the framework enforces a \emph{parser-gated validation} workflow to ensure that only syntactically well-formed
-programs reach later stages of the pipeline. This design is motivated by the observation that some
-failures are caused by superficial syntactic issues that can be repaired mechanically, whereas more
-complex parse failures often require global restructuring that is better handled by the LLM. The
-workflow therefore follows a \emph{repair-or-feedback} strategy: the workflow applies conservative rule-based fixes when the repair is unambiguous, re-checks the program using \souffle's parser, and otherwise returns error feedback to the LLM.
-
-
-The workflow invokes a lightweight parser helper (based on \souffle's parsing frontend) to validate the
-generated program. If parsing fails, the workflow first attempts a small set of mechanical rewrite rules
-targeting high-frequency issues. For example, LLMs frequently introduce naming collisions by using
-reserved or special identifiers as variable names.
-One common case is using \texttt{count} as a variable name while it is a reserved keyword in
-\souffle.
-Such cases can be fixed locally via deterministic renaming.
-
-However, not all parser errors admit a reliable deterministic repair.
-In these cases, the workflow does not attempt speculative transformations. Instead, the workflow returns the raw parser diagnostics (optionally augmented with concise hints) to the LLM, allowing the model to revise the program directly.
-
-Any program that fails parser validation is rejected and never proceeds to later stages. Once a
-program passes syntactic validation (either initially or after rule-based repair), the workflow applies semantic correctness checks that encode \souffle-specific usage rules and common domain
-conventions. These checks detect syntactically valid but semantically incorrect programs arising
-from common misconceptions in LLM-generated Datalog code. Only programs that satisfy both syntactic
-and semantic validation proceed to execution.
-
-A representative example is the use of string containment constraints. \souffle provides a constraint function
-\texttt{contains(sub:symbol,full:symbol)}, which is defined such that the second argument must
-contain the first (i.e., full includes sub). However, LLMs are observed to frequently invert this
-positional relationship by producing atoms like \texttt{contains(content,``keyword'')} instead of
-the correct \texttt{contains(``keyword'',content)}.
-Since such inversions conform to both the syntax and type specifications, they often lead to silent
-failures or empty results that are difficult for LLMs to self-correct, even after multiple rounds
-of feedback.
-
-Prompt techniques such as few-shot learning cannot effectively eliminate this kind of error.
-Therefore, a library of semantic rules is constructed to check the correct usage of built-in
-predicates with non-commutative argument semantics and other similar constraints.
-These repairs are applied only when the transformation is high-confidence and semantics-preserving.
-When uncertain, the checker records the issue for subsequent feedback to the LLM rather than
-applying a blind fix, thereby guiding the refinement in subsequent iterations.
-The contribution of this mechanism is evaluated through an ablation study in~\sref{sec:ablation-dataloc}, demonstrating its effectiveness in improving synthesis quality.
-
-\subsection{Diagnosing Intermediate Rules via Conservative Mutation Analysis}
-\label{sec:method:int-dataloc}
-
-An intermediate-rule diagnostic mechanism is introduced for LLM-generated Datalog programs, corresponding to \textit{Mutation} in the red panel of \fref{fig:arch-dataloc}. As
-illustrated in \fref{fig:mutate-dataloc}, rather than evaluating a program solely by its final output,
-\tooldataloc instruments intermediate derived relations, records their cardinalities, and applies
-diagnostic mutations to relations that derive zero tuples. Since an empty relation may represent
-either a legitimate result or an overly restrictive rule, these mutations serve only as diagnostic
-probes. Their outputs are used to localize the source of failure and are never returned as part of
-the final answer.
-
-\paragraph{Mutation catalog.}
-For a zero-cardinality relation~$R$, the diagnostic mechanism mutates only rules that define~$R$. The
-catalog is prioritized and capped for cost control; each mutation preserves
-the rule head and changes only the body.
-\begin{itemize}[leftmargin=*]
-\item \textsc{M1. Contains-Literal}: replace each body string
-literal \texttt{"s"} with a fresh variable~$V_i$ and append
-\texttt{contains("s", $V_i$)}, relaxing exact equality to substring matching.
-\item \textsc{M2. Drop-Single-Atom}: remove one selected body atom at
-a time while retaining the rest. This general ablation is applied only when a
-rule has at least two body atoms and is bounded by a small variant cap.
-\item \textsc{M3. Match-Literal}: replace each body string literal
-with~$V_i$ and append \texttt{match("s.*", $V_i$)}, testing whether the
-literal is a prefix of the actual fact value.
-\item \textsc{M4. Drop-Contains}: remove one
-\texttt{contains(\ldots)} atom at a time, isolating overly strict string
-filters.
-\item \textsc{M5. Drop-Single-Negation}: remove one negated atom
-(\texttt{!pred(\ldots)}) at a time, probing whether an exclusion constraint is
-too strong.
-\end{itemize}
-M1 and M3 apply only when quoted string literals occur in the rule body; M2, M4, and M5
-apply only when their target atom exists and the remaining body still contains
-at least one atom.
-
-\paragraph{Feedback construction.}
-After applicable probes run, \tooldataloc classifies each zero-cardinality relation as:
-\emph{fragile-empty} if any successful mutation yields rows; \emph{stable-empty}
-if at least one mutation succeeds and all successful mutations remain empty; and
-\emph{inconclusive} if no mutation applies or all probes fail. Feedback reports
-the relation name, original zero cardinality, mutation identity, relaxed or removed
-constraint, rewritten rule, resulting cardinality, and optionally a small sample of surfaced
-tuples.
-This gives the LLM evidence for revision without silently weakening the user's intended query
-semantics.
-
-\begin{landscape}
-\begin{figure}[t]
-	\centering
-	\includegraphics[width=\linewidth]{Figures/Chapter5/mutate.pdf}
-	\caption{Intermediate-rule mutation and feedback.}
-	\label{fig:mutate-dataloc}
-\end{figure}	
-\end{landscape}
-
-\input{Chapters/Chapter5/032.end-to-end-example.tex}
+\input{Chapters/Chapter5/031.preprocessing.tex}
+\input{Chapters/Chapter5/032.extracting.tex}
+\input{Chapters/Chapter5/033.detecting.tex}

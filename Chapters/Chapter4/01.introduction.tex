@@ -1,79 +1,72 @@
-\section{Introduction}\label{sec:introduction-mpchecker}
+\section{Introduction}\label{sec:intro-dataloc}
+The rapid evolution of artificial intelligence is reshaping every stage of the Software Development Life Cycle (SDLC), fundamentally changing how developers interact with codebases. Through natural language interfaces, developers can now gain comprehensive insight into code repositories and delegate sophisticated tasks such as code refactoring, feature implementation, and defect repair. Central to these capabilities is \textit{code localization}, which refers to the process of identifying source code snippets, ranging from individual methods to complex logic blocks, that are relevant to a natural language query within a large-scale repository. As the community pivots towards autonomous software engineering agents, effective code localization has become a critical primary bottleneck. Accurately mapping high-level functional intent to intricate implementation logic is no longer merely a retrieval problem, but a prerequisite for enabling AI systems to reliably navigate, reason about, and modify real-world software.
 
-Machine learning (ML) and Artificial Intelligence (AI) have consistently garnered widespread
-attention, achieving remarkable breakthroughs in diverse domains including natural language
-processing, recommendation systems, autonomous vehicles, and robotics.
-Behind the rapid advancement of these transformative technologies, data science and machine
-learning libraries play a crucial role in AI and ML development.
-By providing extensive APIs for complex mathematical operations and algorithmic implementations,
-these libraries enable researchers and practitioners to focus on solving domain-specific problems
-rather than reimplementing fundamental algorithms.
+State-of-the-art code localization approaches can be broadly categorized into three paradigms:
+embedding-based retrieval, pipeline-guided workflows, and agent-driven exploration. These
+approaches have demonstrated impressive performance on issue-solving benchmarks such as
+SWE-bench~\cite{swebench2024}. However, the investigation in this study identifies a fundamental yet overlooked
+bias, termed the \textbf{Keyword Shortcut}.
+As the primary channel through which users report software failures to maintainers, issue reports
+often contain explicit debugging cues, such as stack traces, distinctive class or function names,
+and even verbatim code snippets.
+These \textbf{keywords} effectively serve as ``cheat sheets'', enabling localization models to
+identify relevant code through lexical matching (e.g., using grep) rather than semantic reasoning.
+For example, in the filtered SWE-bench Lite benchmark, 146 of the 274 instances explicitly mention
+identifiers associated with the ground-truth location.
+\tref{tab:keyword_shortcut-dataloc} reports the performance of LocAgent~\cite{chen-etal-2025-locagent},
+a representative code localization approach.
+On instances containing such keywords, LocAgent achieves improvements of 24.20, 35.22, and 29.17
+Acc@1 percentage points at the file, module, and function levels, respectively, compared with
+instances without keyword cues.
 
-Well-designed API documentation not only provides detailed descriptions of interfaces,
-including the purpose and range of parameters or attributes, returns, and exceptions thrown, but may also specify logical constraints or dependencies among multiple parameters.
-For data science and machine learning libraries, multi-parameter constraints are commonly mentioned
-in their API documentation and users of these libraries are expected to follow them closely when
-using the APIs.
-However, frequent version updates may cause the documentation to become out of sync with the corresponding
-code, known as the \underline{\textbf{C}}ode-\underline{\textbf{D}}ocumentation
-\underline{\textbf{I}}nconsistency (CDI) issue~\cite{aghajani2019software, rai2022review}.
-Such CDI issues are particularly pronounced in data science libraries.
-On one hand, the underlying mathematical models of DS/ML libraries inherently come with various
-constraints, such as \emph{``a model X can only be chosen when a parameter Y is provided''}, and
-incorrect parameter configurations not satisfying their constraints may lead to unexpected outcomes.
-On the other hand, the number of parameters/attributes in the APIs of these libraries can be significantly greater
-than that in a typical library API, sometimes over a few dozen.
-Therefore, it is unrealistic to track all parameter constraints manually.
+\begin{table}[t]
+\centering
+\caption{Effect of keyword shortcuts on localization performance.}
+\label{tab:keyword_shortcut-dataloc}
+\small
+\renewcommand{\arraystretch}{1.1}
+\begin{tabular*}{0.92\columnwidth}{@{\extracolsep{\fill}}lccc@{}}
+\toprule
+\textbf{Level (Acc@1)} & \textbf{w/o Keyword} & \textbf{w/ Keyword} & \textbf{$\Delta$ (pp)} \\
+\midrule
+File     & 64.84\% & 89.04\% & \textcolor{green!50!black}{$\uparrow$24.20} \\
+Module   & 47.66\% & 82.88\% & \textcolor{green!50!black}{$\uparrow$35.22} \\
+Function & 34.40\% & 63.57\% & \textcolor{green!50!black}{$\uparrow$29.17} \\
+\bottomrule
+\end{tabular*}
+\end{table}
 
-Detecting errors in multi-parameter constraints from Python API documentation is challenging for
-several reasons.
-(1) API documentation varies in quality and often does not follow standardized writing guidelines.
-Some API documentation uses ambiguous language, contains typos, and may not follow a consistent
-styling guide.
-This makes simple rule-based pattern-matching approaches ineffective.
-(2) Existing approaches~\cite{ratol2017detecting, liu2020automating} for detecting documentation errors focus on a single parameter
-only: e.g., checking whether the information provided on parameter ranges, nullness, and identifier
-names is correct.
-It is more challenging to extract multi-parameter constraints precisely from free-style descriptions
-written in natural languages.
-(3) For the same reason, a semantics-aware code analysis approach is essential, as logical relations among
-multiple parameters cannot be easily identified through purely syntactic analysis. The challenge is further compounded by Python's dynamic nature, where variable types, attributes, and behaviors can change at runtime.
+This performance gap exposes a key limitation of the current localization paradigms: they often
+rely on lexical anchors and struggle when such anchors are unavailable or unreliable. To isolate
+this missing capability, this study introduces a new diagnostic task, \textbf{Keyword-Agnostic Logical Code
+Localization (KA-LCL)}, where models or agents must identify code locations satisfying explicit
+logical constraints rather than naming hints. Unlike general issue-solving code localization tasks,
+which can often degrade into lexical or semantic matching, KA-LCL represents a higher-order
+\textit{structural reasoning} challenge. For example, a KA-LCL query may ask, \textit{``Find all
+functions where: (1) the function has more than 15 parameters, and (2) the function is not an
+\_\_init\_\_ method.''} Such queries are strongly constrained and leave little room for plausible
+guessing. Every predicted location must meet the required constraints, and the answer set is
+directly verifiable. Moreover, KA-LCL is not intended to mimic human querying behavior. Instead, it
+focuses on structural reasoning which is a prerequisite for handling latent semantic mappings. In
+this sense, it can be viewed as a building block for intent-driven tasks, such as
+\textit{identifying complex APIs that should be refactored}.
 
-
-
-To detect multi-parameter constraint inconsistencies from data science library documentation, this chapter proposes an automated tool, \toolchecker.
-\toolchecker identifies inconsistencies between API documentation and the corresponding library code by
-combining symbolic execution-based program analysis techniques with constraint extraction methods
-powered by large language models (LLMs).
-\toolchecker first extracts multi-parameter constraints from documentation (a.k.a. \emph{doc-constraints}),
-leveraging the powerful natural language understanding capability of LLMs.
-The extraction process incorporates a few optimizations, such as Chain of Thought (CoT)~\cite{wei2022chain} and few-shot
-learning to improve the accuracy of constraint extraction.
-Then \toolchecker uses dynamic symbolic execution to collect all path constraints from the corresponding
-Python source code.
-The symbolic path constraints (a.k.a. \emph{code-constraints}) capture the real constraints that
-the parameters have to follow according to the library code, which are then used to evaluate the
-correctness of the \emph{doc-constraints}.
+To systematically evaluate the limitations of existing tools, this study constructs \dataset, a diagnostic benchmark for keyword-agnostic logical code localization. \dataset complements issue-solving benchmarks for localization tasks by providing a controlled setting where queries are purely logical and devoid of naming hints. It decomposes code structures to synthesize logical queries targeting structural and behavioral code patterns. The evaluation shows a sharp performance drop in state-of-the-art methods, exposing a critical \textit{reasoning gap} in current AI localization systems.
 
 
-Then, in order to mitigate minor discrepancies that may arise from the \emph{doc-constraints} extracted by
-LLMs, a \emph{Fuzzy Constraint Logic} (FCL) framework is designed and implemented to estimate how
-logically consistent a \emph{doc-constraint} is with a set of given \emph{code-constraints}.
-Intuitively, in the absence of LLM-induced unpredictability, a \emph{doc-constraint} must be evaluated as true
-under the assumption of \emph{code-constraints}.
-Through fuzzy constraint satisfaction, \toolchecker can accommodate many \emph{nearly-correct} constraints
-produced by LLMs and thus improve the accuracy of the overall approach.
+The difficulty of KA-LCL stems from two intertwined bottlenecks. \ding{182} \textbf{Without lexical anchors, localization requires searching a much larger repository context.} Existing localization methods often use identifiers as pruning signals to narrow the set of relevant files, classes, or functions. When such signals are absent, models are forced to process substantially broader structural contexts, which aggravates the \textit{lost-in-the-middle} problem. Critical logical patterns and structural constraints become submerged within long input sequences, severely impairing the system's ability to robustly retrieve and utilize them. \ding{183} \textbf{Current methods lack deterministic repository-level structural reasoning.} Although pipeline-guided LLM workflows and agentic exploration attempt to model code relationships, they often operate as probabilistic recommendation systems that generate a ranked list of likely candidates, rather than performing rigorous structural deduction. As a result, these systems fall short of providing deterministic localization or verifiable rationales.
 
+Conceptually, code localization can be viewed as a specialized form of code search~\cite{di2023code}. Unlike general textual information, however, source code has formally defined syntax and semantics, enabling precise parsing and program analysis. This formal nature endows code with intrinsic reasoning affordances. From a high-level perspective, an effective repository-level localization engine requires a robust intermediate representation (IR) to bridge natural language intent and implementation logic. Such an IR should effectively capture code entities, dependencies, and structural hierarchies in an interpretable and actionable form for LLM-based agents.
 
-\paragraph{Contributions.}
-This chapter aims to integrate precise symbolic reasoning with the inherently fuzzy outputs of large language models.
-Specifically, this chapter makes the following contributions.
+To overcome the aforementioned limitations, this study proposes \tooldataloc, a neuro-symbolic framework for repository-level code localization that combines LLM-based intent interpretation with rule-based deterministic Datalog reasoning. \tooldataloc first employs static analysis to extract \textbf{program facts} from the target repository, forming a structured IR that captures both elemental properties and relational dependencies. Given a natural language query, the LLM agent translates the intended constraints into a Datalog program over these facts. The program is then executed by \textbf{\souffle}, a high-performance Datalog engine, to derive the code locations that satisfy the query. To improve the reliability of LLM-generated logic programs, \tooldataloc further incorporates a synthesize-check-refine loop with parser-gated validation, semantic repair, and mutation-based intermediate-rule diagnosis. Notably, the framework is broadly applicable to declarative logic languages, including CodeQL~\cite{github:codeql}. The framework uses \souffle because it provides LLM-friendly relational syntax, avoids the integration constraints of CodeQL’s binary-only CLI and core engine, and supports rapid iterative execution of partial rules, which enables the mutation-based diagnostics to expose zero-row intermediate relations and likely over-constraining clauses.
+
+Crucially, by offloading structural reasoning to a deterministic engine, \tooldataloc provides verifiable answer sets rather than fixed top-$n$ recommendations, while reducing execution time and token consumption. This design also enables the agent to return definitive negative responses when no matches exist, avoiding a common pitfall of probabilistic systems that hallucinate plausible but incorrect candidates.
+
+In summary, the contributions of this chapter are as follows.
+
 \begin{enumerate}
-    \emergencystretch=2em
-    \item An automated multi-parameter code-documentation inconsistency detection technique was proposed, and an end-to-end command-line tool called \toolchecker was developed. Existing techniques in the same area are only designed to handle single parameter inconsistencies, without considering inter-parameter constraints.
-    \item A customized fuzzy constraint satisfaction framework was introduced to mitigate the
-    uncertainties introduced by LLM outputs. A theoretical derivation of the membership function based on constraint similarity is provided.
-    \item The study constructed a documentation constraint dataset comprising 72 real-world constraints sourced from widely used data science libraries, and derived a mutation-based inconsistency dataset with 216 constraints.
-    The dataset and tool implementation are made available online: \url{https://github.com/ParsifalXu/MPChecker}.
-    \item \toolchecker was evaluated on four real-world popular data science libraries. Fourteen inconsistency issues discovered by \toolchecker were reported to the developers, who have confirmed 11 inconsistencies at the time of writing.
+    \item This study identifies the \textit{Keyword Shortcut} bias in issue-solving benchmarks and introduces a new diagnostic benchmark, \dataset, for Keyword-Agnostic Logical Code Localization (KA-LCL). It contains 225 logic-intensive queries across 9 projects, along with \negset, an empty-ground-truth variant for evaluating abstention behavior.
+    \item This study proposes \tooldataloc, a neuro-symbolic framework that represents repositories as program facts and synthesizes Datalog programs from natural language constraints. By delegating structural traversal and logical filtering to a deterministic reasoning engine, \tooldataloc enables verifiable repository-level localization cost-effectively.
+    \item An execution-guided synthesize-check-refine mechanism is designed for LLM-generated Datalog programs, combining parser-gated validation and repair with conservative mutation-based intermediate-rule feedback. The framework is implemented as an automated end-to-end command-line tool; the tool and benchmark are available at: \url{https://zenodo.org/records/22844061}.
+    \item \tooldataloc is evaluated against state-of-the-art localization methods. The results show that \tooldataloc performs strongly on \dataset, achieving 66.98\% precision and 58.67\% success rate at the fine-grained function level, whereas the best-performing baselines reach only 5.87\% precision and 11.73\% success rate. \tooldataloc also maintains robust abstention behavior by explicitly returning \textit{no match found} in over 70\% of \negset cases. On SWE-bench Lite, \tooldataloc remains competitive while returning concise verifiable locations instead of top-$n$ recommendations.
 \end{enumerate}
