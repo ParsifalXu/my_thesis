@@ -55,7 +55,7 @@ Next, the remaining failed cases are examined to investigate the reasons for the
 
 An ablation study further explores \toolchecker's abilities. The results show that \toolchecker without few-shot learning achieves an accuracy of 62.5\%. Most failures occur in the incorrect extraction of constraints. This indicates that including few-shot learning is important for \toolchecker to generate accurate constraints.
 Next, \toolchecker without applying chain-of-thought techniques results in an accuracy of 79.2\%, with the number of missed constraints accounting for more than half of total non-equivalent cases. This suggests that GPT tends to miss more details in documentation when chain-of-thought is removed.
-After including chain-of-thought and few-shot learning, \toolchecker's performance shows a clear improvement.
+After chain-of-thought and few-shot learning are incorporated, \toolchecker's performance shows a clear improvement.
 
 \begin{table}[t]
     \centering
@@ -145,7 +145,7 @@ The remaining 9 unresolved inconsistent constraints stem from external function 
 \end{table}
 
 
-A notable situation arose during one issue report: even though the issue had been confirmed, one developer expressed dissatisfaction. He believed the reporters were an automated tool or AI-based bot because of their anonymous status, which diminished his enthusiasm for addressing the issue. With a mass of LLM-based program analysis or inconsistency checkers now available, while they offer insights sometimes, their results often cost more manual verification than traditional tools due to higher uncertainty.
+A notable situation arose during one issue report: even though the issue had been confirmed, one developer expressed dissatisfaction. He believed the reporters were an automated tool or AI-based bot because of their anonymous status, which diminished his enthusiasm for addressing the issue. With a mass of LLM-based program analysis or inconsistency checkers now available, while they offer insights sometimes, their results often require more manual verification effort than those of traditional tools due to higher uncertainty.
 
 \paragraph{Comparative Study.}
 Therefore, a comparative experiment was conducted between the tool and the approach of using only LLMs as a constraint checker on the same dataset. To align with the experiment settings, GPT-4, one of the leading models, was selected for comparison and evaluated under two settings: 1) LLM: providing the raw documentation and code as input, directly prompting GPT to check for consistency, and 2) LLM+C: first extracting constraints using the LLM and then providing both these constraints and their corresponding code to the LLM for a consistency check. In addition, the LLM was also required to provide justifications for its answers.
@@ -181,7 +181,7 @@ At the time of writing, 10 out of 11 confirmed inconsistencies have been resolve
         \begin{tcolorbox}[fontupper=\footnotesize,fonttitle=\small,colback=Emerald!10,colframe=cyan!40!black,title=\textbf{Constraint description of \texttt{X} and \texttt{Gram} in function \texttt{lars\_path}}]
             {\sffamily \textbf{> X } : None or ndarray of shape (n\_samples, n\_features)
             \\
-            Input data. Note that \colorbox{blue!20}{\textbf{if X is None then the Gram matrix must be specified}}, i.e, cannot None or False.}
+            Input data. Note that \colorbox{blue!20}{\textbf{if X is None then the Gram matrix must be specified}}, i.e., cannot be None or False.}
         \end{tcolorbox}
         \label{fig:eg3-doc}
     \end{subfigure}
@@ -199,7 +199,7 @@ def lars_path(...):
     	\begin{tcolorbox}[fontupper=\footnotesize,fonttitle=\small,colback=Emerald!10,colframe=LimeGreen!60!black,title=\textbf{Fixed Constraint description of \texttt{X} and \texttt{Gram} in function \texttt{lars\_path}}]
     		{\sffamily \textbf{> X } : None or ndarray of shape (n\_samples, n\_features)
     			\\
-    			Input data. Note that \colorbox{blue!20}{\textbf{if X is None, Gram must also be None.}}, If only the Gram matrix is available, use lars\_path\_gram instead.}
+            Input data. Note that \colorbox{blue!20}{\textbf{if X is None, Gram must also be None.}} If only the Gram matrix is available, use lars\_path\_gram instead.}
     	\end{tcolorbox}
     	\label{fig:eg3-fixed-doc}
     \end{subfigure}

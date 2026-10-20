@@ -6,7 +6,7 @@ This subsection describes Phase II of \fref{fig:arch}. It explains how to extrac
 
 The goal of \toolchecker is to verify whether the constraints between multiple parameters in documentation align with the logic during actual code execution. This requires the tool to understand and analyze deeper constraint relationships. Therefore, \toolchecker employs symbolic execution to capture as many path conditions as possible and precisely handle complex paths and constraints, as implemented by the \textit{Symbolic Executor} component in \fref{fig:arch}.
 
-The study modified current advanced dynamic symbolic execution tools~\cite{github:pyexsmt, github:pyexz3, github:pysmt, ball2015deconstructing, bruni2011peer} for path exploration. Unfortunately, supporting dynamic languages like Python is more challenging compared to symbolic execution tools designed for static languages such as Java and C. Despite Python's rapid evolution, symbolic execution tools specifically designed for Python have developed slowly, struggling to keep pace with the growing new syntax and features. This necessitates appropriate modifications to the source code extracted directly from repositories. However, these modifications must not alter the path constraints of the original code; they should be equivalent code transformations that do not affect path exploration. The main modifications were as follows:
+The study modified current advanced dynamic symbolic execution tools~\cite{github:pyexsmt, github:pyexz3, github:pysmt, ball2015deconstructing, bruni2011peer} for path exploration. Unfortunately, supporting symbolic execution for dynamic languages like Python is more challenging than supporting it for statically typed languages such as Java and C. Despite Python's rapid evolution, symbolic execution tools specifically designed for Python have developed slowly, struggling to keep pace with the growing new syntax and features. This necessitates appropriate modifications to the source code extracted directly from repositories. However, these modifications must not alter the path constraints of the original code; they should be equivalent code transformations that do not affect path exploration. The main modifications were as follows:
 
 
 \begin{enumerate}
@@ -78,7 +78,7 @@ In this step, \toolchecker applies LLMs to extract constraints from Python docum
 \paragraph{Model Selection.} 
 \toolchecker uses GPT-4, which is pretrained on a diverse corpus and shows
 excellent performance in natural language understanding. Based on the preliminary study, GPT-4's
-performance stands out compared to Gemini-1.5~\cite{gemini} and LLaMA-3~\cite{llama3} due to its
+performance stands out compared to that of Gemini-1.5~\cite{gemini} and LLaMA-3~\cite{llama3} due to its
 ability to capture details, and it is also well-acquainted with the context of code
 documentation~\cite{dvivedi2024comparative}.
 
