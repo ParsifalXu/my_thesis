@@ -5,7 +5,7 @@
 \chaptermark{Conclusion}  % replace the chapter name with its abbreviated form
 \label{ch:chapter6}
 \section{Conclusion}
-This thesis addresses the fundamental tension in modern software engineering: the need for rapid, AI-driven software evolution versus the requirement for deterministic reliability. While Large Language Models (LLMs) have ushered in a paradigm shift toward autonomous intelligence, their probabilistic nature often fails to meet the rigorous demands of interconnected dependency networks. To bridge this gap, this research introduces a neurosymbolic approach that anchors generative intelligence within formal logical frameworks, addressing selected challenges in environment perception, logic implementation, and artifact delivery.
+This thesis addresses the fundamental tension in modern software engineering: the need for rapid, AI-driven software evolution versus the requirement for deterministic reliability. While Large Language Models (LLMs) have ushered in a paradigm shift toward autonomous intelligence, their probabilistic nature often fails to meet the rigorous demands of interconnected dependency networks. To bridge this gap, this research introduces a neurosymbolic approach that anchors generative intelligence within formal logical frameworks, addressing three core pillars of reliable software evolution.
 
 \begin{itemize}
     \item In \hyperref[ch:chapter3]{\underline{\textbf{\cref{ch:chapter3}}}}, this thesis introduces \toolcompsuite,  a dataset that includes 123 real-world Java client-library pairs where upgrading the library causes an incompatibility issue in the corresponding client. Each incompatibility issue in \toolcompsuite is associated with a test case authored by the developers, which can be used to reproduce the issue. The dataset also provides a command-line interface that simplifies the execution and validation of each issue. By providing a structured dataset for library upgrade incompatibilities, \toolcompsuite allows AI agents to move beyond anecdotal fixes toward a systematic understanding of how third-party dependency shifts propagate through client systems.
@@ -22,7 +22,7 @@ In conclusion, this dissertation demonstrates that reliable software evolution i
 \input{Chapters/Chapter6/01.llm_advances.tex}
 
 \section{Future Work}
-Building on the contributions and the discussion of evolving model capabilities in \sref{sec:llm-advances}, this section outlines further directions for reliable AI-assisted software evolution. The first three directions follow environment perception, logic implementation, and artifact delivery; the final direction examines technical debt across these stages.
+Building on the contributions and the discussion of evolving model capabilities in \sref{sec:llm-advances}, this section outlines further directions for reliable AI-assisted software evolution. 
 
 \subsection{Benchmarking AI-Assisted Self-Healing Under Dependency Evolution}
 Current software engineering benchmarks for AI, such as SWE-bench, primarily focus on issue resolution and bug fixing within self-contained repositories. 
